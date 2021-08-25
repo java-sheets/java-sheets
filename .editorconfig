@@ -1,0 +1,11 @@
+root = true
+
+[*]
+indent_size = 2
+indent_style = space
+trim_trailing_whitespace = true
+insert_final_newline = false
+charset = utf-8
+end_of_line = lf
+max_line_length = 80
+tab_width = 2

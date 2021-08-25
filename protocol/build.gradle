@@ -1,0 +1,14 @@
+plugins {
+  id 'java'
+  id "com.google.protobuf" version "0.8.17"
+}
+
+version '0.1.0'
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  compileOnly 'com.google.protobuf:protobuf-java:3.17.3'
+}

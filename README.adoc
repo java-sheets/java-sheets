@@ -1,0 +1,4 @@
+= JavaSheets
+
+== Protocol
+We use protocol to provide a common definition for frontend, backend and individual snippet runtimes. The frontend uses json over http to communicate with the backend.

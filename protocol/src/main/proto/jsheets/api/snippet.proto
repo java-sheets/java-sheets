@@ -1,0 +1,63 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+option java_multiple_files = true;
+
+package jsheets;
+
+/// One or more blocks of code, contained in a Sheet, that is executed
+/// by the SnippetRuntime. Snippets are composed of {@code Components},
+/// allowing them to contain both code and documentation.
+/// The order is used to determine their precedence in the sheet's
+/// list of snippets.
+message Snippet {
+  /// Components are text parts of Snippets. They are either be of type 'code'
+  /// or 'description' and can therefore can equally use a string to represent
+  /// their structured content (either markdown or java). The order is used
+  /// to determine their precedence in the snippet's list of components.
+  /// Components that contain code are called code components.
+  message Component {
+    enum Kind {
+      KIND_UNSPECIFIED = 0;
+      TEXT = 1;
+      CODE = 2;
+    }
+  }
+  message Reference {
+    string sheet_id = 1;
+    string snippet_id = 2;
+  }
+  message Dependency {
+    Snippet.Reference reference = 1;
+  }
+  /// Determines if a user should see this snippet. Invisible snippets can be
+  /// used as dependencies to other snippets and provide basic fundamental
+  /// library functions. They can be marked as hidden, resulting in them not
+  /// being listed unless a user explicitly enabled hidden snippets.
+  /// This is similar to dotfiles.
+  message Visibility {
+
+  }
+  message Metadata {
+    google.protobuf.Timestamp create_time = 1;
+    google.protobuf.Timestamp update_time = 2;
+  }
+  /// Uniquely identifies a snippet within a sheet.
+  /// This id can conflict with that of other sheets, allowing clients to
+  /// generate it. Uses the format of v4 UUIDs (like Java).
+  string id = 1;
+  /// Name used for display purposes. The id should be used when referring to
+  /// this snippet within a sheet, to allow duplicated names and renaming.
+  string name = 2;
+  /// Unordered set of components. Since the order of the components is not
+  /// just relevant for display purposes but also code evaluation, a client
+  /// must explicitly order this list based on their order fields.
+  repeated Component components = 3;
+  /// Possibly empty set of dependencies that have to be loaded before any
+  /// of the code components is evaluated. Circular dependency is neither
+  /// explicitly supported nor forbidden, runtimes can choose to support
+  /// them based on possibility of implementation.
+  repeated Dependency dependencies = 4;
+  Metadata metadata = 100;
+}

@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+import "jsheets/api/snippet.proto";
+
+option java_multiple_files = true;
+
+package jsheets;
+
+/// Describes a snippet with a code that is synchronized between client and
+/// server by using the SnippetSources in the EvaluationRequest. Each dependency
+/// may contain zero or more dependencies itself if duplicated dependencies are
+/// detected, the runtime is free to ignore them and their expected hash.
+/// Duplicated dependencies with different hashes should not occur if the
+/// client is valid, different snippets would have to depend on the same snippet
+/// but with a different computed hash.
+message EvaluatedSnippet {
+  Snippet.Reference reference = 1;
+  string hash = 2;
+  repeated EvaluatedSnippet dependencies = 3;
+}
+
+message SnippetSources {
+  Snippet.Reference reference = 1;
+  string hash = 2;
+  repeated string code_components = 3;
+}
+
+message Evaluation {
+  string id = 1;
+}
+
+message StartEvaluationRequest {
+  EvaluatedSnippet snippet = 1;
+  repeated SnippetSources sources = 2;
+}
+
+enum SourceCachingPolicy {
+  POLICY_UNSPECIFIED = 0;
+}
+
+message MissingSources {
+  repeated Snippet.Reference missing_snippets = 1;
+  SourceCachingPolicy caching_policy = 2;
+}
+
+service SnippetRuntime {
+  rpc Evaluate(stream EvaluateRequest) returns (stream EvaluateResponse);
+}
+
+message StopEvaluationRequest {}
+
+message EvaluateRequest {
+  oneof message {
+    StartEvaluationRequest start = 1;
+    StopEvaluationRequest stop = 2;
+  }
+}
+
+message Text {}
+
+message EvaluationResult {
+  string output = 1;
+}
+
+message EvaluationError {
+  string message = 2;
+}
+
+message EvaluateResponse {
+  oneof message {
+    MissingSources missing_sources = 1;
+    Text text = 2;
+    EvaluationResult result = 3;
+    EvaluationError error = 4;
+  }
+}

@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+import "jsheets/api/snippet.proto";
+
+option java_multiple_files = true;
+
+package jsheets;
+
+message Sheet {
+  message Metadata {
+    google.protobuf.Timestamp create_time = 1;
+    google.protobuf.Timestamp update_time = 2;
+  }
+  message Author {
+    string id = 1;
+    string name = 2;
+  }
+  string id = 1;
+  string template_id = 2;
+  string title = 3;
+  string description = 4;
+  Author author = 5;
+  Snippet snippets = 6;
+  Metadata metadata = 100;
+}
