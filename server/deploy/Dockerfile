@@ -23,7 +23,7 @@ RUN jdeps --ignore-missing-deps -q --multi-release 17  \
     --class-path libs/* \
     app.jar > deps.info
 
-# zip compression
+# link using zip compression
 RUN jlink --verbose  \
     --compress 2  \
     --strip-java-debug-attributes  \

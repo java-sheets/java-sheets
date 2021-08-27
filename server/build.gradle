@@ -12,13 +12,15 @@ repositories {
 
 dependencies {
   implementation project(':protocol')
-  implementation 'org.cfg4j:cfg4j-core:4.4.0'
+	implementation project(':runtime')
+	implementation 'org.cfg4j:cfg4j-core:4.4.0'
   implementation 'io.javalin:javalin:3.13.11'
+	implementation 'org.slf4j:slf4j-simple:1.7.30'
   implementation 'com.google.protobuf:protobuf-java-util:3.17.3'
   implementation 'net.sourceforge.argparse4j:argparse4j:0.9.0'
   implementation 'javax.annotation:javax.annotation-api:1.3.2'
   implementation 'com.google.flogger:flogger:0.6'
-  implementation 'com.google.flogger:flogger-system-backend:0.6'
+	implementation 'com.google.flogger:flogger-slf4j-backend:0.6'
   implementation 'com.google.dagger:dagger:2.13'
   annotationProcessor 'com.google.dagger:dagger-compiler:2.13'
   testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
@@ -66,7 +68,8 @@ task justRunDocker(type: Exec) {
 }
 
 task runDocker(type: Exec) {
-  dependsOn buildDocker, justRunDocker
-  workingDir "$projectDir"
+  dependsOn buildDocker
+	workingDir "$projectDir"
+	commandLine "docker", "run", dockerImage, "-p", "8080:8080"
 }
 
