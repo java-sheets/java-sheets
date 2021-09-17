@@ -9,10 +9,11 @@ export const TextComponent = styled.div`
 export const Editor = styled(RichMarkdownEditor)`
 	margin: 0 !important;
 	overflow: hidden;
-
-	background: black;
 	:first-child {
 		padding: 10px !important;
+	}
+	background: rgb(253, 253, 253) !important;
+	* > div {
 		background: rgb(253, 253, 253) !important;
 	}
 	& > :first-child h1 {

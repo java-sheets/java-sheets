@@ -4,7 +4,7 @@ import {Button, Layout, Menu, Space} from 'antd'
 import {Content, Header} from 'antd/lib/layout/layout'
 import * as icons from '@ant-design/icons'
 import styled from 'styled-components'
-import Sheet from './components/snippet/Sheet'
+import Sheet from "./sheet/snippet/Sheet";
 
 const Logo = styled.span`
   span:first-child {
@@ -28,7 +28,7 @@ const StyledHeader = styled(Header)`
   }
 `
 
-function App() {
+export default function App() {
   return (
     <Layout>
       <StyledHeader style={{background: '#fff'}} className="header">
@@ -45,12 +45,3 @@ function App() {
     </Layout>
   )
 }
-
-interface SheetProperties {
-  title: string
-  description?: React.ReactNode
-  code: string
-}
-
-
-export default App

@@ -1,5 +1,5 @@
 import * as Styled from './Sheet.style'
-import Snippet, {SnippetPosition} from './Snippet'
+import Snippet from './Snippet'
 import {useSheet} from './useSheet'
 import React, {useMemo} from 'react'
 import * as icons from '@ant-design/icons'
@@ -11,10 +11,8 @@ import {
 	DropResult
 } from 'react-beautiful-dnd'
 import {useDispatch} from 'react-redux'
-import {reorderSnippet} from '../../sheet/state'
-
-export interface SheetProperties {
-}
+import {SheetSnippet} from "../index";
+import {reorderSnippet} from "../state";
 
 const MemoizedSnippet = React.memo(Snippet)
 
@@ -30,6 +28,19 @@ function useReorder(): (result: DropResult) => void {
 	}, [dispatch])
 }
 
+const newSnippetTemplate: () => Partial<SheetSnippet> = () => ({
+	components: [
+		{
+			id: uuid(),
+			type: 'code',
+			order: 0,
+			content: '// TODO: Write Code'
+		}
+	]
+})
+
+export interface SheetProperties {}
+
 export default function Sheet(_properties: SheetProperties) {
 	const {sheet, addSnippet, moveSnippet} = useSheet()
 	const reorder = useReorder()
@@ -39,26 +50,26 @@ export default function Sheet(_properties: SheetProperties) {
 		const lowestOrder = snippets[0]?.order
 		const highestOrder = snippets[snippets.length - 1]?.order
 		return {sorted: snippets, lowestOrder, highestOrder}
-	}, [sheet.snippets.map(snippet => snippet.order)])
+	}, [sheet.snippets])
 	return (
 		<Styled.Sheet>
 			<DragDropContext onDragEnd={reorder}>
-				<Droppable droppableId="droppable">
-					{(provided) => (
+				<Droppable droppableId="sheets">
+					{droppable => (
 						<div
-							{...provided.droppableProps}
-							ref={provided.innerRef}
+							{...droppable.droppableProps}
+							ref={droppable.innerRef}
 						>
-							{snippets.sorted.map((snippet, index) => (
+							{snippets.sorted.map((snippet) => (
 								<Draggable key={snippet.id} draggableId={snippet.id} index={snippet.order}>
-									{(provided, snapshot) => (
+									{(draggable) => (
 										<Styled.SnippetContainer
-											{...provided.draggableProps}
-											ref={provided.innerRef}
+											{...draggable.draggableProps}
+											ref={draggable.innerRef}
 										>
 											<MemoizedSnippet
-												dragHandleProps={provided.dragHandleProps}
 												key={snippet.id}
+												dragHandleProps={draggable.dragHandleProps}
 												id={snippet.id}
 												position={
 													{
@@ -73,7 +84,7 @@ export default function Sheet(_properties: SheetProperties) {
 									)}
 								</Draggable>
 							))}
-							{provided.placeholder}
+							{droppable.placeholder}
 						</div>
 					)}
 				</Droppable>
@@ -81,20 +92,9 @@ export default function Sheet(_properties: SheetProperties) {
 			<Styled.AddButtonContainer>
 				<Styled.AddButton
 					icon={<icons.PlusOutlined/>}
-					onClick={() => {
-						addSnippet({
-							components: [
-								{
-									id: uuid(),
-									type: 'code',
-									order: 0,
-									content: '// TODO: Write Code'
-								}
-							]
-						})
-					}}
 					type="primary"
 					ghost
+					onClick={() => addSnippet(newSnippetTemplate())}
 				/>
 			</Styled.AddButtonContainer>
 		</Styled.Sheet>

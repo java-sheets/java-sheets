@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {Sheet, SheetSnippet, SheetSnippetComponent} from './index'
 import { v4 as uuid } from 'uuid'
+import {message} from "antd";
 
 const initialState: Sheet = {
 	id: uuid(),
@@ -39,17 +40,17 @@ const slice = createSlice({
 	reducers: {
 		changeDetails(state, action: PayloadAction<{title?: string, description?: string}>) {
 			const {title, description} = action.payload
-			if (title != undefined) {
+			if (title !== undefined) {
 				state.title = title
 			}
-			if (description != undefined) {
+			if (description !== undefined) {
 				state.description = description
 			}
 		},
 		changeSnippetDetails(state, action: PayloadAction<{snippetId: string, title?: string}>) {
 			const {snippetId, title} = action.payload
 			const snippet = state.snippets.find(snippet => snippet.id === snippetId)
-			if (snippet && title != undefined) {
+			if (snippet && title !== undefined) {
 				snippet.title = title
 			}
 		},
@@ -128,14 +129,35 @@ const slice = createSlice({
 				return
 			}
 			const current = snippet.components.find(component => component.order === from)
-			const target = snippet.components.find(component => component.order === to)
-			if (current && target) {
-				current.order = to
-				target.order = from
+			if (!current) {
+				return
 			}
+			if (current.order >= to) {
+				addRightGap(to, snippet.components)
+			} else {
+				addLeftGap(to, snippet.components)
+			}
+			current.order = to
 		}
 	}
 })
+
+function addRightGap(start: number, elements: {order: number}[]) {
+	for (const component of elements) {
+		if (component.order >= start) {
+			component.order++
+		}
+	}
+}
+
+function addLeftGap(start: number, elements: {order: number}[]) {
+	for (const component of elements) {
+		if (component.order <= start) {
+			component.order--
+		}
+	}
+}
+
 
 export interface ReorderComponent {
 	snippetId: string

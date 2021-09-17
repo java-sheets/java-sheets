@@ -1,4 +1,4 @@
-import React, {Ref, useEffect} from 'react'
+import React, {useEffect} from 'react'
 import * as Styled from './Title.style'
 import {Input} from 'antd'
 
@@ -16,7 +16,7 @@ export default function Title(properties: TitleProperties) {
 		if (properties.editing) {
 			ref.current?.focus()
 		}
-	}, [properties.editing])
+	}, [ref, properties.editing])
   return (
     <Styled.Title>
 			<Styled.IconBox>{properties.icon}</Styled.IconBox>

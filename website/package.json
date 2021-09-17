@@ -12,7 +12,7 @@
     "@types/react-beautiful-dnd": "^13.1.2",
     "@types/uuid": "^8.3.1",
     "antd": "^4.16.13",
-    "i18next": "^20.4.0",
+    "i18next": "^20.6.1",
     "install": "^0.13.0",
     "npm": "^7.21.0",
     "prosemirror-utils": "^1.0.0-0",
