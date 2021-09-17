@@ -1,0 +1,26 @@
+version: '3.7'
+services:
+  server:
+    build:
+      # Make sure to run 'gradle copyDependencies' before building
+      dockerfile: deploy/Dockerfile
+      context: server
+    container_name: jsheets-server
+    environment:
+      JSHEETS_SERVER_PORT: 8080
+      JSHEETS_MONGODB_URI: mongodb://root:root@document-store/jsheets
+    ports:
+      - "8080:8080"
+    networks:
+      - database
+  document-store:
+    container_name: document-store
+    image: mongo:latest
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+    networks:
+      - database
+
+networks:
+  database:

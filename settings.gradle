@@ -3,4 +3,5 @@ rootProject.name = 'jsheets'
 include 'runtime'
 include 'protocol'
 include 'server'
+include 'website'
 

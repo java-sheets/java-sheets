@@ -2,7 +2,7 @@ package jsheets.server.evaluation;
 
 import io.javalin.Javalin;
 import io.javalin.websocket.WsHandler;
-import jsheets.server.Endpoint;
+import jsheets.server.endpoint.Endpoint;
 import jsheets.server.evaluation.connection.EvaluationConnection;
 
 import javax.inject.Inject;

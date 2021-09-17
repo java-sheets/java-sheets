@@ -1,3 +1,10 @@
 version '0.1.0'
 
 allprojects { group 'dev.jsheets' }
+
+ext {
+	floggerVersion = '0.6'
+	junitPlatformVersion = '5.7.2'
+	protobufJavaVersion = '3.17.3'
+	micrometerVersion = 'latest.integration'
+}

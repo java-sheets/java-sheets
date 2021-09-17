@@ -10,6 +10,7 @@ import jsheets.source.SharedSources;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.time.Clock;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 final class ShellEvaluation implements Evaluation {
@@ -28,9 +29,14 @@ final class ShellEvaluation implements Evaluation {
 	}
 
 	public void start(StartEvaluationRequest request) {
-		shell = JShell.builder()
+		shell = createShell();
+	}
+
+	private JShell createShell() {
+		return JShell.builder()
 			.out(createOutputStream())
 			.err(createErrorStream())
+			.executionEngine(environment.control(), Map.of())
 			.build();
 	}
 

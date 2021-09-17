@@ -27,6 +27,7 @@ public final class InProcessExecution implements ExecutionEnvironment {
 	interface Tenancy {
 		PrintStream createErrorOutput(ThreadGroup group);
 		PrintStream createStandardOutput(ThreadGroup group);
+		void wrap(Runnable task);
 	}
 
 	public static final class MultiTenancy implements Tenancy {
@@ -52,6 +53,13 @@ public final class InProcessExecution implements ExecutionEnvironment {
 					output.registerGroup(group.getName(), message -> {});
 					return (PrintStream) output;
 				}).orElse(System.out);
+		}
+
+		@Override
+		public void wrap(Runnable task) {
+			var output = System.out;
+			task.run();
+			System.setOut(output);
 		}
 	}
 

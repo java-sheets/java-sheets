@@ -1,0 +1,33 @@
+@precedence {}
+
+@top Program {
+  
+}
+
+ClassDeclaration {
+  Modifiers? kw<"class"> ClassName TypeParameters? SuperTypes? ClassBody ?
+}
+
+Modifiers {
+  annotation+ (modifier annotation*)* ~annotations | (modifier annotation*)+ ~annotations
+}
+
+modifier {
+  kw<"public">
+}
+
+accessModifier {
+  kw<"public"> | kw<"private"> | kw<"protected"> 
+}
+
+otherModifier {
+  kw<"native"> | kw<"static"> | kw<"transient"> | kw<"final"> |
+  kw<"volatile"> | kw<"strictfp"> | kw<"default"> | kw<"synchronized"> |
+  kw<"abstract"> | kw<"sealed"> | kw<"primitive">
+}
+
+kw<term> {
+  @specialize[@name={term}]<identifier, term> 
+}
+
+// BudgetService(Usage(component, amount), total)

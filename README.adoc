@@ -1,4 +1,10 @@
 = JavaSheets
 
+== Server
+
+=== Config
+`JSHEETS_SERVER_PORT` Port that the server is listening on
+`JSHEETS_MONGODB_URI` MongoDb Connection string
+
 == Protocol
-We use protocol to provide a common definition for frontend, backend and individual snippet runtimes. The frontend uses json over http to communicate with the backend.
+We use protocol to provide a common definition for frontend, backend and individual snippet runtimes. The frontend uses json over http to communicate with the backend

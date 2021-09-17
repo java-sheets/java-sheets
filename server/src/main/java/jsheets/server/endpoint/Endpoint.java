@@ -1,4 +1,4 @@
-package jsheets.server;
+package jsheets.server.endpoint;
 
 import io.javalin.Javalin;
 

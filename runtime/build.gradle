@@ -11,10 +11,10 @@ repositories {
 
 dependencies {
 	implementation project(':protocol')
-	implementation 'com.google.protobuf:protobuf-java-util:3.17.3'
-	implementation 'com.google.flogger:flogger:0.6'
-	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
-	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+	implementation "com.google.protobuf:protobuf-java-util:$protobufJavaVersion"
+	implementation "com.google.flogger:flogger:$floggerVersion"
+	testImplementation "org.junit.jupiter:junit-jupiter-api:$junitPlatformVersion"
+	testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitPlatformVersion"
 }
 
 test {
