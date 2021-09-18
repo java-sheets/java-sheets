@@ -8,6 +8,8 @@ import {
 import * as Styled from "./SnippetExtras.style";
 import React from "react";
 import {SheetSnippetComponent} from "../index";
+import {TFunction} from 'i18next'
+import {useTranslation, WithTranslationProps} from 'react-i18next'
 
 type AddComponent = (component: Partial<SheetSnippetComponent>) => void
 
@@ -18,7 +20,7 @@ export interface SnippetExtrasProperties {
 	addComponent: AddComponent
 }
 
-const AddMenu: React.FC<{addComponent: AddComponent}> = ({addComponent}) =>  (
+const AddMenu: React.FC<{addComponent: AddComponent, t: TFunction}> = ({addComponent, t}) =>  (
 	<Dropdown
 		overlay={
 			<Menu>
@@ -26,44 +28,52 @@ const AddMenu: React.FC<{addComponent: AddComponent}> = ({addComponent}) =>  (
 					key="add-code"
 					icon={<CodeOutlined />}
 					onClick={() => addComponent({type: 'code'})}
-				>Code</Menu.Item>
+				>{t('snippet.menu.add.code')}</Menu.Item>
 				<Menu.Item
 					key="add-text"
 					icon={<CommentOutlined />}
 					onClick={() => addComponent({type: 'text'})}
-				>Comment</Menu.Item>
+				>{t('snippet.menu.add.comment')}</Menu.Item>
 			</Menu>
 		}>
-		<Button type="primary" ghost icon={<PlusOutlined/>}>Add</Button>
+		<Button type="primary" ghost icon={<PlusOutlined/>}>
+			{t('snippet.menu.add.title')}
+		</Button>
 	</Dropdown>
 )
 
-const EditMenu: React.FC<SnippetExtrasProperties> = properties => (
+const EditMenu: React.FC<SnippetExtrasProperties & {t: TFunction}> = properties => (
 	<Dropdown overlay={
 		<Menu>
 			<Menu.Item
 				key="rename"
 				icon={<EditOutlined/>}
 				onClick={() => properties.setEditingTitle(!properties.editingTitle)}
-			>Rename</Menu.Item>
+			>{properties.t('snippet.menu.edit.rename')}</Menu.Item>
 			<Menu.Item
 				key="delete"
 				danger
 				icon={<DeleteOutlined/>}
 				onClick={properties.delete}
-			>Delete</Menu.Item>
+			>{properties.t('snippet.menu.edit.delete')}</Menu.Item>
 		</Menu>
 	}>
-		<Button type="primary" ghost icon={<MoreOutlined/>}/>
+		<Button
+			type="primary"
+			ghost
+			icon={<MoreOutlined/>}
+			title={properties.t('snippet.menu.edit.title')}
+		/>
 	</Dropdown>
 )
 
 export default function SnippetExtras(properties: SnippetExtrasProperties) {
+	const {t} = useTranslation()
 	return (
 		<Styled.SnippetExtras>
-			<AddMenu key="add" addComponent={properties.addComponent}/>
-			<Button type="primary" icon={<FireOutlined/>}>Run</Button>
-			<EditMenu key="edit" {...properties}/>
+			<AddMenu key="add" t={t} addComponent={properties.addComponent}/>
+			<Button type="primary" icon={<FireOutlined/>}>{t('snippet.menu.run.button')}</Button>
+			<EditMenu key="edit" t={t} {...properties}/>
 		</Styled.SnippetExtras>
 	)
 }

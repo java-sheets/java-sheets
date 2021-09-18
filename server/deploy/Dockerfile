@@ -14,7 +14,7 @@ ENV APP_LOG_VERSION=$APP_LOG_VERSION
 WORKDIR /usr/src/build
 
 # Context is parent directory
-COPY ./build/libs libs
+COPY ./server/build/libs libs
 
 RUN mv ./libs/app.jar app.jar
 
@@ -38,8 +38,10 @@ WORKDIR /app
 COPY --from=link-java /usr/src/build/jre jre
 COPY --from=link-java /usr/src/build/libs/* libs/
 COPY --from=link-java /usr/src/build/app.jar app.jar
-ADD /deploy/entrypoint.sh entrypoint.sh
+ADD /server/deploy/entrypoint.sh entrypoint.sh
+ADD /website/build static/
 RUN chmod +x entrypoint.sh
+ENV JSHEETS_SERVER_STATIC_FILES_PATH=/app/static
 
 EXPOSE 8080
 

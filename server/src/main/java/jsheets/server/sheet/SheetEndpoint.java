@@ -32,7 +32,7 @@ public final class SheetEndpoint implements Endpoint {
 
 	@Override
 	public void configure(Javalin server) {
-		server.get("/sheets/:id", this::findById);
+		server.get("/sheets/{id}", this::findById);
 		server.put("/sheets/", this::update);
 		server.post("/sheets/", this::post);
 	}

@@ -5,6 +5,7 @@ import {Content, Header} from 'antd/lib/layout/layout'
 import * as icons from '@ant-design/icons'
 import styled from 'styled-components'
 import Sheet from "./sheet/snippet/Sheet";
+import {useTranslation} from 'react-i18next'
 
 const Logo = styled.span`
   span:first-child {
@@ -29,13 +30,14 @@ const StyledHeader = styled(Header)`
 `
 
 export default function App() {
+	const {t} = useTranslation()
   return (
     <Layout>
       <StyledHeader style={{background: '#fff'}} className="header">
         <Menu theme="light" style={{marginRight: 'auto'}} mode="horizontal" defaultSelectedKeys={['2']}>
           <Logo><span>Java</span><span>Sheets</span></Logo>
           <Space style={{marginLeft: 'auto'}} size="middle">
-            <Button type="primary" ghost icon={<icons.ShareAltOutlined/>}>Share</Button>
+            <Button type="primary" ghost icon={<icons.ShareAltOutlined/>}>{t('menu.share')}</Button>
           </Space>
         </Menu>
       </StyledHeader>

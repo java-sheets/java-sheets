@@ -5,8 +5,13 @@ import {
 	NotDraggingStyle
 } from "react-beautiful-dnd"
 import * as Styled from "./ComponentContainer.style"
-import {CheckOutlined, DeleteOutlined, DragOutlined} from "@ant-design/icons"
+import {
+	CheckOutlined,
+	DeleteOutlined,
+	DragOutlined
+} from '@ant-design/icons'
 import useTimedFlag from "../../../util/useTimedFlag"
+import {useTranslation} from 'react-i18next'
 
 function fixToVerticalAxis(style: DraggingStyle | NotDraggingStyle | undefined) {
 	if (style?.transform) {
@@ -30,6 +35,7 @@ interface ComponentContainerProperties {
 export default function ComponentContainer(
 	{item, onDelete}: ComponentContainerProperties
 ) {
+	const {t} = useTranslation()
 	const [confirmDelete, setConfirmDelete] = useTimedFlag(false, 2000)
 	return (
 		<Draggable key={item.id} draggableId={item.id} index={item.order}>
@@ -46,6 +52,7 @@ export default function ComponentContainer(
 							size="small"
 							danger
 							ghost
+							title={t('snippet.component.option.delete')}
 							icon={confirmDelete ? <CheckOutlined/> : <DeleteOutlined/>}
 							onClick={() => {
 								if (confirmDelete) {
@@ -55,7 +62,7 @@ export default function ComponentContainer(
 								}
 							}}
 						/>
-						<Styled.DragHandle{...provided.dragHandleProps}>
+						<Styled.DragHandle {...provided.dragHandleProps}>
 							<DragOutlined/>
 						</Styled.DragHandle>
 					</Styled.ComponentOptions>

@@ -3,9 +3,13 @@ package jsheets.server;
 import com.google.common.flogger.FluentLogger;
 import io.javalin.Javalin;
 import io.javalin.core.JavalinConfig;
+import io.javalin.http.staticfiles.Location;
+import io.javalin.http.staticfiles.StaticFileConfig;
 import jsheets.server.sheet.SheetEndpoint;
 
 import javax.inject.Inject;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 public final class Server {
@@ -49,5 +53,30 @@ public final class Server {
 
 	private static void configure(JavalinConfig config) {
 		config.showJavalinBanner = false;
+		config.addStaticFiles(Server::configureStaticFiles);
+	}
+
+	private static void configureStaticFiles(StaticFileConfig config) {
+		config.hostedPath = "/";
+		config.directory = pathToStaticFiles();
+		config.location = Location.EXTERNAL;
+		config.precompress = shouldCacheStaticFiles();
+		config.headers = Map.of();
+	}
+
+	private static boolean shouldCacheStaticFiles() {
+		return Boolean.parseBoolean(
+			Objects.requireNonNullElse(
+				System.getenv("JSHEETS_SERVER_CACHE_STATIC_FILES"),
+				"false"
+			)
+		);
+	}
+
+	private static String pathToStaticFiles() {
+		return Objects.requireNonNullElse(
+			System.getenv("JSHEETS_SERVER_STATIC_FILES_PATH"),
+			"/static"
+		);
 	}
 }

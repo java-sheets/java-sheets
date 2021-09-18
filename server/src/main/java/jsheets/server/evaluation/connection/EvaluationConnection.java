@@ -83,7 +83,7 @@ public final class EvaluationConnection {
     this.engine = engine;
   }
 
-  public void listen(WsHandler connection) {
+  public void listen(WsConfig connection) {
     connection.onConnect(this::connect);
     connection.onClose(this::close);
     connection.onMessage(this::receive);
@@ -124,7 +124,7 @@ public final class EvaluationConnection {
 
   private EvaluateRequest readRequest(WsMessageContext context) {
     try {
-      return context.message(EvaluateRequest.class);
+      return context.messageAsClass(EvaluateRequest.class);
     } catch (Exception failedDeserialization) {
       log.atWarning()
         .withCause(failedDeserialization)
@@ -133,7 +133,7 @@ public final class EvaluationConnection {
     }
   }
 
-  private void receiveStart(WsContext context, StartEvaluationRequest request) {
+  private void receiveStart(WsMessageContext context, StartEvaluationRequest request) {
     establishConnection(context, request);
   }
 
@@ -141,7 +141,7 @@ public final class EvaluationConnection {
     new CloseStatus(HttpStatus.BAD_REQUEST_400, "cancelled");
 
   private void establishConnection(
-    WsContext context,
+		WsMessageContext context,
     StartEvaluationRequest request
   ) {
     var listener = new UpstreamListener(context.session);
