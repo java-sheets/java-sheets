@@ -12,9 +12,9 @@ export interface TextComponentProperties {
 }
 
 const MarkdownEditorStyle = createGlobalStyle`
-	#block-menu-container, .heading-actions, .block-menu-trigger {
-		display: none !important;
-	}
+  #block-menu-container, .heading-actions, .block-menu-trigger {
+    display: none !important;
+  }
 `
 
 // @ts-ignore
@@ -26,22 +26,22 @@ export default class TextComponent
 
   private readonly editorRef = React.createRef<RichMarkdownEditor>()
 
-	render() {
-		return (
-			<Styled.TextComponent>
-				<MarkdownEditorStyle/>
-				<Styled.Editor
+  render() {
+    return (
+      <Styled.TextComponent>
+        <MarkdownEditorStyle/>
+        <Styled.Editor
           ref={this.editorRef}
-					disableExtensions={disabledExtensions}
-					placeholder={''}
-					defaultValue={this.props.value}
-				/>
-			</Styled.TextComponent>
-		)
-	}
+          disableExtensions={disabledExtensions}
+          placeholder={''}
+          defaultValue={this.props.value}
+        />
+      </Styled.TextComponent>
+    )
+  }
 
-	componentDidMount() {
-	  this.props.listRef?.current?.components.set(this.props.id, this)
+  componentDidMount() {
+    this.props.listRef?.current?.components.set(this.props.id, this)
   }
 
   content = (): string | null => {
@@ -51,10 +51,10 @@ export default class TextComponent
   updateContent = (target: string) => { }
 
   shouldComponentUpdate(
-		nextProps: Readonly<EditorComponentProperties>,
-		nextState: Readonly<{}>,
-		nextContext: any
-	): boolean {
-		return nextProps.value !== this.props.value
-	}
+    nextProps: Readonly<EditorComponentProperties>,
+    nextState: Readonly<{}>,
+    nextContext: any
+  ): boolean {
+    return nextProps.value !== this.props.value
+  }
 }

@@ -19,9 +19,9 @@ const theme = EditorView.theme({
     backgroundColor: "#f6f8fa",
     padding: "10px 0"
   },
-	".cm-matchingBracket": {
-		color: "#2b2b2b",
-	},
+  ".cm-matchingBracket": {
+    color: "#2b2b2b",
+  },
   ".cm-activeLineGutter, .cm-activeLine": {
     backgroundColor: "#f8f8f8"
   },
@@ -42,25 +42,25 @@ const theme = EditorView.theme({
 }, {dark: false})
 
 const githubHighlighting = HighlightStyle.define([
-	{tag: t.function(t.name), color: '#00627A'},
-	{tag: t.standard(t.typeName), fontStyle: 'bold', color: '#E75A7C'},
-	{tag: customTags.annotationAttribute, color: '#8250df'},
-	{tag: t.typeName, fontStyle: 'bold', color: '#89D2DC'},
-	{tag: t.function(customTags.call), color: '#502cc5'},
-	{tag: t.constant(t.variableName), color: '#0550ae'},
-	{tag: t.className, color: '#6564DB'},
-	{tag: t.keyword, color: '#D73A49'},
-	{tag: t.definitionKeyword, color: '#D73A49'},
-	{tag: t.controlKeyword, color: '#D73A49'},
-	{tag: t.operatorKeyword, color: '#D73A49'},
-	{tag: t.annotation, color: "#9E880D"},
-	{tag: t.function(t.definition(t.variableName)), color: '#871094'},
-	{tag: t.definition(t.variableName), color: "#6f42c1"},
-	{tag: t.constant, color: '#005cc5'},
-	{tag: t.operator, color: '#D73A49'},
-	{tag: t.number, color: '#1750EB'},
-	{tag: t.string, color: '#067D17'},
-	{tag: t.comment, color: '#6a737d'}
+  {tag: t.function(t.name), color: '#00627A'},
+  {tag: t.standard(t.typeName), fontStyle: 'bold', color: '#E75A7C'},
+  {tag: customTags.annotationAttribute, color: '#8250df'},
+  {tag: t.typeName, fontStyle: 'bold', color: '#89D2DC'},
+  {tag: t.function(customTags.call), color: '#502cc5'},
+  {tag: t.constant(t.variableName), color: '#0550ae'},
+  {tag: t.className, color: '#6564DB'},
+  {tag: t.keyword, color: '#D73A49'},
+  {tag: t.definitionKeyword, color: '#D73A49'},
+  {tag: t.controlKeyword, color: '#D73A49'},
+  {tag: t.operatorKeyword, color: '#D73A49'},
+  {tag: t.annotation, color: "#9E880D"},
+  {tag: t.function(t.definition(t.variableName)), color: '#871094'},
+  {tag: t.definition(t.variableName), color: "#6f42c1"},
+  {tag: t.constant, color: '#005cc5'},
+  {tag: t.operator, color: '#D73A49'},
+  {tag: t.number, color: '#1750EB'},
+  {tag: t.string, color: '#067D17'},
+  {tag: t.comment, color: '#6a737d'}
 ])
 
 export default function Editor(properties: EditorProperties) {

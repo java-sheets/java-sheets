@@ -1,10 +1,9 @@
-package jsheets.server.evaluation.connection;
+package jsheets.server.evaluation;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.flogger.FluentLogger;
 import com.google.common.flogger.MetadataKey;
 
-import com.google.protobuf.ByteString;
 import io.javalin.websocket.*;
 import jsheets.*;
 import jsheets.runtime.evaluation.Evaluation;
@@ -14,7 +13,7 @@ import org.eclipse.jetty.websocket.api.CloseStatus;
 import org.eclipse.jetty.websocket.api.Session;
 
 import javax.inject.Inject;
-import java.io.IOException;
+
 import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -42,16 +41,16 @@ import java.util.concurrent.atomic.AtomicReference;
  * <ul>
  *   <li>
  *     <strong>Initial:</strong>
- *  	 Transitions into <italic>Connecting</italic> after receiving a
- *  	 {@link StartEvaluationRequest}.
+ *     Transitions into <italic>Connecting</italic> after receiving a
+ *     {@link StartEvaluationRequest}.
  *   </li>
  *   <li>
- *			<strong>Connecting:</strong>
- * 			Is the active stage while waiting for the evaluation to start,
- * 		  after which it transitions to <italic>Evaluating</italic>.
- *			If an asynchronous {@link StopEvaluationRequest} is received, the
- *			evaluation is stopped immediately after is has been created and the
- *			stage changes to <italic>Terminated</italic>.
+ *      <strong>Connecting:</strong>
+ *       Is the active stage while waiting for the evaluation to start,
+ *       after which it transitions to <italic>Evaluating</italic>.
+ *      If an asynchronous {@link StopEvaluationRequest} is received, the
+ *      evaluation is stopped immediately after is has been created and the
+ *      stage changes to <italic>Terminated</italic>.
  *   </li>
  *   <li>
  *     <strong>Evaluating:</strong>

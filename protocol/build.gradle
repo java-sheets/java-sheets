@@ -12,38 +12,38 @@ repositories {
 }
 
 dependencies {
-	implementation "com.google.protobuf:protobuf-java:$protobufJavaVersion"
+  implementation "com.google.protobuf:protobuf-java:$protobufJavaVersion"
 }
 
 
 sourceSets {
-	main {
-		java {
-			srcDirs = [
-				"src/main/java",
-				"${buildDir}/generated/source/proto/main/java",
-				"${buildDir}/generated/source/proto/main/grpc"
-			]
-		}
-	}
+  main {
+    java {
+      srcDirs = [
+        "src/main/java",
+        "${buildDir}/generated/source/proto/main/java",
+        "${buildDir}/generated/source/proto/main/grpc"
+      ]
+    }
+  }
 }
 
 def extension = Os.isFamily(Os.FAMILY_WINDOWS) ? '.cmd' : ''
 
 protobuf {
-	protoc {
-		artifact = "com.google.protobuf:protoc:3.11.4"
-	}
-	plugins {
-		grpc {
-			artifact = 'io.grpc:protoc-gen-grpc-java:1.29.0'
-		}
+  protoc {
+    artifact = "com.google.protobuf:protoc:3.11.4"
+  }
+  plugins {
+    grpc {
+      artifact = 'io.grpc:protoc-gen-grpc-java:1.29.0'
+    }
     "ts" {
       def binary = project.projectDir.toPath().resolve(
         "node_modules/.bin/protoc-gen-ts${extension}")
       path = binary
     }
-	}
+  }
   generateProtoTasks {
     all()*.plugins {
       "ts" {

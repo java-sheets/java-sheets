@@ -12,9 +12,9 @@ public final class StandardExecution implements ExecutionEnvironment {
     return new StandardExecution();
   }
 
-	@Override
-	public ExecutionControlProvider control(String name) {
-	  return new Provider();
+  @Override
+  public ExecutionControlProvider control(String name) {
+    return new Provider();
   }
 
   @Override

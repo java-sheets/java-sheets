@@ -10,13 +10,13 @@ import i18n from './i18n'
 
 ReactDOM.render(
   <React.StrictMode>
-		<Provider store={store}>
-			<React.Suspense fallback={<></>}>
-				<I18nextProvider i18n={i18n}>
-					<App />
-				</I18nextProvider>
-			</React.Suspense>
-		</Provider>
+    <Provider store={store}>
+      <React.Suspense fallback={<></>}>
+        <I18nextProvider i18n={i18n}>
+          <App />
+        </I18nextProvider>
+      </React.Suspense>
+    </Provider>
   </React.StrictMode>,
   document.getElementById('root')
 );

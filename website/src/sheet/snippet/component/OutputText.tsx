@@ -3,7 +3,7 @@ import {ErrorOutput, SheetSnippetComponentOutput} from "../../index";
 import {CloseCircleFilled} from "@ant-design/icons";
 
 export interface OutputTextProperties {
-	output?: SheetSnippetComponentOutput
+  output?: SheetSnippetComponentOutput
   onClose?: () => void
 }
 
@@ -24,8 +24,8 @@ export default function OutputText(properties: OutputTextProperties) {
       {properties.output.message}
     </div>
   )
-	return (
-		<Type>
+  return (
+    <Type>
       {content}
       <Styled.Overlay>
         <Styled.CloseButton
@@ -34,6 +34,6 @@ export default function OutputText(properties: OutputTextProperties) {
           onClick={properties.onClose}
         />
       </Styled.Overlay>
-		</Type>
-	)
+    </Type>
+  )
 }

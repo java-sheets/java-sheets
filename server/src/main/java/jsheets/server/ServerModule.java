@@ -11,42 +11,42 @@ import jsheets.server.sheet.SheetModule;
 import java.util.OptionalInt;
 
 public final class ServerModule extends AbstractModule {
-	private static final FluentLogger log = FluentLogger.forEnclosingClass();
+  private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
-	public static ServerModule create() {
-		return new ServerModule();
-	}
+  public static ServerModule create() {
+    return new ServerModule();
+  }
 
-	private ServerModule() {}
+  private ServerModule() {}
 
-	@Override
-	protected void configure() {
-		install(SheetModule.create());
-		install(EvaluationModule.create());
-	}
+  @Override
+  protected void configure() {
+    install(SheetModule.create());
+    install(EvaluationModule.create());
+  }
 
-	private static final int defaultPort = 8080;
+  private static final int defaultPort = 8080;
 
-	@Provides
-	Server.Config createConfig() {
-		return new Server.Config(
-			readIntFromEnvironment("JSHEETS_SERVER_PORT").orElse(defaultPort)
-		);
-	}
+  @Provides
+  Server.Config createConfig() {
+    return new Server.Config(
+      readIntFromEnvironment("JSHEETS_SERVER_PORT").orElse(defaultPort)
+    );
+  }
 
-	private static OptionalInt readIntFromEnvironment(String key) {
-		var value = System.getenv(key);
-		if (value == null) {
-			return OptionalInt.empty();
-		}
-		try {
-			return OptionalInt.of(Integer.parseInt(value));
-		} catch (NumberFormatException malformedNumber) {
-			log.atWarning()
-				.withCause(malformedNumber)
-				.with(MetadataKey.single("key", String.class), key)
-				.log("ignoring variable because it is not an int");
-			return OptionalInt.empty();
-		}
-	}
+  private static OptionalInt readIntFromEnvironment(String key) {
+    var value = System.getenv(key);
+    if (value == null) {
+      return OptionalInt.empty();
+    }
+    try {
+      return OptionalInt.of(Integer.parseInt(value));
+    } catch (NumberFormatException malformedNumber) {
+      log.atWarning()
+        .withCause(malformedNumber)
+        .with(MetadataKey.single("key", String.class), key)
+        .log("ignoring variable because it is not an int");
+      return OptionalInt.empty();
+    }
+  }
 }

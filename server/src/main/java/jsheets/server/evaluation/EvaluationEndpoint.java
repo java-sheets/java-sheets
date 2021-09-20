@@ -9,7 +9,6 @@ import io.javalin.Javalin;
 import io.javalin.websocket.WsConfig;
 import io.javalin.websocket.WsContext;
 import jsheets.server.endpoint.Endpoint;
-import jsheets.server.evaluation.connection.EvaluationConnection;
 
 import javax.inject.Inject;
 

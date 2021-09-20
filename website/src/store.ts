@@ -1,6 +1,6 @@
 import {
-	combineReducers,
-	configureStore,
+  combineReducers,
+  configureStore,
 } from '@reduxjs/toolkit'
 import sheetReducer from './sheet/state'
 

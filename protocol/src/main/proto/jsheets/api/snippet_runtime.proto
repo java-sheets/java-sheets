@@ -20,11 +20,11 @@ message EvaluatedSnippet {
 }
 
 message SnippetSources {
-	message CodeComponent {
-		string id = 1;
-	  int32 order = 2;
-		string code = 3;
-	}
+  message CodeComponent {
+    string id = 1;
+    int32 order = 2;
+    string code = 3;
+  }
   Snippet.Reference reference = 1;
   string hash = 2;
   repeated CodeComponent code_components = 3;
@@ -64,26 +64,26 @@ message EvaluateRequest {
 message Text {}
 
 message EvaluationResult {
-	enum Kind {
-		KIND_UNSPECIFIED = 0;
-		INFO = 1;
-		ERROR = 2;
-	}
-	string component_id = 1;
-	Kind kind = 2;
+  enum Kind {
+    KIND_UNSPECIFIED = 0;
+    INFO = 1;
+    ERROR = 2;
+  }
+  string component_id = 1;
+  Kind kind = 2;
   string output = 3;
 }
 
 message CodeSpan {
-	int64 start = 1;
-	int64 end = 2;
+  int64 start = 1;
+  int64 end = 2;
 }
 
 message EvaluationError {
-	string component_id = 1;
-	string kind = 2;
+  string component_id = 1;
+  string kind = 2;
   string message = 3;
-	CodeSpan span = 4;
+  CodeSpan span = 4;
 }
 
 message EvaluateResponse {

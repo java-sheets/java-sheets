@@ -1,5 +1,5 @@
 plugins {
-	id 'java'
+  id 'java'
 }
 
 group 'dev.jsheets'
@@ -9,18 +9,18 @@ sourceCompatibility = 16
 targetCompatibility = 16
 
 repositories {
-	mavenCentral()
+  mavenCentral()
 }
 
 dependencies {
-	implementation project(':protocol')
-	implementation "com.google.protobuf:protobuf-java-util:$protobufJavaVersion"
-	implementation "com.google.flogger:flogger:$floggerVersion"
-	testImplementation "org.junit.jupiter:junit-jupiter-api:$junitPlatformVersion"
-	testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitPlatformVersion"
-	testRuntimeOnly "com.google.flogger:flogger-slf4j-backend:$floggerVersion"
+  implementation project(':protocol')
+  implementation "com.google.protobuf:protobuf-java-util:$protobufJavaVersion"
+  implementation "com.google.flogger:flogger:$floggerVersion"
+  testImplementation "org.junit.jupiter:junit-jupiter-api:$junitPlatformVersion"
+  testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitPlatformVersion"
+  testRuntimeOnly "com.google.flogger:flogger-slf4j-backend:$floggerVersion"
 }
 
 test {
-	useJUnitPlatform()
+  useJUnitPlatform()
 }

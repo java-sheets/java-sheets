@@ -12,17 +12,17 @@ import * as EvaluationProtocol from "@jsheets/protocol/src/jsheets/api/snippet_r
 import {StartEvaluationRequest} from "@jsheets/protocol/src/jsheets/api/snippet_runtime_pb";
 
 export interface SnippetPosition {
-	highestOrder: number
-	lowestOrder: number
-	moveUp: () => void
-	moveDown: () => void
+  highestOrder: number
+  lowestOrder: number
+  moveUp: () => void
+  moveDown: () => void
 }
 
 interface ExistingSnippetProperties extends UseSnippet {
   sheetId: string
-	snippet: SheetSnippet
-	position: SnippetPosition
-	headProperties?: any
+  snippet: SheetSnippet
+  position: SnippetPosition
+  headProperties?: any
   running?: boolean
   snippetRef?: MutableRefObject<SnippetRef | null>
   onRun: (request: StartEvaluationRequest) => void
@@ -52,14 +52,14 @@ class ExistingSnippet
     this.state = {editingTitle: props.snippet.title === ''}
   }
 
-	changeEditingTitle = (target: boolean) => {
-		if (!target && this.props.snippet.title === '') {
-			this.props.changeDetails({title: 'None'})
-		}
-		this.setState({editingTitle: target})
-	}
+  changeEditingTitle = (target: boolean) => {
+    if (!target && this.props.snippet.title === '') {
+      this.props.changeDetails({title: 'None'})
+    }
+    this.setState({editingTitle: target})
+  }
 
-	componentDidMount() {
+  componentDidMount() {
     if (this.props.snippetRef) {
       this.props.snippetRef.current = this
     }
@@ -158,30 +158,30 @@ function createCodeComponent(id: string, code: string, snippet: SheetSnippet) {
 
 
 export interface SnippetProperties {
-	id: string
+  id: string
   sheetId: string
-	position: SnippetPosition
-	dragHandleProps?: any
+  position: SnippetPosition
+  dragHandleProps?: any
   running?: boolean
   snippetRef?: MutableRefObject<SnippetRef | null>
   onRun: (request: StartEvaluationRequest) => void
 }
 
 export default function Snippet(properties: SnippetProperties) {
-	const snippetContext = useSnippet(properties.id)
-	if (!snippetContext.snippet) {
-		return <></>
-	}
-	return (
-	  <ExistingSnippet
-		  {...snippetContext}
+  const snippetContext = useSnippet(properties.id)
+  if (!snippetContext.snippet) {
+    return <></>
+  }
+  return (
+    <ExistingSnippet
+      {...snippetContext}
       running={properties.running}
       onRun={properties.onRun}
       sheetId={properties.sheetId}
       snippetRef={properties.snippetRef}
-		  position={properties.position}
-		  headProperties={properties.dragHandleProps}
-		  snippet={snippetContext.snippet}
-	  />
+      position={properties.position}
+      headProperties={properties.dragHandleProps}
+      snippet={snippetContext.snippet}
+    />
   )
 }

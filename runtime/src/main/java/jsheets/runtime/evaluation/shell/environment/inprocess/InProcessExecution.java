@@ -13,20 +13,20 @@ import jsheets.runtime.evaluation.shell.environment.ExecutionEnvironment;
  * way to support multi tenancy.
  */
 public final class InProcessExecution implements ExecutionEnvironment {
-	public static InProcessExecution create() {
-		return new InProcessExecution(MultiTenancy.create());
-	}
-
-	private final Tenancy tenancy;
-
-	private InProcessExecution(Tenancy tenancy) {
-	  this.tenancy = tenancy;
+  public static InProcessExecution create() {
+    return new InProcessExecution(MultiTenancy.create());
   }
 
-	@Override
-	public ExecutionControlProvider control(String name) {
-	  return new Provider(name, tenancy);
-	}
+  private final Tenancy tenancy;
+
+  private InProcessExecution(Tenancy tenancy) {
+    this.tenancy = tenancy;
+  }
+
+  @Override
+  public ExecutionControlProvider control(String name) {
+    return new Provider(name, tenancy);
+  }
 
   @Override
   public Installation install() {
@@ -39,12 +39,12 @@ public final class InProcessExecution implements ExecutionEnvironment {
   }
 
   static final class Provider implements ExecutionControlProvider {
-	  private final String name;
-	  private final Tenancy tenancy;
+    private final String name;
+    private final Tenancy tenancy;
 
-	  private Provider(String name, Tenancy tenancy) {
-	    this.name = name;
-	    this.tenancy = tenancy;
+    private Provider(String name, Tenancy tenancy) {
+      this.name = name;
+      this.tenancy = tenancy;
     }
 
     @Override
@@ -57,8 +57,8 @@ public final class InProcessExecution implements ExecutionEnvironment {
       ExecutionEnv environment,
       Map<String, String> parameters
     ) {
-	    return new InProcessExecutionControl(
-	      environment,
+      return new InProcessExecutionControl(
+        environment,
         tenancy,
         "schell-executor-" + name
       );
