@@ -31,7 +31,7 @@ deploy/npm
 
 # Java annotation processor (APT)
 .factorypath
-
+node_modules/
 # PDT-specific (PHP Development Tools)
 .buildpath
 
