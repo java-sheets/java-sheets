@@ -139,12 +139,34 @@ const slice = createSlice({
 			}
 			current.order = to
 		},
+    removeOutput(state, action: PayloadAction<RemoveOutput>) {
+		  const {snippetId, componentId} = action.payload
+
+      const findComponents = () => {
+        if (action.payload.snippetId) {
+          return state.snippets.find(snippet => snippet.id === snippetId)?.components
+        }
+        if (action.payload.componentId) {
+          return state.snippets.flatMap(snippet =>
+            snippet.components.filter(component => component.id === componentId)
+          )
+        }
+        return state.snippets.flatMap(snippet => snippet.components)
+      }
+
+      findComponents()?.forEach(component => component.output = undefined)
+    },
     reportOutput(state, action: PayloadAction<ReportOutput>) {
-		  console.log({action})
 		  state.snippets.forEach(snippet => {
 		    snippet.components
           .filter(component => component.id === action.payload.componentId)
-          .forEach(component => component.output = action.payload.output)
+          .forEach(component => {
+            if (component.output) {
+              component.output.push(action.payload.output)
+            } else {
+              component.output = [action.payload.output]
+            }
+          })
       })
     }
 	}
@@ -153,6 +175,11 @@ const slice = createSlice({
 interface ReportOutput {
   output: SheetSnippetComponentOutput
   componentId: string
+}
+
+interface RemoveOutput {
+  snippetId?: string
+  componentId?: string
 }
 
 function addRightGap(start: number, elements: {order: number}[]) {
@@ -213,6 +240,7 @@ export const {
 	addComponent,
   reportOutput,
 	deleteComponent,
+  removeOutput,
 	changeSnippetDetails
 } = slice.actions
 

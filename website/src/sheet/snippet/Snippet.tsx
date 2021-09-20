@@ -23,6 +23,7 @@ interface ExistingSnippetProperties extends UseSnippet {
 	snippet: SheetSnippet
 	position: SnippetPosition
 	headProperties?: any
+  running?: boolean
   snippetRef?: MutableRefObject<SnippetRef | null>
   onRun: (request: StartEvaluationRequest) => void
 }
@@ -76,6 +77,7 @@ class ExistingSnippet
             text={this.props.snippet.title}
           />
           <MemoizedExtras
+            running={this.props.running}
             editingTitle={this.state.editingTitle}
             setEditingTitle={this.changeEditingTitle}
             delete={this.props.delete}
@@ -160,6 +162,7 @@ export interface SnippetProperties {
   sheetId: string
 	position: SnippetPosition
 	dragHandleProps?: any
+  running?: boolean
   snippetRef?: MutableRefObject<SnippetRef | null>
   onRun: (request: StartEvaluationRequest) => void
 }
@@ -172,6 +175,7 @@ export default function Snippet(properties: SnippetProperties) {
 	return (
 	  <ExistingSnippet
 		  {...snippetContext}
+      running={properties.running}
       onRun={properties.onRun}
       sheetId={properties.sheetId}
       snippetRef={properties.snippetRef}

@@ -17,7 +17,7 @@ export interface SheetSnippetComponent {
 	order: number
 	type: 'code' | 'text'
 	content: string
-  output?: SheetSnippetComponentOutput
+  output?: SheetSnippetComponentOutput[]
 }
 
 export type SheetSnippetComponentOutput = ErrorOutput | MessageOutput

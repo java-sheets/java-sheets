@@ -19,6 +19,7 @@ export interface SnippetExtrasProperties {
 	delete: () => void
 	addComponent: AddComponent
   onRun: () => void
+  running?: boolean
 }
 
 const AddMenu: React.FC<{addComponent: AddComponent, t: TFunction}> = ({addComponent, t}) =>  (
@@ -76,6 +77,7 @@ export default function SnippetExtras(properties: SnippetExtrasProperties) {
 			<Button
         type="primary"
         icon={<FireOutlined/>}
+        loading={properties.running}
         onClick={properties.onRun}
       >{t('snippet.menu.run.button')}</Button>
 			<EditMenu t={t} key="edit" {...properties}/>

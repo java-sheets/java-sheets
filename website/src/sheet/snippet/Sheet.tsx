@@ -41,6 +41,7 @@ const newSnippetTemplate: () => Partial<SheetSnippet> = () => ({
 })
 
 export interface SheetProperties {
+  running?: boolean
   onRun: (request: StartEvaluationRequest) => void
 }
 
@@ -72,6 +73,7 @@ export default function Sheet(properties: SheetProperties) {
 										>
 											<MemoizedSnippet
 												key={snippet.id}
+                        running={properties.running}
                         sheetId={sheet.id}
                         onRun={properties.onRun}
 												dragHandleProps={draggable.dragHandleProps}

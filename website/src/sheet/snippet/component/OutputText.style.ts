@@ -1,6 +1,27 @@
 import styled from 'styled-components'
+import {Button} from "antd";
 
-export const OutputText = styled.code`
+export const Overlay = styled.div`
+  position: absolute;
+  display: flex;
+  left: 0;
+  top: 5px;
+  opacity: 0;
+  transition: opacity .1s ease-in-out;
+  & > * {
+    margin: auto 0 auto 0;
+  }
+`
+
+export const CloseButton = styled(Button)`
+  color: white;
+  &:hover {
+    color: #e1e1e1;
+  }
+`
+
+const OutputText = styled.code`
+  position: relative;
   font-size: 13px;
   color: #fff;
   overflow-y: scroll;
@@ -14,6 +35,9 @@ export const OutputText = styled.code`
     transition: max-height 2s ease-in;
     max-height: 0;
     padding: 0;
+  }
+  &:hover ${Overlay} {
+    opacity: 1;
   }
   div {
     outline: none;
@@ -31,3 +55,9 @@ export const OutputText = styled.code`
     border: 4px solid #272727;
   }
 `
+
+export const ErrorOutput = styled(OutputText)`
+  background-color: #e34e53;
+`
+
+export const InfoOutput = styled(OutputText)``

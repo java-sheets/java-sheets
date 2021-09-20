@@ -13,7 +13,8 @@ import {
 import useTimedFlag from "../../../util/useTimedFlag"
 import {SheetSnippetComponentOutput} from "../../index";
 import OutputText from "./OutputText";
-import {useTranslation} from 'react-i18next'
+import {useDispatch} from "react-redux";
+import {removeOutput} from "../../state";
 
 function fixToVerticalAxis(style: DraggingStyle | NotDraggingStyle | undefined) {
 	if (style?.transform) {
@@ -33,18 +34,33 @@ interface ComponentContainerProperties {
 	item: {
 	  id: string
     order: number
-    output: SheetSnippetComponentOutput | undefined
+    output: SheetSnippetComponentOutput[] | undefined
     content: React.ReactNode
   }
 	onDelete?: () => void
-  output?: SheetSnippetComponentOutput
 }
 
 export default function ComponentContainer(
 	{item, onDelete}: ComponentContainerProperties
 ) {
-	const {t} = useTranslation()
+  const dispatch =  useDispatch()
 	const [confirmDelete, setConfirmDelete] = useTimedFlag(false, 2000)
+
+  const onOutputClose = () => {
+    dispatch(removeOutput({componentId: item.id}))
+  }
+
+  const outputs = React.useMemo(() =>
+    item.output?.map((output, index) => (
+      <OutputText
+        key={index}
+        output={output}
+        onClose={onOutputClose}
+      />
+    )),
+    [item.output]
+  )
+
 	return (
 		<Draggable key={item.id} draggableId={item.id} index={item.order}>
 			{(provided, snapshot) => (
@@ -78,7 +94,7 @@ export default function ComponentContainer(
               {item.content}
             </Styled.ComponentContent>
           </Styled.ComponentInputArea>
-          <OutputText output={item.output}/>
+          {outputs}
 				</Styled.Component>
 			)}
 		</Draggable>

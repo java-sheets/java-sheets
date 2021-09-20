@@ -1,8 +1,10 @@
 import * as Styled from './OutputText.style'
 import {ErrorOutput, SheetSnippetComponentOutput} from "../../index";
+import {CloseCircleFilled} from "@ant-design/icons";
 
 export interface OutputTextProperties {
 	output?: SheetSnippetComponentOutput
+  onClose?: () => void
 }
 
 export default function OutputText(properties: OutputTextProperties) {
@@ -10,17 +12,28 @@ export default function OutputText(properties: OutputTextProperties) {
     return <></>
   }
   const errorOutput = properties.output as ErrorOutput
-  if (errorOutput.span !== undefined) {
-    return (
-      <Styled.OutputText>
-        {errorOutput.code}
-        {errorOutput.message}
-      </Styled.OutputText>
-    )
-  }
+  const isError = errorOutput.code !== undefined
+  const Type = isError ? Styled.ErrorOutput : Styled.InfoOutput
+  const content = isError ? (
+    <div>
+      {errorOutput.code}
+      {errorOutput.message}
+    </div>
+  ) : (
+    <div>
+      {properties.output.message}
+    </div>
+  )
 	return (
-		<Styled.OutputText>
-			{properties.output.message}
-		</Styled.OutputText>
+		<Type>
+      {content}
+      <Styled.Overlay>
+        <Styled.CloseButton
+          type="text"
+          icon={<CloseCircleFilled/>}
+          onClick={properties.onClose}
+        />
+      </Styled.Overlay>
+		</Type>
 	)
 }
