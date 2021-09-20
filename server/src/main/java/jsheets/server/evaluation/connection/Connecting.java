@@ -2,7 +2,7 @@ package jsheets.server.evaluation.connection;
 
 import jsheets.EvaluateRequest;
 import jsheets.StartEvaluationRequest;
-import jsheets.server.evaluation.EvaluationEngine;
+import jsheets.runtime.evaluation.EvaluationEngine;
 import org.eclipse.jetty.websocket.api.Session;
 
 import java.util.concurrent.CompletableFuture;

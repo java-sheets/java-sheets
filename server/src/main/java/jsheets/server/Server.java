@@ -3,24 +3,27 @@ package jsheets.server;
 import com.google.common.flogger.FluentLogger;
 import io.javalin.Javalin;
 import io.javalin.core.JavalinConfig;
+import jsheets.server.evaluation.EvaluationEndpoint;
 import jsheets.server.sheet.SheetEndpoint;
 
 import javax.inject.Inject;
 import java.util.concurrent.atomic.AtomicReference;
+
+import com.google.inject.Injector;
 
 public final class Server {
 	private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
 	public record Config(int port) { }
 
-	private final SheetEndpoint sheetEndpoint;
+	private final Injector injector;
 	private final Config config;
 	private final AtomicReference<Javalin> runningServer =
 		new AtomicReference<>(null);
 
 	@Inject
-	Server(SheetEndpoint sheetEndpoint, Config config) {
-		this.sheetEndpoint = sheetEndpoint;
+	Server(Injector injector, Config config) {
+		this.injector = injector;
 		this.config = config;
 	}
 
@@ -43,7 +46,8 @@ public final class Server {
 
 	private Javalin createServer() {
 		var server = Javalin.create(Server::configure);
-		sheetEndpoint.configure(server);
+    injector.getInstance(EvaluationEndpoint.class).configure(server);
+    injector.getInstance(SheetEndpoint.class).configure(server);
 		return server;
 	}
 

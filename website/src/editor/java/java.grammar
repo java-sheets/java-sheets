@@ -164,8 +164,12 @@ wildcardBounds {
 }
 
 Dimension {
-  annotation* !array "[" "]"
+  annotation* !array ArrayDimensionStart ArrayDimensionEnd
 }
+
+ArrayDimensionStart { "[" }
+
+ArrayDimensionEnd { "]" }
 
 statement[@isGroup=Statement] {
   declaration |
@@ -183,6 +187,7 @@ statement[@isGroup=Statement] {
   BreakStatement |
   ContinueStatement |
   ReturnStatement |
+  YieldStatement |
   SynchronizedStatement |
   LocalVariableDeclaration |
   ThrowStatement |
@@ -219,7 +224,9 @@ SwitchBlock {
 
 SwitchLabel {
   kw<"case"> expression ":" |
-  kw<"default"> ":"
+  kw<"case"> expression "=>" |
+  kw<"default"> ":" |
+  kw<"default"> "=>"
 }
 
 DoStatement {
@@ -240,6 +247,10 @@ ReturnStatement {
 
 SynchronizedStatement {
   kw<"synchronized"> ParenthesizedExpression Block
+}
+
+YieldStatement {
+  kw<"yield"> expression ";"
 }
 
 ThrowStatement {
@@ -340,6 +351,8 @@ declaration {
   PackageDeclaration |
   ImportDeclaration |
   ClassDeclaration |
+  MethodDeclaration |
+  RecordDeclaration |
   InterfaceDeclaration |
   AnnotationTypeDeclaration |
   EnumDeclaration
@@ -394,6 +407,14 @@ ClassDeclaration {
   Modifiers? kw<"class"> Definition TypeParameters? Superclass? SuperInterfaces? ClassBody
 }
 
+RecordDeclaration {
+  Modifiers? kw<"record"> Definition TypeParameters? RecordParameters? Superclass? SuperInterfaces? ClassBody
+}
+
+RecordParameters {
+  FormalParameters
+}
+
 Modifiers {
   annotation+ (modifier annotation*)* ~annotations |
   (modifier annotation*)+ ~annotations
@@ -436,6 +457,7 @@ classBodyDeclaration {
   FieldDeclaration |
   MethodDeclaration |
   ClassDeclaration |
+  RecordDeclaration |
   InterfaceDeclaration |
   AnnotationTypeDeclaration |
   EnumDeclaration |
@@ -454,7 +476,7 @@ ConstructorDeclaration {
 }
 
 constructorDeclarator {
-  TypeParameters? Definition FormalParameters
+  TypeParameters? Definition FormalParameters?
 }
 
 ConstructorBody {
@@ -636,6 +658,12 @@ commaSepTrailing<expr> { (expr ("," expr?)*)? }
 
 @skip { LineComment | BlockComment | whitespace }
 
+@skip {} {
+  StringLiteral {
+    singleLineStringLiteral | stringBlockLiteral
+  }
+}
+
 @tokens {
   whitespace {
     std.whitespace+
@@ -680,7 +708,18 @@ commaSepTrailing<expr> { (expr ("," expr?)*)? }
   CharacterLiteral {
     "'" (![\\'\n] | "\\" ![\n] | "\\\n")+ "'"
   }
-  StringLiteral {
+
+  @precedence { stringBlockLiteral, singleLineStringLiteral }
+
+  stringBlockLiteral {
+    '"""' stringBlockContent* '""""'
+  }
+
+  stringBlockContent { (!["\\] | "\\" _ | '"' stringBlockContent2_2)+ }
+  stringBlockContent2_2 { !["\\] | "\\" _ | '"' stringBlockContent2_3 }
+  stringBlockContent2_3 { !["\\] | "\\" _ }
+
+  singleLineStringLiteral {
     "\"" (![\\"\n] | "\\" (![\n] | "\n"))* "\""
   }
 

@@ -1,7 +1,11 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import {Sheet, SheetSnippet, SheetSnippetComponent} from './index'
+import {
+  Sheet,
+  SheetSnippet,
+  SheetSnippetComponent,
+  SheetSnippetComponentOutput
+} from './index'
 import { v4 as uuid } from 'uuid'
-import {message} from "antd";
 
 const initialState: Sheet = {
 	id: uuid(),
@@ -138,9 +142,22 @@ const slice = createSlice({
 				addLeftGap(to, snippet.components)
 			}
 			current.order = to
-		}
+		},
+    reportOutput(state, action: PayloadAction<ReportOutput>) {
+		  console.log({action})
+		  state.snippets.forEach(snippet => {
+		    snippet.components
+          .filter(component => component.id === action.payload.componentId)
+          .forEach(component => component.output = action.payload.output)
+      })
+    }
 	}
 })
+
+interface ReportOutput {
+  output: SheetSnippetComponentOutput
+  componentId: string
+}
 
 function addRightGap(start: number, elements: {order: number}[]) {
 	for (const component of elements) {
@@ -157,7 +174,6 @@ function addLeftGap(start: number, elements: {order: number}[]) {
 		}
 	}
 }
-
 
 export interface ReorderComponent {
 	snippetId: string
@@ -199,6 +215,7 @@ export const {
 	changeDetails,
 	reorderComponent,
 	addComponent,
+  reportOutput,
 	deleteComponent,
 	changeSnippetDetails
 } = slice.actions

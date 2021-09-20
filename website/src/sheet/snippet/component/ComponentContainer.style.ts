@@ -1,6 +1,10 @@
 import styled from "styled-components";
 import {Button} from "antd";
 
+export const ComponentInputArea = styled.div`
+  position: relative;
+`
+
 export const ComponentOptions = styled.div`
 	z-index: 20;
 	position: absolute;
@@ -16,14 +20,19 @@ export const ComponentOptions = styled.div`
 `
 
 export const Component = styled.div`
-	position: relative;
 	min-height: 45px; // To include the options
 	transition: opacity .1s ease-in, box-shadow .1s ease-in;
 	background: rgb(253, 253, 253);
+
+	&:not(:first-child) {
+		border-top: 1px solid #ededed;
+	}
+
 	&.dragging-component {
 		box-shadow: inset 0 -2px 3px 1px rgba(240, 240, 240, 0.3);
 	}
-	&.show-options ${ComponentOptions} , &.dragging-component ${ComponentOptions} , :hover ${ComponentOptions} {
+
+	&.show-options ${ComponentOptions}, &.dragging-component ${ComponentOptions}, :hover ${ComponentOptions} {
 		opacity: 100%;
 		right: 10px;
 	}

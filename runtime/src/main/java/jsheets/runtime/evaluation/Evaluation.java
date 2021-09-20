@@ -1,15 +1,11 @@
 package jsheets.runtime.evaluation;
 
-import jsheets.EvaluationError;
-import jsheets.EvaluationResult;
-import jsheets.MissingSources;
+import jsheets.EvaluateResponse;
 
 public interface Evaluation {
 	interface Listener {
-		default void onError(EvaluationError error) {}
-		default void onResult(EvaluationResult result) {}
-		default void onMissingSources(MissingSources sources) {}
-		default void onEnd() {}
+		default void send(EvaluateResponse response) {}
+		default void close() {}
 	}
 
 	void stop();

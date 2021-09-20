@@ -4,6 +4,8 @@ import com.google.common.flogger.FluentLogger;
 import com.google.common.flogger.MetadataKey;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
+
+import jsheets.server.evaluation.EvaluationModule;
 import jsheets.server.sheet.SheetModule;
 
 import java.util.OptionalInt;
@@ -20,6 +22,7 @@ public final class ServerModule extends AbstractModule {
 	@Override
 	protected void configure() {
 		install(SheetModule.create());
+		install(EvaluationModule.create());
 	}
 
 	private static final int defaultPort = 8080;

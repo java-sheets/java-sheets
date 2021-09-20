@@ -13,6 +13,7 @@ import {
 import {useDispatch} from 'react-redux'
 import {SheetSnippet} from "../index";
 import {reorderSnippet} from "../state";
+import {StartEvaluationRequest} from "@jsheets/protocol/src/jsheets/api/snippet_runtime_pb";
 
 const MemoizedSnippet = React.memo(Snippet)
 
@@ -39,9 +40,11 @@ const newSnippetTemplate: () => Partial<SheetSnippet> = () => ({
 	]
 })
 
-export interface SheetProperties {}
+export interface SheetProperties {
+  onRun: (request: StartEvaluationRequest) => void
+}
 
-export default function Sheet(_properties: SheetProperties) {
+export default function Sheet(properties: SheetProperties) {
 	const {sheet, addSnippet, moveSnippet} = useSheet()
 	const reorder = useReorder()
 	const snippets = useMemo(() => {
@@ -69,6 +72,8 @@ export default function Sheet(_properties: SheetProperties) {
 										>
 											<MemoizedSnippet
 												key={snippet.id}
+                        sheetId={sheet.id}
+                        onRun={properties.onRun}
 												dragHandleProps={draggable.dragHandleProps}
 												id={snippet.id}
 												position={

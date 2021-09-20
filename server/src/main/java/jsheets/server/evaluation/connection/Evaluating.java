@@ -3,7 +3,6 @@ package jsheets.server.evaluation.connection;
 import com.google.common.base.MoreObjects;
 import com.google.common.flogger.FluentLogger;
 import jsheets.*;
-import jsheets.server.evaluation.Evaluation;
 import org.eclipse.jetty.websocket.api.Session;
 
 import java.io.IOException;
@@ -45,7 +44,9 @@ public final class Evaluating implements Stage {
 
   }
 
-  private final class UpstreamListener implements Evaluation.Listener {
+  private final class UpstreamListener
+    implements jsheets.runtime.evaluation.Evaluation.Listener {
+
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
     private final Session downstream;
@@ -55,35 +56,18 @@ public final class Evaluating implements Stage {
     }
 
     @Override
-    public void onEnd() {
-
-    }
+    public void close() {}
 
     @Override
-    public void onError(EvaluationError error) {
-      send(EvaluateResponse.newBuilder().setError(error));
-    }
-
-    @Override
-    public void onResult(EvaluationResult result) {
-      send(EvaluateResponse.newBuilder().setResult(result));
-    }
-
-    @Override
-    public void onMissingSources(MissingSources sources) {
-      send(EvaluateResponse.newBuilder().setMissingSources(sources));
-    }
-
-    private void send(EvaluateResponse.Builder message) {
+    public void send(EvaluateResponse response) {
       if (terminated.get()) {
-        discardDueToTermination(message.build());
+        discardDueToTermination(response);
         return;
       }
-      sendInRunningSession(message);
+      sendInRunningSession(response);
     }
 
-    private void sendInRunningSession(EvaluateResponse.Builder message) {
-      var response = message.build();
+    private void sendInRunningSession(EvaluateResponse response) {
       try {
         var payload = ByteBuffer.wrap(response.toByteArray());
         downstream.getRemote().sendBytes(payload);
@@ -94,8 +78,7 @@ public final class Evaluating implements Stage {
 
     private void discardDueToTermination(EvaluateResponse message) {
       log.atWarning().log(
-        "discarding {} because session to {} has been closed",
-        message.getMessageCase(),
+        "discarding message because session to %s has been closed",
         downstream.getRemoteAddress()
       );
     }
@@ -107,8 +90,7 @@ public final class Evaluating implements Stage {
       log.atWarning()
         .withCause(failedTransmission)
         .log(
-          "could not write {} to {}",
-          response.getMessageCase(),
+          "could not write message to %s",
           downstream.getRemoteAddress()
         );
     }

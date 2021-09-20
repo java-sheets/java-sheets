@@ -1,4 +1,4 @@
-import React, {useMemo} from "react";
+import React, {MutableRefObject, useMemo} from "react";
 import {DragDropContext, Droppable, DropResult} from "react-beautiful-dnd";
 import ComponentContainer from "./ComponentContainer";
 import TextComponent from "./TextComponent";
@@ -6,6 +6,7 @@ import EditorComponent from "./EditorComponent";
 import {useDispatch} from "react-redux";
 import {reorderComponent} from "../../state";
 import {SheetSnippetComponent} from "../../index";
+import {SnippetComponentListRef} from "./Component";
 
 function useReorder(snippetId: string): (result: DropResult) => void {
 	const dispatch = useDispatch()
@@ -23,6 +24,7 @@ export interface ComponentListProperties {
 	snippetId: string
 	components: SheetSnippetComponent[]
 	deleteComponent: (id: string) => void
+  listRef?: MutableRefObject<SnippetComponentListRef | null>
 }
 
 export default function ComponentList(properties: ComponentListProperties) {
@@ -32,11 +34,11 @@ export default function ComponentList(properties: ComponentListProperties) {
 		.sort((left, right) => left.order - right.order)
 		.map(component => {
 				const content = component.type === 'text'
-					? <TextComponent value={component.content}/>
-					: <EditorComponent value={component.content}/>
-				return {id: component.id, order: component.order, content}
+					? <TextComponent listRef={properties.listRef} id={component.id} value={component.content}/>
+					: <EditorComponent listRef={properties.listRef} id={component.id} value={component.content}/>
+				return {id: component.id, order: component.order, output: component.output, content}
 			}
-		), [properties.components])
+		), [properties.listRef, properties.components])
 
 	return (
 		<DragDropContext onDragEnd={reorder}>

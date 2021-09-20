@@ -10,6 +10,9 @@ repositories {
   mavenCentral()
 }
 
+sourceCompatibility = 16
+targetCompatibility = 16
+
 ext {
 	mongoDbDriverVersion = '4.3.0'
 	cfg4jVersion = '4.4.1'
