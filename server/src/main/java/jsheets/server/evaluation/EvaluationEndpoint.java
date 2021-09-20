@@ -6,8 +6,8 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import io.javalin.Javalin;
+import io.javalin.websocket.WsConfig;
 import io.javalin.websocket.WsContext;
-import io.javalin.websocket.WsHandler;
 import jsheets.server.endpoint.Endpoint;
 import jsheets.server.evaluation.connection.EvaluationConnection;
 
@@ -36,7 +36,7 @@ public final class EvaluationEndpoint implements Endpoint {
       this.factory = connectionFactory;
     }
 
-    public void listen(WsHandler handler) {
+    public void listen(WsConfig handler) {
       handler.onConnect(forward(EvaluationConnection::connect)::accept);
       handler.onClose(forward(EvaluationConnection::close)::accept);
       handler.onBinaryMessage(forward(EvaluationConnection::receive)::accept);

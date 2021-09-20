@@ -201,6 +201,7 @@ public final class EvaluationConnection {
     }
   }
 
+
   private void ensureSessionIsClosed(Session session, CloseStatus status) {
     // close does not throw an exception if the session is already closed
     session.close(status);

@@ -5,6 +5,7 @@ import {Content, Header} from 'antd/lib/layout/layout'
 import * as icons from '@ant-design/icons'
 import styled from 'styled-components'
 import Sheet from "./sheet/snippet/Sheet";
+import {useTranslation} from 'react-i18next'
 import Client, {EvaluationListener} from "./client";
 import {
   EvaluationError, EvaluationResult,
@@ -37,6 +38,7 @@ const StyledHeader = styled(Header)`
 `
 
 export default function App() {
+	const {t} = useTranslation()
   const evaluator = useEvaluator()
   return (
     <Layout>
@@ -44,7 +46,7 @@ export default function App() {
         <Menu theme="light" style={{marginRight: 'auto'}} mode="horizontal" defaultSelectedKeys={['2']}>
           <Logo><span>Java</span><span>Sheets</span></Logo>
           <Space style={{marginLeft: 'auto'}} size="middle">
-            <Button type="primary" ghost icon={<icons.ShareAltOutlined/>}>Share</Button>
+            <Button type="primary" ghost icon={<icons.ShareAltOutlined/>}>{t('menu.share')}</Button>
           </Space>
         </Menu>
       </StyledHeader>
@@ -56,7 +58,7 @@ export default function App() {
 }
 
 function useEvaluator() {
-  const client = Client.forHost({protocol: 'http:', host: 'localhost:8090'})
+  const client = Client.create()
   const dispatch = useDispatch()
   return (start: StartEvaluationRequest) => {
     console.log({start: start.toObject()})

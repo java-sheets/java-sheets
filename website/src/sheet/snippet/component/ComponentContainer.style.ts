@@ -53,7 +53,9 @@ export const DragHandle = styled.div`
 `
 
 export const DeleteButton = styled(Button)`
+`
 
+export const DuplicateButton = styled(Button)`
 `
 
 export const AddComponentButton = styled(Button)`

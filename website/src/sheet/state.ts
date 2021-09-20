@@ -9,28 +9,24 @@ import { v4 as uuid } from 'uuid'
 
 const initialState: Sheet = {
 	id: uuid(),
-	title: 'Hello, World!',
+	title: 'Welcome!',
 	description: '',
 	snippets: [
 		{
 			id: uuid(),
-			title: 'Hello, World!',
+			title: 'Welcome!',
 			order: 0,
 			components: [
 				{
 					id: uuid(),
 					order: 0,
-					content: `Hey there`,
+					content: `Welcome to the JSheets Demo`,
 					type: 'text'
 				},
 				{
 					id: uuid(),
 					order: 1,
-					content: `class Greeting {
-  public static void main(String[] options) {
-    System.out.println("Hello, World!");
-  }
-}`,
+					content: `Math.min(420, 1337)`,
 					type: 'code'
 				}
 			]

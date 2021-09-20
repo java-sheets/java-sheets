@@ -17,7 +17,7 @@ ext {
 	mongoDbDriverVersion = '4.3.0'
 	cfg4jVersion = '4.4.1'
 	slf4jVersion = '1.7.32'
-	javalinVersion = '3.13.11'
+	javalinVersion = '4.0.0'
 	argsParseVersion = '0.9.0'
 	javaxAnnotationVersion = '1.3.2'
 	guiceVersion = '5.0.1'
@@ -58,6 +58,9 @@ private def listClassPath() {
 
 jar {
   archiveName 'app.jar'
+  from ('../website/build/') {
+    into 'static'
+  }
   manifest {
     attributes(
       "Main-Class": "jsheets.server.App",
@@ -73,7 +76,7 @@ def dockerImage = "$dockerImageName:$dockerImageTag"
 task buildDocker(type: Exec) {
   dependsOn copyDependencies, build
   workingDir "$projectDir"
-  commandLine "docker", "build", "--rm", ".", "-t", dockerImage, "-f", "./deploy/Dockerfile"
+  commandLine "docker", "build", "--rm", ".", "-t", dockerImage, "-f", "./server/deploy/Dockerfile"
 }
 
 task justRunDocker(type: Exec) {
