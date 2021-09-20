@@ -163,8 +163,15 @@ public final class EvaluationConnection {
     return true;
   }
 
-  private void complete() {
+  private static final int evaluationDoneCode = 4001;
 
+  private void complete(WsContext downstream) {
+    stage.set(Stage.Terminated);
+    try {
+      downstream.session.close(evaluationDoneCode, "done");
+    } finally {
+      closeHook.run();
+    }
   }
 
   final class UpstreamListener implements Evaluation.Listener {
@@ -178,7 +185,7 @@ public final class EvaluationConnection {
 
     @Override
     public void close() {
-      complete();
+      complete(downstream);
     }
 
     @Override
@@ -200,7 +207,6 @@ public final class EvaluationConnection {
         .toString();
     }
   }
-
 
   private void ensureSessionIsClosed(Session session, CloseStatus status) {
     // close does not throw an exception if the session is already closed

@@ -56,7 +56,15 @@ private def listClassPath() {
   return configurations.runtimeClasspath.collect { "libs/${it.name}" }.join(" ")
 }
 
+processResources {
+  duplicatesStrategy = DuplicatesStrategy.INCLUDE
+  from ('../website/build/') {
+    into 'static'
+  }
+}
+
 jar {
+  duplicatesStrategy = DuplicatesStrategy.INCLUDE
   archiveName 'app.jar'
   from ('../website/build/') {
     into 'static'
