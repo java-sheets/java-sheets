@@ -53,14 +53,17 @@ export default class Client {
 
   evaluate(start: StartEvaluationRequest, listener: EvaluationListener): Evaluation {
     const client = new WebSocket(`${this.webSocketUrl}/api/v1/evaluate`)
+
     client.onerror = error => {
       console.log({error})
     }
+
     client.onopen = () => {
       const request = new EvaluateRequest()
       request.setStart(start)
       client.send(request.serializeBinary())
     }
+
     client.onmessage = async (message) => {
       const blob = message.data as Blob
       if (blob == undefined) {
@@ -77,10 +80,12 @@ export default class Client {
       response.getMissingSourcesList()?.forEach(listener.onMissingSources)
       response.getResultList()?.forEach(listener.onResult)
     }
+
     client.onclose = event => {
       listener.onEnd()
       console.log({event})
     }
+
     return new WebSocketEvaluation(client)
   }
 

@@ -217,6 +217,7 @@ final class MoreFiles {
 }
 
 task generateJavascriptPackage {
+  dependsOn generateProto
   doLast {
     def generation =new GeneratedLibrary(
       version: version,
