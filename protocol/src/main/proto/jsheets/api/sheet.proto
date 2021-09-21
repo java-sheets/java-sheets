@@ -16,11 +16,20 @@ message Sheet {
     string id = 1;
     string name = 2;
   }
+  message Form {
+    string template_id = 2;
+    string title = 3;
+    string description = 4;
+    Author author = 5;
+    repeated Snippet snippets = 6;
+  }
   string id = 1;
   string template_id = 2;
   string title = 3;
   string description = 4;
   Author author = 5;
-  Snippet snippets = 6;
+  repeated Snippet snippets = 6;
+  // Output only. Link to the sheets page.
+  string url = 7;
   Metadata metadata = 100;
 }

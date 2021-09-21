@@ -14,7 +14,7 @@ ENV APP_LOG_VERSION=$APP_LOG_VERSION
 WORKDIR /usr/src/build
 
 # Context is parent directory
-COPY ./build/libs libs
+COPY ./server/build/libs libs
 
 RUN mv ./libs/app.jar app.jar
 
@@ -23,7 +23,7 @@ RUN jdeps --ignore-missing-deps -q --multi-release 17  \
     --class-path libs/* \
     app.jar > deps.info
 
-# zip compression
+# link using zip compression
 RUN jlink --verbose  \
     --compress 2  \
     --strip-java-debug-attributes  \
@@ -38,7 +38,8 @@ WORKDIR /app
 COPY --from=link-java /usr/src/build/jre jre
 COPY --from=link-java /usr/src/build/libs/* libs/
 COPY --from=link-java /usr/src/build/app.jar app.jar
-ADD /deploy/entrypoint.sh entrypoint.sh
+ADD /server/deploy/entrypoint.sh entrypoint.sh
+ADD /website/build static/
 RUN chmod +x entrypoint.sh
 
 EXPOSE 8080

@@ -1,0 +1,74 @@
+{
+  "name": "jeet",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@ant-design/icons": "^4.6.3",
+    "@codemirror/basic-setup": "^0.19.0",
+    "@codemirror/highlight": "0.19.2",
+    "@codemirror/language": "0.19.2",
+    "@codemirror/state": "0.19.1",
+    "@codemirror/view": "0.19.2",
+    "@jsheets/protocol": "file:../protocol/generated/js-protocol",
+    "@lezer/common": "^0.15.5",
+    "@lezer/lr": "^0.15.2",
+    "@reduxjs/toolkit": "^1.6.1",
+    "@types/react-beautiful-dnd": "^13.1.2",
+    "@types/uuid": "^8.3.1",
+    "antd": "^4.16.13",
+    "google-protobuf": "^3.18.0",
+    "i18next": "^20.6.1",
+    "install": "^0.13.0",
+    "npm": "^7.21.0",
+    "prosemirror-utils": "^1.0.0-0",
+    "react": "^17.0.2",
+    "react-beautiful-dnd": "^13.1.0",
+    "react-dom": "^17.0.2",
+    "react-i18next": "^11.11.4",
+    "react-redux": "^7.2.5",
+    "react-scripts": "4.0.3",
+    "rich-markdown-editor": "^11.17.8",
+    "styled-components": "^5.3.1",
+    "typescript": "^4.3.5",
+    "uuid": "^8.3.2",
+    "web-vitals": "^1.1.2"
+  },
+  "devDependencies": {
+    "@lezer/generator": "^0.15.0",
+    "@testing-library/jest-dom": "^5.14.1",
+    "@testing-library/react": "^11.2.7",
+    "@testing-library/user-event": "^12.8.3",
+    "@types/jest": "^26.0.24",
+    "@types/node": "^12.20.20",
+    "@types/react": "^17.0.19",
+    "@types/react-dom": "^17.0.9",
+    "@types/styled-components": "^5.1.12",
+    "lessc": "^1.0.2"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "generate-grammar": "lezer-generator ./src/editor/java/java.grammar -o ./src/editor/java/parser",
+    "build-theme": "lessc src/antd.less src/antd.css --js"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

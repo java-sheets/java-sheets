@@ -11,4 +11,3 @@ jre/bin/java -jar app.jar \
   -Xmx"$APP_HEAP_LIMIT" \
   -Xms"$APP_HEAP_MINIMUM" \
   "$@"
-
