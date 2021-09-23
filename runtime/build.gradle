@@ -12,8 +12,13 @@ repositories {
   mavenCentral()
 }
 
+ext {
+  asmVersion = '9.2'
+}
+
 dependencies {
   implementation project(':protocol')
+  implementation "org.ow2.asm:asm:$asmVersion"
   implementation "com.google.protobuf:protobuf-java-util:$protobufJavaVersion"
   implementation "com.google.flogger:flogger:$floggerVersion"
   testImplementation "org.junit.jupiter:junit-jupiter-api:$junitPlatformVersion"

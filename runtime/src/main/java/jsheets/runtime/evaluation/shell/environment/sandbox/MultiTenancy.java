@@ -1,4 +1,4 @@
-package jsheets.runtime.evaluation.shell.environment.inprocess;
+package jsheets.runtime.evaluation.shell.environment.sandbox;
 
 import java.io.PrintStream;
 import java.util.function.Consumer;

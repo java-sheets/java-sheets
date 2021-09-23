@@ -2,6 +2,7 @@ package jsheets.runtime.evaluation.shell.environment.inprocess;
 
 import com.google.common.util.concurrent.Uninterruptibles;
 
+import jsheets.runtime.evaluation.shell.environment.sandbox.TenantBasedOutput;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -1,4 +1,4 @@
-package jsheets.runtime.evaluation.shell.environment.inprocess;
+package jsheets.runtime.evaluation.shell.environment.sandbox;
 
 import java.util.Map;
 
@@ -60,7 +60,8 @@ public final class InProcessExecution implements ExecutionEnvironment {
       return new InProcessExecutionControl(
         environment,
         tenancy,
-        "schell-executor-" + name
+        "schell-executor-" + name,
+        new SandboxLoader()
       );
     }
   }

@@ -1,4 +1,4 @@
-package jsheets.runtime.evaluation.shell.environment.inprocess;
+package jsheets.runtime.evaluation.shell.environment.sandbox;
 
 import com.google.errorprone.annotations.Var;
 

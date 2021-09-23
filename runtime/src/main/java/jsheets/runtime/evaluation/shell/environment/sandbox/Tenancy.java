@@ -1,4 +1,4 @@
-package jsheets.runtime.evaluation.shell.environment.inprocess;
+package jsheets.runtime.evaluation.shell.environment.sandbox;
 
 import jdk.jshell.spi.ExecutionEnv;
 

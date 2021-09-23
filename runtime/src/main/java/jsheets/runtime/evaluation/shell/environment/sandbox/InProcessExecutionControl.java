@@ -1,4 +1,4 @@
-package jsheets.runtime.evaluation.shell.environment.inprocess;
+package jsheets.runtime.evaluation.shell.environment.sandbox;
 
 import java.lang.reflect.Method;
 import java.util.Objects;
@@ -29,8 +29,10 @@ public final class InProcessExecutionControl extends DirectExecutionControl {
   InProcessExecutionControl(
     ExecutionEnv environment,
     Tenancy tenancy,
-    String workerGroupName
+    String workerGroupName,
+    SandboxLoader loader
   ) {
+    super(loader);
     this.tenancy = tenancy;
     this.environment = environment;
     this.workerGroupName = workerGroupName;
