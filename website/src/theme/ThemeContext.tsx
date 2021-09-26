@@ -10,12 +10,12 @@ export type ThemeKey = 'light' | 'dark'
 
 type UpdateTheme = React.Dispatch<React.SetStateAction<ThemeKey>>
 
-interface ThemeContextProperties {
+export interface ThemeContextProperties {
 	theme: ThemeKey
 	update: UpdateTheme
 }
 
-const ThemeContext = React.createContext<ThemeContextProperties>(
+export const ThemeContext = React.createContext<ThemeContextProperties>(
 	{
 		theme: 'light',
 		update: () => 'light'
@@ -43,12 +43,14 @@ export interface ThemeProviderProperties {
 	children: React.ReactNode
 }
 
-const themeSources: Record<ThemeKey, string> = {
+export type ThemeTable<T> = Record<ThemeKey, T>
+
+const themeSources: ThemeTable<string> = {
 	light: '/theme/light.css',
 	dark: '/theme/dark.css'
 }
 
-const themeVariables: Record<ThemeKey, DefaultTheme> = {
+const themeVariables: ThemeTable<DefaultTheme> = {
 	light: lightTheme,
 	dark: darkTheme
 }

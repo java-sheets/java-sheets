@@ -1,18 +1,19 @@
-package jsheets.server.evaluation.connection;
+package jsheets.server.evaluation;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.flogger.FluentLogger;
 import com.google.common.flogger.MetadataKey;
+
 import io.javalin.websocket.*;
 import jsheets.*;
-import jsheets.server.evaluation.Evaluation;
-import jsheets.server.evaluation.EvaluationEngine;
+import jsheets.runtime.evaluation.Evaluation;
+import jsheets.runtime.evaluation.EvaluationEngine;
 import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.websocket.api.CloseStatus;
 import org.eclipse.jetty.websocket.api.Session;
 
 import javax.inject.Inject;
-import java.io.IOException;
+
 import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -40,16 +41,16 @@ import java.util.concurrent.atomic.AtomicReference;
  * <ul>
  *   <li>
  *     <strong>Initial:</strong>
- *  	 Transitions into <italic>Connecting</italic> after receiving a
- *  	 {@link StartEvaluationRequest}.
+ *     Transitions into <italic>Connecting</italic> after receiving a
+ *     {@link StartEvaluationRequest}.
  *   </li>
  *   <li>
- *			<strong>Connecting:</strong>
- * 			Is the active stage while waiting for the evaluation to start,
- * 		  after which it transitions to <italic>Evaluating</italic>.
- *			If an asynchronous {@link StopEvaluationRequest} is received, the
- *			evaluation is stopped immediately after is has been created and the
- *			stage changes to <italic>Terminated</italic>.
+ *      <strong>Connecting:</strong>
+ *       Is the active stage while waiting for the evaluation to start,
+ *       after which it transitions to <italic>Evaluating</italic>.
+ *      If an asynchronous {@link StopEvaluationRequest} is received, the
+ *      evaluation is stopped immediately after is has been created and the
+ *      stage changes to <italic>Terminated</italic>.
  *   </li>
  *   <li>
  *     <strong>Evaluating:</strong>
@@ -75,45 +76,45 @@ public final class EvaluationConnection {
     new AtomicReference<>(Stage.Initial);
 
   private final EvaluationEngine engine;
+  private final Runnable closeHook;
 
   private volatile Evaluation evaluation;
 
   @Inject
-  EvaluationConnection(EvaluationEngine engine) {
+  EvaluationConnection(EvaluationEngine engine, Runnable closeHook) {
     this.engine = engine;
-  }
-
-  public void listen(WsConfig connection) {
-    connection.onConnect(this::connect);
-    connection.onClose(this::close);
-    connection.onMessage(this::receive);
+    this.closeHook = closeHook;
   }
 
   private static final FluentLogger.Api logPreemption = log.atInfo()
     .atMostEvery(5, TimeUnit.SECONDS);
 
-  private void close(WsCloseContext context) {
+  public void close(WsCloseContext context) {
     var previousStage = stage.getAndSet(Stage.Terminated);
     if (previousStage.equals(Stage.Evaluating)) {
-      evaluation.stop();
+      try {
+        evaluation.stop();
+      } finally {
+        closeHook.run();
+      }
       return;
     }
     if (!previousStage.equals(Stage.Terminated)) {
-       logPreemption.with(sessionIdMetadata, context.getSessionId())
-       .log("evaluation call was closed without receiving stop");
+      logPreemption.with(sessionIdMetadata, context.getSessionId())
+        .log("evaluation call was closed without receiving stop");
     }
   }
 
   private static final CloseStatus illegalStage =
     new CloseStatus(HttpStatus.CONFLICT_409, "illegal stage");
 
-  private void connect(WsConnectContext context) {
+  public void connect(WsConnectContext context) {
     if (!stage.compareAndSet(Stage.Initial, Stage.Connecting)) {
       context.session.close(illegalStage);
     }
   }
 
-  private void receive(WsMessageContext context) {
+  public void receive(WsBinaryMessageContext context) {
     var request = readRequest(context);
     switch (request.getMessageCase()) {
       case START -> receiveStart(context, request.getStart());
@@ -122,9 +123,9 @@ public final class EvaluationConnection {
     }
   }
 
-  private EvaluateRequest readRequest(WsMessageContext context) {
+  private EvaluateRequest readRequest(WsBinaryMessageContext context) {
     try {
-      return context.messageAsClass(EvaluateRequest.class);
+      return EvaluateRequest.parseFrom(context.data());
     } catch (Exception failedDeserialization) {
       log.atWarning()
         .withCause(failedDeserialization)
@@ -133,7 +134,7 @@ public final class EvaluationConnection {
     }
   }
 
-  private void receiveStart(WsMessageContext context, StartEvaluationRequest request) {
+  private void receiveStart(WsContext context, StartEvaluationRequest request) {
     establishConnection(context, request);
   }
 
@@ -141,17 +142,17 @@ public final class EvaluationConnection {
     new CloseStatus(HttpStatus.BAD_REQUEST_400, "cancelled");
 
   private void establishConnection(
-		WsMessageContext context,
+    WsContext context,
     StartEvaluationRequest request
   ) {
-    var listener = new UpstreamListener(context.session);
+    var listener = new UpstreamListener(context);
     var upstream = engine.start(request, listener);
     if (!completeConnecting(upstream)) {
       ensureSessionIsClosed(context.session, CANCELLED);
     }
   }
 
-  private boolean completeConnecting(jsheets.server.evaluation.Evaluation upstream) {
+  private boolean completeConnecting(Evaluation upstream) {
     if (!stage.compareAndSet(Stage.Connecting, Stage.Evaluating)) {
       log.atWarning().log("the evaluation was terminated in the connecting stage");
       upstream.stop();
@@ -161,60 +162,50 @@ public final class EvaluationConnection {
     return true;
   }
 
-  private void complete() {
+  private static final int evaluationDoneCode = 4001;
 
+  private void complete(WsContext downstream) {
+    stage.set(Stage.Terminated);
+    try {
+      downstream.session.close(evaluationDoneCode, "done");
+    } finally {
+      closeHook.run();
+    }
   }
 
   final class UpstreamListener implements Evaluation.Listener {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
-    private final Session downstream;
+    private final WsContext downstream;
 
-    private UpstreamListener(Session downstream) {
+    private UpstreamListener(WsContext downstream) {
       this.downstream = downstream;
     }
 
     @Override
-    public void onEnd() {
-      EvaluationConnection.this.complete();
+    public void close() {
+      complete(downstream);
     }
 
     @Override
-    public void onError(EvaluationError error) {
-      send(EvaluateResponse.newBuilder().setError(error));
-    }
-
-    @Override
-    public void onResult(EvaluationResult result) {
-      send(EvaluateResponse.newBuilder().setResult(result));
-    }
-
-    @Override
-    public void onMissingSources(MissingSources sources) {
-      send(EvaluateResponse.newBuilder().setMissingSources(sources));
-    }
-
-    private void send(EvaluateResponse.Builder message) {
-      var payload = ByteBuffer.wrap(message.build().toByteArray());
+    public void send(EvaluateResponse response) {
+      var payload = ByteBuffer.wrap(response.toByteArray());
       try {
-        downstream.getRemote().sendBytes(payload);
-      } catch (IOException failedTransmission) {
-        log.atWarning().log(
-          "could not write {} to {}",
-          message.getMessageCase(),
-          downstream.getRemoteAddress()
-        );
+        downstream.send(payload);
+      } catch (Exception failedTransmission) {
+        log.atWarning()
+          .log("could not write message to %s",
+            downstream.session.getRemoteAddress());
       }
     }
 
     @Override
     public String toString() {
       return MoreObjects.toStringHelper(this)
-        .add("downstreamAddress", downstream.getRemoteAddress())
+        .add("downstreamAddress", downstream)
         .toString();
     }
   }
-
 
   private void ensureSessionIsClosed(Session session, CloseStatus status) {
     // close does not throw an exception if the session is already closed
@@ -250,10 +241,10 @@ public final class EvaluationConnection {
   );
 
   private static final MetadataKey<String> sessionIdMetadata =
-    MetadataKey.single("ws-session-id", String.class);
+    MetadataKey.single("wsSessionId", String.class);
 
   private static final MetadataKey<Stage> stageMetadata =
-    MetadataKey.single("connection-stage", Stage.class);
+    MetadataKey.single("connectionStage", Stage.class);
 
   private void receiveInvalidMessage(WsContext context) {
     var previousStage = stage.getAndSet(Stage.Terminated);
@@ -272,5 +263,18 @@ public final class EvaluationConnection {
       .add("evaluation", currentEvaluation)
       .add("running", currentEvaluation != null)
       .toString();
+  }
+
+  public static final class Factory {
+    private final EvaluationEngine engine;
+
+    @Inject
+    private Factory(EvaluationEngine engine) {
+      this.engine = engine;
+    }
+
+    public EvaluationConnection withCloseHook(Runnable hook) {
+      return new EvaluationConnection(engine, hook);
+    }
   }
 }

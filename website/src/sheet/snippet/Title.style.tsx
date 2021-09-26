@@ -5,10 +5,10 @@ import themed from '../../theme/themed'
 export const Title = styled.span`
   display: flex;
   font-size: 18px;
-	cursor: default !important;
-	& > * {
-		margin: auto 0 auto 0;
-	}
+  cursor: default !important;
+  & > * {
+    margin: auto 0 auto 0;
+  }
 `
 
 export const IconBox = styled.span`
@@ -24,21 +24,20 @@ export const IconBox = styled.span`
 `
 
 export const Input = styled(AntdInput)`
-	margin-left: 5px;
-	margin-right: 10px;
-	font-size: 18px;
-	max-width: 300px;
-	height: 34px;
-	padding: 2px;
-	border: none;
-	outline: none;
-	&:focus {
-		outline: none;
-	}
+  margin: auto 10px auto 5px !important;
+  max-width: 300px;
+  height: 34px !important;
+  padding: 2px !important;
+  font-size: 18px !important;
+  border: none !important;
+  outline: none !important;
+  &:focus {
+    outline: none !important;
+  }
 `
 
 export const Text = styled.span`
   margin: auto 0 auto 7px;
-	cursor: text;
-	user-select: text !important;
+  cursor: text;
+  user-select: text !important;
 `

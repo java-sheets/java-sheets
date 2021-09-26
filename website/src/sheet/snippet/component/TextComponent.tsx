@@ -1,37 +1,64 @@
 import * as Styled from './TextComponent.style'
 import {createGlobalStyle} from 'styled-components'
-import React from "react";
-import Editor from "../../../editor/Editor";
+import React, {MutableRefObject} from "react";
 import {EditorComponentProperties} from "./EditorComponent";
+import {SnippetComponentListRef, SnippetComponentRef} from "./Component";
+import RichMarkdownEditor from "rich-markdown-editor";
+import {ThemeContext} from '../../../theme/ThemeContext'
 
 export interface TextComponentProperties {
   value: string
+  id: string
+  listRef?: MutableRefObject<SnippetComponentListRef | null>
 }
 
 const MarkdownEditorStyle = createGlobalStyle`
-	#block-menu-container, .block-menu-trigger, .heading-actions, .ProseMirror > .placeholder {
-		display: none !important;
-	}
+  #block-menu-container, .heading-actions, .block-menu-trigger {
+    display: none !important;
+  }
 `
 
-export default class TextComponent extends React.Component<TextComponentProperties>{
-	render() {
-		return (
-			<Styled.TextComponent>
-				<MarkdownEditorStyle/>
-				<Styled.Editor
-					disableExtensions={['placeholder']}
-					defaultValue={this.props.value}
-				/>
-			</Styled.TextComponent>
-		)
-	}
+// @ts-ignore
+const disabledExtensions: 'placeholder'[] = ['empty-placeholder', 'placeholder', 'blockmenu']
 
-	shouldComponentUpdate(
-		nextProps: Readonly<EditorComponentProperties>,
-		nextState: Readonly<{}>,
-		nextContext: any
-	): boolean {
-		return nextProps.value !== this.props.value
-	}
+export default class TextComponent
+  extends React.Component<TextComponentProperties>
+  implements SnippetComponentRef {
+
+  static contextType = ThemeContext
+
+  private readonly editorRef = React.createRef<RichMarkdownEditor>()
+
+  render() {
+    return (
+      <Styled.TextComponent>
+        <MarkdownEditorStyle/>
+        <Styled.Editor
+          ref={this.editorRef}
+          disableExtensions={disabledExtensions}
+          placeholder={''}
+          defaultValue={this.props.value}
+          dark={this.context.theme === 'dark'}
+        />
+      </Styled.TextComponent>
+    )
+  }
+
+  componentDidMount() {
+    this.props.listRef?.current?.components.set(this.props.id, this)
+  }
+
+  content = (): string | null => {
+    return this.editorRef.current?.value() || null
+  }
+
+  updateContent = (target: string) => { }
+
+  shouldComponentUpdate(
+    nextProps: Readonly<EditorComponentProperties>,
+    nextState: Readonly<{}>,
+    nextContext: any
+  ): boolean {
+    return nextProps.value !== this.props.value
+  }
 }

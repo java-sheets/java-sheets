@@ -17,7 +17,14 @@ export const light = {
 			icon: {
 				background: '#f0f2f5'
 			}
-		}
+		},
+    component: {
+      background: 'rgb(253, 253, 253)',
+      borderTop: '1px solid #ededed'
+    },
+    textComponent: {
+      background: 'rgb(253, 253, 253)'
+    }
 	}
 }
 
@@ -35,12 +42,19 @@ export const dark: typeof light = {
 			background: '#313131',
 			shadow: '0 3px 5px 0 rgb(35 35 35 / 30%)',
 			head: {
-				shadow: 'inset 0 -1px 0 0 #eeeeee'
+				shadow: 'inset 0 -1px 0 0 #171717'
 			},
 			icon: {
 				background: '#313131'
 			}
-		}
+		},
+    component: {
+      background: '#3c3f40',
+      borderTop: '1px solid #3c3f40',
+    },
+    textComponent: {
+      background: '#3c3f40'
+    }
 	}
 }
 

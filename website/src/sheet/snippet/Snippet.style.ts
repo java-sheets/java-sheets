@@ -22,6 +22,6 @@ export const CardHead = styled.div`
 `
 
 export const CardBody = styled.div`
-	padding: 0;
-	overflow: hidden;
+  padding: 0;
+  overflow: hidden;
 `

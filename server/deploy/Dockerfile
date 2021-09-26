@@ -41,7 +41,6 @@ COPY --from=link-java /usr/src/build/app.jar app.jar
 ADD /server/deploy/entrypoint.sh entrypoint.sh
 ADD /website/build static/
 RUN chmod +x entrypoint.sh
-ENV JSHEETS_SERVER_STATIC_FILES_PATH=/app/static
 
 EXPOSE 8080
 

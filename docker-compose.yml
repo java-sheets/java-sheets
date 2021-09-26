@@ -1,6 +1,7 @@
 version: '3.7'
 services:
   server:
+    image: ehenoma/jsheets:latest
     build:
       # Make sure to run 'gradle copyDependencies' before building
       dockerfile: server/deploy/Dockerfile

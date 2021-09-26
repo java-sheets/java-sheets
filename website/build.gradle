@@ -1,0 +1,8 @@
+task webInstall(type: Exec) {
+  commandLine "yarn", "i"
+}
+
+task webBuild(type: Exec) {
+  dependsOn webInstall
+  commandLine "yarn", "run", "build"
+}

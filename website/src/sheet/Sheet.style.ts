@@ -13,8 +13,8 @@ export const AddButtonContainer = styled.div`
   display: flex;
   justify-content: center;
   margin: 50px auto 0 auto;
-  width: 90%;
-  max-width: 900px;
+  width: 90% !important;
+  max-width: 900px !important;
   .ant-btn:hover {
     background: #00758f;
     color: white;
@@ -22,5 +22,5 @@ export const AddButtonContainer = styled.div`
 `
 
 export const AddButton = styled(Button)`
-  width: 100%;
+  width: 100% !important;
 `
