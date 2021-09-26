@@ -1,13 +1,14 @@
 import styled from 'styled-components'
+import themed from '../../theme/themed'
 
 export const Card = styled.div`
 	max-width: 1000px;
 	margin: 50px auto 0 auto;
 	overflow: hidden;
-	box-shadow: 0 3px 5px 0 rgb(200 200 200 / 30%);
+	box-shadow: ${themed('snippet.card.shadow')};
 	border: none;
 	border-radius: 3px;
-	background: white;
+	background: ${themed('background')};
 	&:first-child {
 		margin-top: 0;
 	}
@@ -16,7 +17,7 @@ export const Card = styled.div`
 export const CardHead = styled.div`
 	padding: 0 15px;
 	height: 70px;
-	box-shadow: inset 0 -1px 0 0 #eeeeee !important;
+	box-shadow: ${themed('snippet.card.head.shadow')} !important;
 	display: flex;
 `
 

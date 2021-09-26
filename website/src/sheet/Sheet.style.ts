@@ -1,9 +1,7 @@
 import styled from 'styled-components'
 import {Button} from 'antd'
 
-export const SnippetContainer = styled.div`
-
-`
+export const SnippetContainer = styled.div``
 
 export const Sheet = styled.div`
   ${SnippetContainer} {

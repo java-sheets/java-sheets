@@ -1,7 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {Sheet, SheetSnippet, SheetSnippetComponent} from './index'
 import { v4 as uuid } from 'uuid'
-import {message} from "antd";
 
 const initialState: Sheet = {
 	id: uuid(),

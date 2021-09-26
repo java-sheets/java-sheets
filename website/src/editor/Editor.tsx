@@ -1,8 +1,7 @@
 import React, {useEffect} from 'react'
 import {EditorView} from '@codemirror/view'
-import {EditorState} from '@codemirror/state'
+import {EditorState, Transaction} from '@codemirror/state'
 import {basicSetup} from '@codemirror/basic-setup'
-import {javaLanguage} from '@codemirror/lang-java'
 import {tags, HighlightStyle} from '@codemirror/highlight'
 
 export interface EditorProperties {
@@ -36,7 +35,36 @@ const theme = EditorView.theme({
     color: "#ddd",
     border: "none"
   },
+
 }, {dark: false})
+
+const darkTheme = EditorView.theme({
+	".cm-scroller": {
+		fontFamily: `'JetBrains Mono', Menlo, Monaco, source-code-pro, Consolas, monospace`
+	},
+	"&": {
+		color: "#f6f8fa",
+		backgroundColor: "#24292e",
+		padding: "10px 0"
+	},
+	".cm-activeLineGutter, .cm-activeLine": {
+		backgroundColor: "#24292e"
+	},
+	".cm-content": {
+		caretColor: "#24292e"
+	},
+	"&.cm-focused .cm-cursor": {
+		borderLeftColor: "#24292e"
+	},
+	"&.cm-focused .cm-selectionBackground, ::selection": {
+		backgroundColor: "#24292e"
+	},
+	".cm-gutters": {
+		backgroundColor: "#24292e",
+		color: "#24292e",
+		border: "none"
+	},
+}, {dark: true})
 
 const githubHighlighting = HighlightStyle.define([
   {tag: tags.function, color: '#6f42c1'},
@@ -54,6 +82,21 @@ const githubHighlighting = HighlightStyle.define([
   {tag: tags.comment, color: '#6a737d'}
 ])
 
+const githubDarkHighlighting = HighlightStyle.define([
+	{tag: tags.function, color: '#dcbdfb'},
+	{tag: tags.className, color: '#dcbdfb'},
+	{tag: tags.keyword, color: '#f47067'},
+	{tag: tags.definitionKeyword, color: '#f47067'},
+	{tag: tags.controlKeyword, color: '#f47067'},
+	{tag: tags.operatorKeyword, color: '#f47067'},
+	{tag: tags.function(tags.variableName), color: "#f69d50"},
+	{tag: tags.constant, color: '#6cb6ff'},
+	{tag: tags.operator, color: '#f47067'},
+	{tag: tags.number, color: '#6cb6ff'},
+	{tag: tags.string, color: '#96d0ff'},
+	{tag: tags.comment, color: '#768390'}
+])
+
 export default function Editor(properties: EditorProperties) {
   const element = React.createRef<HTMLDivElement>()
   const editor = React.useRef<{editor: EditorView | undefined}>({editor: undefined})
@@ -64,7 +107,7 @@ export default function Editor(properties: EditorProperties) {
     const created = new EditorView({
       state: EditorState.create({
         doc: properties.code,
-        extensions: [theme, basicSetup, javaLanguage, githubHighlighting]
+        extensions: [darkTheme, basicSetup, javaLanguage, githubDarkHighlighting]
       }),
       parent: element.current!,
     })

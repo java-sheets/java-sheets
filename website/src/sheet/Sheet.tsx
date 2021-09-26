@@ -1,5 +1,5 @@
 import * as Styled from './Sheet.style'
-import Snippet from './Snippet'
+import Snippet from './snippet/Snippet'
 import {useSheet} from './useSheet'
 import React, {useMemo} from 'react'
 import * as icons from '@ant-design/icons'
@@ -11,8 +11,8 @@ import {
 	DropResult
 } from 'react-beautiful-dnd'
 import {useDispatch} from 'react-redux'
-import {SheetSnippet} from "../index";
-import {reorderSnippet} from "../state";
+import {SheetSnippet} from "./index";
+import {reorderSnippet} from "./state";
 
 const MemoizedSnippet = React.memo(Snippet)
 

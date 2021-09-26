@@ -1,12 +1,12 @@
 import {useDispatch, useSelector} from 'react-redux'
-import {RootState} from '../../store'
-import {Sheet, SheetSnippet, SheetSnippetComponent} from '../index'
+import {RootState} from '../store'
+import {Sheet, SheetSnippet, SheetSnippetComponent} from './index'
 import {
 	addComponent,
 	addSnippet, changeSnippetDetails, deleteComponent,
 	deleteSnippet, moveSnippet, reorderComponent,
 	reorderSnippet
-} from '../state'
+} from './state'
 
 export interface UseSheet {
 	sheet: Sheet

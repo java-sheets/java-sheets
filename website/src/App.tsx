@@ -1,11 +1,12 @@
 import React from 'react'
-import './antd.css'
 import {Button, Layout, Menu, Space} from 'antd'
 import {Content, Header} from 'antd/lib/layout/layout'
 import * as icons from '@ant-design/icons'
 import styled from 'styled-components'
-import Sheet from "./sheet/snippet/Sheet";
+import Sheet from "./sheet/Sheet";
 import {useTranslation} from 'react-i18next'
+import {useThemeToggle} from './theme/ThemeContext'
+import themed from './theme/themed'
 
 const Logo = styled.span`
   span:first-child {
@@ -22,8 +23,11 @@ const Logo = styled.span`
 `
 
 const StyledHeader = styled(Header)`
-  box-shadow: 0 5px 5px 0 rgb(230 230 230 / 90%);
-
+  box-shadow: ${themed('header.shadow')};
+	background: ${themed('header.background')} !important;
+	ul {
+		background: none;
+	}
   .ant-menu-horizontal {
     border-bottom: none;
   }
@@ -31,13 +35,25 @@ const StyledHeader = styled(Header)`
 
 export default function App() {
 	const {t} = useTranslation()
+	const toggleTheme = useThemeToggle()
   return (
     <Layout>
-      <StyledHeader style={{background: '#fff'}} className="header">
-        <Menu theme="light" style={{marginRight: 'auto'}} mode="horizontal" defaultSelectedKeys={['2']}>
+      <StyledHeader className="header">
+        <Menu style={{marginRight: 'auto'}} mode="horizontal" defaultSelectedKeys={['2']}>
           <Logo><span>Java</span><span>Sheets</span></Logo>
           <Space style={{marginLeft: 'auto'}} size="middle">
-            <Button type="primary" ghost icon={<icons.ShareAltOutlined/>}>{t('menu.share')}</Button>
+            <Button
+							type="primary"
+							ghost
+							icon={<icons.ShareAltOutlined/>}>
+							{t('menu.share')}
+						</Button>
+						<Button
+							type="primary"
+							shape="round"
+							icon={<icons.BulbOutlined/>}
+							onClick={toggleTheme}
+						/>
           </Space>
         </Menu>
       </StyledHeader>

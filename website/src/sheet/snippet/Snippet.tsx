@@ -3,7 +3,7 @@ import {ExperimentOutlined} from '@ant-design/icons'
 import React, {useState} from 'react'
 import Title from './Title'
 import OutputText from './OutputText'
-import {UseSnippet, useSnippet} from './useSheet'
+import {UseSnippet, useSnippet} from '../useSheet'
 import {SheetSnippet} from '../index'
 import ComponentList from "./component/ComponentList";
 import SnippetExtras from "./SnippetExtras";
@@ -24,9 +24,7 @@ interface ExistingSnippetProperties extends UseSnippet {
 const MemoizedTitle = React.memo(Title)
 const MemoizedExtras = React.memo(SnippetExtras)
 
-function ExistingSnippet(
-	properties: ExistingSnippetProperties
-) {
+function ExistingSnippet(properties: ExistingSnippetProperties) {
 	const {snippet, deleteComponent, changeDetails} = properties
 	const [editingTitle, setEditingTitle] = useState(properties.snippet.title === '')
 

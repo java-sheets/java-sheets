@@ -18,6 +18,7 @@
     "prosemirror-utils": "^1.0.0-0",
     "react": "^17.0.2",
     "react-beautiful-dnd": "^13.1.0",
+    "react-css-theme-switcher": "^0.3.0",
     "react-dom": "^17.0.2",
     "react-i18next": "^11.11.4",
     "react-redux": "^7.2.5",
@@ -37,14 +38,16 @@
     "@types/react": "^17.0.19",
     "@types/react-dom": "^17.0.9",
     "@types/styled-components": "^5.1.12",
-    "lessc": "^1.0.2"
+    "less": "^4.1.1"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "build-theme": "lessc src/antd.less src/antd.css --js"
+    "build-theme": "npm run build-light-theme && npm run build-dark-theme",
+    "build-light-theme": "lessc src/theme/light.less public/theme/light.css -js",
+    "build-dark-theme": "lessc src/theme/dark.less public/theme/dark.css -js"
   },
   "eslintConfig": {
     "extends": [
