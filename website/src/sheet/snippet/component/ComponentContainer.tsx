@@ -1,4 +1,4 @@
-import React from "react"
+import React, {useCallback} from 'react'
 import {
   Draggable,
   DraggingStyle,
@@ -30,25 +30,26 @@ function fixToVerticalAxis(style: DraggingStyle | NotDraggingStyle | undefined) 
   return style
 }
 
+export interface ComponentNode {
+  id: string
+  order: number
+  node: React.ReactNode
+  output?: SheetSnippetComponentOutput[]
+}
+
 interface ComponentContainerProperties {
-  item: {
-    id: string
-    order: number
-    output: SheetSnippetComponentOutput[] | undefined
-    content: React.ReactNode
-  }
+  item: ComponentNode
   onDelete?: () => void
 }
 
-export default function ComponentContainer(
-  {item, onDelete}: ComponentContainerProperties
-) {
+export default function ComponentContainer(properties: ComponentContainerProperties) {
   const dispatch =  useDispatch()
   const [confirmDelete, setConfirmDelete] = useTimedFlag(false, 2000)
+  const {item} = properties
 
-  const onOutputClose = () => {
+  const onOutputClose = useCallback(() => {
     dispatch(removeOutput({componentId: item.id}))
-  }
+  }, [dispatch, item])
 
   const outputs = React.useMemo(() =>
     item.output?.map((output, index) => (
@@ -58,7 +59,7 @@ export default function ComponentContainer(
         onClose={onOutputClose}
       />
     )),
-    [item.output]
+    [item.output, onOutputClose]
   )
 
   return (
@@ -80,7 +81,7 @@ export default function ComponentContainer(
                 icon={confirmDelete ? <CheckOutlined/> : <DeleteOutlined/>}
                 onClick={() => {
                   if (confirmDelete) {
-                    onDelete?.()
+                    properties.onDelete?.()
                   } else {
                     setConfirmDelete(true)
                   }
@@ -91,7 +92,7 @@ export default function ComponentContainer(
               </Styled.DragHandle>
             </Styled.ComponentOptions>
             <Styled.ComponentContent>
-              {item.content}
+              {properties.item.node}
             </Styled.ComponentContent>
           </Styled.ComponentInputArea>
           {outputs}

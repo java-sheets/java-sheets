@@ -7,11 +7,12 @@ import {
   changeSnippetDetails, deleteComponent,
   deleteSnippet,
   moveSnippet, reorderComponent,
-  reorderSnippet
+  reorderSnippet, updateSheet
 } from './state'
 
 export interface UseSheet {
   sheet: Sheet
+  update: (target: Sheet) => void
   moveSnippet: (id: string, direction: 'up' | 'down') => void
   reorderSnippet: (from: number, to: number) => void
   addSnippet: (snippet: Partial<SheetSnippet>) => void
@@ -23,6 +24,7 @@ export function useSheet(): UseSheet {
   const sheet = useSelector((state: RootState) => state.sheet)
   return {
     sheet,
+    update: sheet => dispatch(updateSheet(sheet)),
     moveSnippet: (id, direction) => dispatch(moveSnippet({id, direction})),
     reorderSnippet: (from, to) => dispatch(reorderSnippet({from, to})),
     addSnippet: (snippet) => dispatch(addSnippet(snippet)),

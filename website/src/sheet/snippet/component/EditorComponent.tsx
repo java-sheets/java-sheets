@@ -1,20 +1,20 @@
 import * as Styled from './EditorComponent.style'
-import React, {MutableRefObject} from 'react'
+import React from 'react'
 import Editor from '../../../editor/Editor'
 import {EditorView} from '@codemirror/view'
 import {EditorState} from '@codemirror/state'
 import * as SnippetProtocol from '@jsheets/protocol/src/jsheets/api/snippet_pb'
-import {SnippetComponentListRef, SnippetComponentRef} from './reference'
+import {SnippetComponentReference} from './reference'
 
 export interface EditorComponentProperties {
   value: string
   id: string
-  listRef?: MutableRefObject<SnippetComponentListRef | null>
+  capture?: (reference: SnippetComponentReference) => void
 }
 
 export default class EditorComponent
   extends React.Component<EditorComponentProperties>
-  implements SnippetComponentRef {
+  implements SnippetComponentReference {
 
   private editorReference = React.createRef<EditorView | null>()
 
@@ -25,8 +25,9 @@ export default class EditorComponent
       </Styled.EditorComponent>
     )
   }
+
   componentDidMount() {
-    this.props.listRef?.current?.components.set(this.props.id, this)
+    this.props.capture?.(this)
   }
 
   shouldComponentUpdate(
@@ -37,7 +38,7 @@ export default class EditorComponent
     return nextProps.value !== this.props.value
   }
 
-  serialize = (): SnippetProtocol.Snippet.Component =>{
+  serialize = (): SnippetProtocol.Snippet.Component => {
     const component = new SnippetProtocol.Snippet.Component()
     component.setId(this.props.id)
     component.setKind(SnippetProtocol.Snippet.Component.Kind.CODE)

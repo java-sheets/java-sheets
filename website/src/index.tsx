@@ -8,6 +8,7 @@ import store from './store'
 import {I18nextProvider} from 'react-i18next'
 import i18n from './i18n'
 import ThemeProvider, {installThemes} from './theme/ThemeContext'
+import {BrowserRouter} from 'react-router-dom'
 
 installThemes().then(() => {
   ReactDOM.render(
@@ -16,7 +17,9 @@ installThemes().then(() => {
         <React.Suspense fallback={<></>}>
           <I18nextProvider i18n={i18n}>
             <ThemeProvider>
-              <App/>
+              <BrowserRouter>
+                <App/>
+              </BrowserRouter>
             </ThemeProvider>
           </I18nextProvider>
         </React.Suspense>

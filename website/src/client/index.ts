@@ -7,7 +7,9 @@ import {
   MissingSources,
   EvaluateRequest
 } from "@jsheets/protocol/src/jsheets/api/snippet_runtime_pb";
-import {Sheet} from "@jsheets/protocol/src/jsheets/api/sheet_pb";
+import * as SnippetProtocol from "@jsheets/protocol/src/jsheets/api/snippet_pb";
+import * as SheetProtocol from "@jsheets/protocol/src/jsheets/api/sheet_pb";
+import {Sheet} from '../sheet'
 
 export interface EvaluationListener {
   onEnd(): void
@@ -48,7 +50,7 @@ export default class Client {
     private readonly baseUrl: string,
     private readonly webSocketUrl: string
   ) {
-    this.sheets_ = this.sheets()
+    this.sheets_ = new SheetClient(baseUrl)
   }
 
   evaluate(start: StartEvaluationRequest, listener: EvaluationListener): Evaluation {
@@ -107,24 +109,104 @@ class WebSocketEvaluation implements Evaluation {
 export class SheetClient {
   constructor(private readonly baseUrl: string) { }
 
-  async find(id: string): Promise<Sheet.AsObject> {
+  async find(id: string): Promise<Sheet> {
     const call = await fetch(`${this.baseUrl}/api/v1/sheets/${id}`)
     if (call.ok) {
       const body = await call.json()
-      return JSON.parse(body) as Sheet.AsObject
+      return createSheetFromResponse(body)
     }
     throw new Error(`${call.status}`)
   }
 
-  async post(snippet: Sheet.AsObject): Promise<Sheet.AsObject> {
+  async post(snippet: Partial<SheetProtocol.Sheet.AsObject>): Promise<Sheet> {
+    convertRequest(snippet)
     const call = await fetch(`${this.baseUrl}/api/v1/sheets`, {
       method: 'POST',
       body: JSON.stringify(snippet)
     })
     if (call.ok) {
       const body = await call.json()
-      return JSON.parse(body) as Sheet.AsObject
+      return createSheetFromResponse(body)
     }
     throw new Error(`${call.status}`)
   }
+}
+
+function createSheetFromResponse(response: Record<string, any>): Sheet {
+  convertResponse(response)
+  console.log({response})
+  const message = response as SheetProtocol.Sheet.AsObject
+  return {
+    id: message.id,
+    title: message.title,
+    description: message.description,
+    snippets: message.snippetsList.map(snippet => ({
+      id: snippet.id,
+      order: snippet.order,
+      title: snippet.name,
+      components: snippet.componentsList.map(component => ({
+        id: component.id,
+        order: component.order,
+        type: component.kind === SnippetProtocol.Snippet.Component.Kind.CODE ? 'code' : 'text',
+        content: component.content
+      }))
+    }))
+  }
+}
+
+function convertResponse(object: Record<string, any>) {
+  return process(object, '', convertResponseKey(['snippets', 'snippets.components']))
+}
+
+function convertResponseKey(listKeys: string[]) {
+  return (key: string, path: string) => {
+    const converted = convertSnakeCaseToCamelCase(key)
+    return listKeys.includes(path)
+      ? `${converted}List`
+      : converted
+  }
+}
+
+function convertRequest(object: Record<string, any>) {
+  return process(object, '', convertRequestKey)
+}
+
+function process(
+  object: Record<string, any>,
+  path: string,
+  mapKey: (key: string, path: string) => string
+) {
+  if (typeof object !== 'object') {
+    return
+  }
+  for (const [key, value] of Object.entries(object)) {
+    const childPath = path === '' ? key : path + '.' + key
+    const fixedKey = mapKey(key, childPath)
+    if (fixedKey !== key) {
+      object[fixedKey] = value
+      delete object[key]
+    }
+    if (value == null) {
+      continue
+    }
+    if (Array.isArray(value)) {
+      for (const element of value) {
+        process(element, childPath, mapKey)
+      }
+    } else {
+      process(value, childPath, mapKey)
+    }
+  }
+}
+
+function convertRequestKey(key: string) {
+  return convertCamelCaseToSnakeCase(key).replace(/_list$/, "")
+}
+
+function convertSnakeCaseToCamelCase(input: string) {
+  return input.replace(/_([a-z])?/, match => match?.toUpperCase() || '')
+}
+
+function convertCamelCaseToSnakeCase(input: string) {
+  return input.split(/(?=[A-Z])/).join('_').toLowerCase()
 }

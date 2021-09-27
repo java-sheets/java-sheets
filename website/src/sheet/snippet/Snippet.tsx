@@ -6,7 +6,10 @@ import {UseSnippet, useSnippet} from '../useSheet'
 import {SheetSnippet} from '../index'
 import ComponentList from "./component/ComponentList";
 import SnippetExtras from "./SnippetExtras";
-import {SnippetComponentListRef} from "./component/reference";
+import {
+  SnippetComponentListRef,
+  SnippetComponentReference
+} from './component/reference'
 import * as SnippetProtocol from "@jsheets/protocol/src/jsheets/api/snippet_pb";
 import {StartEvaluationRequest} from "@jsheets/protocol/src/jsheets/api/snippet_runtime_pb";
 import createEvaluateRequest from './createEvauateRequest'
@@ -24,8 +27,8 @@ interface ExistingSnippetProperties extends UseSnippet {
   position: SnippetPosition
   headProperties?: any
   running?: boolean
-  snippetRef?: MutableRefObject<SnippetRef | null>
-  onRun: (request: StartEvaluationRequest) => void
+  evaluate: (request: StartEvaluationRequest) => void
+  capture?: (reference: SnippetReference) => void
 }
 
 const MemoizedTitle = React.memo(Title)
@@ -35,14 +38,14 @@ interface ExistingSnippetState {
   editingTitle: boolean
 }
 
-export interface SnippetRef {
+export interface SnippetReference {
   listSources(): Map<string, string>
   serialize(): SnippetProtocol.Snippet
 }
 
 class ExistingSnippet
   extends React.Component<ExistingSnippetProperties, ExistingSnippetState>
-  implements SnippetRef {
+  implements SnippetReference {
 
   private readonly componentsReferences: React.MutableRefObject<SnippetComponentListRef | null>
     = React.createRef<SnippetComponentListRef | null>()
@@ -61,9 +64,7 @@ class ExistingSnippet
   }
 
   componentDidMount() {
-    if (this.props.snippetRef) {
-      this.props.snippetRef.current = this
-    }
+    this.props.capture?.(this)
   }
 
   render() {
@@ -88,7 +89,7 @@ class ExistingSnippet
         </Styled.CardHead>
         <Styled.CardBody>
           <ComponentList
-            listRef={this.componentsReferences}
+            capture={this.registerComponent}
             snippetId={this.props.snippet.id}
             components={this.props.snippet.components}
             deleteComponent={this.props.deleteComponent}
@@ -98,13 +99,17 @@ class ExistingSnippet
     )
   }
 
+  private registerComponent = (id: string, reference: SnippetComponentReference) => {
+    this.componentsReferences.current?.components.set(id, reference)
+  }
+
   run = () => {
     const start = createEvaluateRequest(
       this.props.sheetId,
       this.props.snippet,
       this.listSources('code')
     )
-    this.props.onRun(start)
+    this.props.evaluate(start)
   }
 
   serialize = () => {
@@ -158,8 +163,8 @@ export interface SnippetProperties {
   position: SnippetPosition
   dragHandleProps?: any
   running?: boolean
-  snippetRef?: MutableRefObject<SnippetRef | null>
-  onRun: (request: StartEvaluationRequest) => void
+  evaluate: (request: StartEvaluationRequest) => void
+  capture?: (reference: SnippetReference) => void
 }
 
 export default function Snippet(properties: SnippetProperties) {
@@ -171,9 +176,9 @@ export default function Snippet(properties: SnippetProperties) {
     <ExistingSnippet
       {...snippetContext}
       running={properties.running}
-      onRun={properties.onRun}
+      evaluate={properties.evaluate}
       sheetId={properties.sheetId}
-      snippetRef={properties.snippetRef}
+      capture={properties.capture}
       position={properties.position}
       headProperties={properties.dragHandleProps}
       snippet={snippetContext.snippet}

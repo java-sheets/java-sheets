@@ -1,10 +1,16 @@
-import styled from 'styled-components'
+import styled, {createGlobalStyle} from 'styled-components'
 import RichMarkdownEditor from 'rich-markdown-editor'
 import themed from '../../../theme/themed'
 
 export const TextComponent = styled.div`
   padding: 0;
   margin: 0;
+`
+
+export const GlobalMarkdown = createGlobalStyle`
+  #block-menu-container, .heading-actions, .block-menu-trigger {
+    display: none !important;
+  }
 `
 
 export const Editor = styled(RichMarkdownEditor)`

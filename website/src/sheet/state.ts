@@ -38,6 +38,9 @@ const slice = createSlice({
   name: "sheet",
   initialState,
   reducers: {
+    updateSheet(state, action: PayloadAction<Sheet>) {
+      return action.payload
+    },
     changeDetails(state, action: PayloadAction<{title?: string, description?: string}>) {
       const {title, description} = action.payload
       if (title !== undefined) {
@@ -231,6 +234,7 @@ function findLastOrder(values: IterableIterator<{order: number}>): number {
 }
 
 export const {
+  updateSheet,
   addSnippet,
   deleteSnippet,
   moveSnippet,
