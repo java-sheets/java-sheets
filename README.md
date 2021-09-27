@@ -15,9 +15,8 @@ to complex classes, methods and even Markdown comments.
 
 ### Deploy Via Docker
 
-The best way to deploy **JSheets** is using [Docker](https://docs.docker.com/).
-
-The **official image** is `ehenoma/jsheets`.
+The best way to deploy **JSheets** is to use our
+[Official Docker Image](https://hub.docker.com/r/ehenoma/jsheets).
 
 Run the following for a minimal deployment:
 
