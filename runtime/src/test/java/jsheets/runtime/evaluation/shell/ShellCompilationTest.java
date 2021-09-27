@@ -6,8 +6,6 @@ import jsheets.runtime.evaluation.shell.environment.inprocess.InProcessExecution
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.Map;
 
 public final class ShellCompilationTest {
@@ -34,11 +32,8 @@ public final class ShellCompilationTest {
     try {
       var wrapAccessor = Snippet.class.getDeclaredMethod("guts");
       wrapAccessor.setAccessible(true);
-      AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
-        wrapAccessor.setAccessible(true);
-        return null;
-      });
       var wrap = wrapAccessor.invoke(snippet);
+      System.out.println(wrap);
       return new Range(0, 0);
     } catch (Exception failedAccess) {
       throw new RuntimeException(failedAccess);
