@@ -1,17 +1,16 @@
-<table align="center"><tr><td align="center" width="9999">
-<img src="/assets/logo.svg" align="center" width="150" alt="JSheets Logo">
+<p align="center">
+  <img src="/assets/logo.svg" align="center" width="150" alt="JSheets Logo">
+</p>
 
-# JSheets
-
-Run Java Snippets in your Browser
-</td></tr></table>
+#JSheets
 
 ## Overview
 
 Jsheet lets you create and share Java snippets, ranging from small expressions
 
-![Small](/assets/screenshots/small-light.png)
+<img src="/assets/screenshots/small-light.png" align="center"
+width="200"alt="Small">
 
-to methods, classes and even styled comments.
+to methods, classes and even rich Markdown comments.
 
-![Large](/assets/screenshots/large-light.png)
+<img src="/assets/screenshots/small-light.png" align="center" width="350"alt="Large">
