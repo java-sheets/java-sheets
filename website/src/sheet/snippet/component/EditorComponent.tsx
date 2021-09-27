@@ -35,7 +35,7 @@ export default class EditorComponent
     nextState: Readonly<{}>,
     nextContext: any
   ): boolean {
-    return nextProps.value !== this.props.value
+    return nextProps.id !== this.props.id || nextProps.value !== this.props.value
   }
 
   serialize = (): SnippetProtocol.Snippet.Component => {

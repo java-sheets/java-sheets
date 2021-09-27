@@ -7,6 +7,7 @@ import {useDispatch} from "react-redux";
 import {reorderComponent} from "../../state";
 import {SheetSnippetComponent} from "../../index";
 import {SnippetComponentReference} from './reference'
+import {useDraggableId, useDraggableIds} from '../draggableId'
 
 function useReorder(snippetId: string): (result: DropResult) => void {
   const dispatch = useDispatch()
@@ -49,9 +50,10 @@ function useComponents(
 export default function ComponentList(properties: ComponentListProperties) {
   const reorder = useReorder(properties.snippetId)
   const components = useComponents(properties.components, properties.capture)
+  const draggableId = useDraggableId(properties.snippetId)
   return (
     <DragDropContext onDragEnd={reorder}>
-      <Droppable droppableId="components">
+      <Droppable droppableId={`components-${draggableId}`}>
         {(droppable) => (
           <div ref={droppable.innerRef}{...droppable.droppableProps}>
             {components.map((item) => (

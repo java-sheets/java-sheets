@@ -66,6 +66,6 @@ export default class TextComponent
     nextState: Readonly<{}>,
     nextContext: any
   ): boolean {
-    return nextProps.value !== this.props.value
+    return nextProps.id !== this.props.id || nextProps.value !== this.props.value
   }
 }

@@ -23,7 +23,7 @@ public class ShellEvaluationEngineTest {
   }
 
   @Test
-  @Disabled
+  // @Disabled
   public void testExecution() {
     var environment = StandardExecution.create();
     var installation = environment.install();

@@ -7,7 +7,6 @@ import {
   MissingSources,
   EvaluateRequest
 } from "@jsheets/protocol/src/jsheets/api/snippet_runtime_pb";
-import * as SnippetProtocol from "@jsheets/protocol/src/jsheets/api/snippet_pb";
 import * as SheetProtocol from "@jsheets/protocol/src/jsheets/api/sheet_pb";
 import {Sheet} from '../sheet'
 
@@ -134,7 +133,6 @@ export class SheetClient {
 
 function createSheetFromResponse(response: Record<string, any>): Sheet {
   convertResponse(response)
-  console.log({response})
   const message = response as SheetProtocol.Sheet.AsObject
   return {
     id: message.id,
@@ -144,14 +142,17 @@ function createSheetFromResponse(response: Record<string, any>): Sheet {
       id: snippet.id,
       order: snippet.order,
       title: snippet.name,
-      components: snippet.componentsList.map(component => ({
-        id: component.id,
-        order: component.order,
-        type: component.kind === SnippetProtocol.Snippet.Component.Kind.CODE ? 'code' : 'text',
-        content: component.content
-      }))
+      components: snippet.componentsList.map(component => {
+        const kind = (component.kind as unknown) as string
+        return {
+          id: component.id,
+          order: component.order,
+          type: kind.toLowerCase(),
+          content: component.content
+        }
+      })
     }))
-  }
+  } as Sheet
 }
 
 function convertResponse(object: Record<string, any>) {

@@ -14,6 +14,7 @@ import {StartEvaluationRequest} from "@jsheets/protocol/src/jsheets/api/snippet_
 import {reorderSnippet} from './state'
 import {SheetSnippet} from './index'
 import Snippet, {SnippetReference} from './snippet/Snippet'
+import {useDraggableIds} from './snippet/draggableId'
 
 const MemoizedSnippet = React.memo(Snippet)
 
@@ -60,6 +61,8 @@ export default function Sheet(properties: SheetProperties) {
     return {sorted: snippets, lowestOrder, highestOrder}
   }, [sheet.snippets])
 
+  const [associateDraggableId] = useDraggableIds()
+
   return (
     <Styled.Sheet>
       <DragDropContext onDragEnd={reorder}>
@@ -70,7 +73,7 @@ export default function Sheet(properties: SheetProperties) {
               ref={droppable.innerRef}
             >
               {snippets.sorted.map((snippet) => (
-                <Draggable key={snippet.id} draggableId={snippet.id} index={snippet.order}>
+                <Draggable key={snippet.id} draggableId={`${associateDraggableId(snippet.id)}`} index={snippet.order}>
                   {(draggable) => (
                     <Styled.SnippetContainer
                       {...draggable.draggableProps}

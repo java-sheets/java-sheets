@@ -55,21 +55,61 @@ const themeVariables: ThemeTable<DefaultTheme> = {
   dark: darkTheme
 }
 
+const themeStorageKey = 'jsheets.theme'
+
+export function detectTheme(): ThemeKey {
+  try {
+    const stored = localStorage.getItem(themeStorageKey)
+    if (stored) {
+      return stored === 'dark' ? 'dark' : 'light'
+    }
+  } catch (error) {
+    console.error({message: 'failed to detect theme', error})
+  }
+  return selectUserPreference()
+}
+
+function storeTheme(theme: ThemeKey) {
+  try {
+    localStorage.setItem(themeStorageKey, theme)
+  } catch (error) {
+    console.error({message: 'failed to store theme', error})
+  }
+}
+
+function selectUserPreference(): ThemeKey {
+  const prefersDark = window.matchMedia &&
+    window.matchMedia('(prefers-color-scheme: dark)').matches
+  return prefersDark ? 'dark' : 'light'
+}
+
 export async function installThemes(): Promise<string> {
   return new Promise(resolve => {
+    const initial = detectTheme()
     insertPrefetches(themeSources)
-    const theme = 'light'
-    updateTheme(theme, themeSources[theme], () => resolve(theme))
+    updateTheme(initial, themeSources[initial], () => resolve(initial))
   })
+}
+
+function useUpdate(call: () => void, dependencies: any[]) {
+  const firstRender = React.useRef(true)
+  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false
+    } else {
+      call()
+    }
+  }, [...dependencies, firstRender])
 }
 
 export default function ThemeProvider(properties: ThemeProviderProperties) {
   const [theme, update] = useState<ThemeKey>(properties.initialTheme || 'light')
   const variables = themeVariables[theme]
 
-  useEffect(() => {
+  useUpdate(() => {
     const link = themeSources[theme]
     updateTheme(theme, link)
+    storeTheme(theme)
   }, [theme])
 
   return (

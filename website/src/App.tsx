@@ -58,6 +58,7 @@ function ImportedSheet(properties: ImportedSheetProperties) {
   const [error, setError] = useState()
   const {sheetId} = useParams<{sheetId: string}>()
   const {update} = useSheet()
+
   useEffect(() => {
     const client = Client.create()
     if (!sheetId) {
@@ -71,7 +72,7 @@ function ImportedSheet(properties: ImportedSheetProperties) {
         setLoading(false)
         setError(error)
       })
-  }, [])
+  }, [sheetId])
 
   if (loading) {
     return <Loading/>

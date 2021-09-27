@@ -7,7 +7,7 @@ import {Provider} from 'react-redux'
 import store from './store'
 import {I18nextProvider} from 'react-i18next'
 import i18n from './i18n'
-import ThemeProvider, {installThemes} from './theme/ThemeContext'
+import ThemeProvider, {detectTheme, installThemes} from './theme/ThemeContext'
 import {BrowserRouter} from 'react-router-dom'
 
 installThemes().then(() => {
@@ -16,7 +16,7 @@ installThemes().then(() => {
       <Provider store={store}>
         <React.Suspense fallback={<></>}>
           <I18nextProvider i18n={i18n}>
-            <ThemeProvider>
+            <ThemeProvider initialTheme={detectTheme()}>
               <BrowserRouter>
                 <App/>
               </BrowserRouter>

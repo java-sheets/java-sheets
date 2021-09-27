@@ -15,6 +15,7 @@ import {SheetSnippetComponentOutput} from "../../index";
 import OutputText from "./OutputText";
 import {useDispatch} from "react-redux";
 import {removeOutput} from "../../state";
+import {useDraggableId, useDraggableIds} from '../draggableId'
 
 function fixToVerticalAxis(style: DraggingStyle | NotDraggingStyle | undefined) {
   if (style?.transform) {
@@ -62,8 +63,10 @@ export default function ComponentContainer(properties: ComponentContainerPropert
     [item.output, onOutputClose]
   )
 
+  const draggableId = useDraggableId(properties.item.id)
+
   return (
-    <Draggable key={item.id} draggableId={item.id} index={item.order}>
+    <Draggable key={item.id} draggableId={`${draggableId}`} index={item.order}>
       {(provided, snapshot) => (
         <Styled.Component
           className={snapshot.isDragging ? 'dragging-component' : ''}

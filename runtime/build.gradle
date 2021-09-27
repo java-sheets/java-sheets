@@ -23,4 +23,5 @@ dependencies {
 
 test {
   useJUnitPlatform()
+  jvmArgs ['--add-opens jdk.jshell=ALL-UNNAMED'] //=ALL-UNNAMED
 }
