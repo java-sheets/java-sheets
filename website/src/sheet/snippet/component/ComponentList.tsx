@@ -6,7 +6,7 @@ import EditorComponent from "./EditorComponent";
 import {useDispatch} from "react-redux";
 import {reorderComponent} from "../../state";
 import {SheetSnippetComponent} from "../../index";
-import {SnippetComponentListRef} from "./Component";
+import {SnippetComponentListRef} from "./reference";
 
 function useReorder(snippetId: string): (result: DropResult) => void {
   const dispatch = useDispatch()

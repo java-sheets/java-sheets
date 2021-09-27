@@ -48,6 +48,7 @@ export interface SheetProperties {
 export default function Sheet(properties: SheetProperties) {
   const {sheet, addSnippet, moveSnippet} = useSheet()
   const reorder = useReorder()
+
   const snippets = useMemo(() => {
     const snippets = [...sheet.snippets]
     snippets.sort((left, right) => left.order - right.order)
@@ -55,6 +56,7 @@ export default function Sheet(properties: SheetProperties) {
     const highestOrder = snippets[snippets.length - 1]?.order
     return {sorted: snippets, lowestOrder, highestOrder}
   }, [sheet.snippets])
+
   return (
     <Styled.Sheet>
       <DragDropContext onDragEnd={reorder}>

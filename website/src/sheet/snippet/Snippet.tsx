@@ -6,10 +6,10 @@ import {UseSnippet, useSnippet} from '../useSheet'
 import {SheetSnippet} from '../index'
 import ComponentList from "./component/ComponentList";
 import SnippetExtras from "./SnippetExtras";
-import {SnippetComponentListRef} from "./component/Component";
+import {SnippetComponentListRef} from "./component/reference";
 import * as SnippetProtocol from "@jsheets/protocol/src/jsheets/api/snippet_pb";
-import * as EvaluationProtocol from "@jsheets/protocol/src/jsheets/api/snippet_runtime_pb";
 import {StartEvaluationRequest} from "@jsheets/protocol/src/jsheets/api/snippet_runtime_pb";
+import createEvaluateRequest from './createEvauateRequest'
 
 export interface SnippetPosition {
   highestOrder: number
@@ -37,6 +37,7 @@ interface ExistingSnippetState {
 
 export interface SnippetRef {
   listSources(): Map<string, string>
+  serialize(): SnippetProtocol.Snippet
 }
 
 class ExistingSnippet
@@ -101,19 +102,44 @@ class ExistingSnippet
     const start = createEvaluateRequest(
       this.props.sheetId,
       this.props.snippet,
-      this.listSources()
+      this.listSources('code')
     )
     this.props.onRun(start)
   }
 
-  listSources = (): Map<string, string> => {
+  serialize = () => {
+    const message = new SnippetProtocol.Snippet()
+    message.setId(this.props.snippet.id)
+    message.setName(this.props.snippet.title)
+    message.setComponentsList(this.serializeComponents())
+    return message
+  }
+
+  serializeComponents = () => {
+    const references = this.componentsReferences.current?.components
+    const output: SnippetProtocol.Snippet.Component[] = []
+    if (!references) {
+      return output
+    }
+    for (const component of this.props.snippet.components) {
+      const reference = references.get(component.id)
+      const serialized = reference?.serialize()
+      if (serialized) {
+        serialized.setOrder(component.order)
+        output.push(serialized)
+      }
+    }
+    return output
+  }
+
+  listSources = (type?: 'text' | 'code'): Map<string, string> => {
     const componentRefTable = this.componentsReferences.current?.components
     if (!componentRefTable) {
       return new Map()
     }
     const sources = new Map<string, string>()
     for (const component of this.props.snippet.components) {
-      if (component.type !== 'code') {
+      if (component.type !== type) {
         continue
       }
       const ref = componentRefTable.get(component.id)
@@ -125,37 +151,6 @@ class ExistingSnippet
     return sources
   }
 }
-
-function createEvaluateRequest(sheetId: string, snippet: SheetSnippet, componentSources: Map<string, string>) {
-  const reference = createSnippetReference(sheetId, snippet)
-  const evaluatedSnippet = new EvaluationProtocol.EvaluatedSnippet()
-  evaluatedSnippet.setReference(reference)
-  const sources = new EvaluationProtocol.SnippetSources()
-  sources.setReference(reference)
-  for (const [id, code] of componentSources) {
-    sources.addCodeComponents(createCodeComponent(id, code, snippet))
-  }
-  const request = new EvaluationProtocol.StartEvaluationRequest()
-  request.setSnippet(evaluatedSnippet)
-  request.setSourcesList([sources])
-  return request
-}
-
-function createSnippetReference(sheetId: string, snippet: SheetSnippet) {
-  const reference = new SnippetProtocol.Snippet.Reference()
-  reference.setSheetId(sheetId)
-  reference.setSnippetId(snippet.id)
-  return reference
-}
-
-function createCodeComponent(id: string, code: string, snippet: SheetSnippet) {
-  const component = new EvaluationProtocol.SnippetSources.CodeComponent()
-  component.setId(id)
-  component.setCode(code)
-  component.setOrder(snippet.components.find(target => target.id === id)?.order || 1)
-  return component
-}
-
 
 export interface SnippetProperties {
   id: string

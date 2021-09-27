@@ -1,9 +1,10 @@
 import * as Styled from './EditorComponent.style'
 import React, {MutableRefObject} from 'react'
 import Editor from '../../../editor/Editor'
-import {EditorView} from "@codemirror/view";
-import {SnippetComponentListRef, SnippetComponentRef} from "./Component";
-import {EditorState} from "@codemirror/state";
+import {EditorView} from '@codemirror/view'
+import {EditorState} from '@codemirror/state'
+import * as SnippetProtocol from '@jsheets/protocol/src/jsheets/api/snippet_pb'
+import {SnippetComponentListRef, SnippetComponentRef} from './reference'
 
 export interface EditorComponentProperties {
   value: string
@@ -34,6 +35,17 @@ export default class EditorComponent
     nextContext: any
   ): boolean {
     return nextProps.value !== this.props.value
+  }
+
+  serialize = (): SnippetProtocol.Snippet.Component =>{
+    const component = new SnippetProtocol.Snippet.Component()
+    component.setId(this.props.id)
+    component.setKind(SnippetProtocol.Snippet.Component.Kind.CODE)
+    const content = this.content()
+    if (content) {
+      component.setContent(content)
+    }
+    return component
   }
 
   content = (): string | null => {

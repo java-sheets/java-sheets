@@ -1,10 +1,12 @@
 import * as Styled from './TextComponent.style'
 import {createGlobalStyle} from 'styled-components'
-import React, {MutableRefObject} from "react";
-import {EditorComponentProperties} from "./EditorComponent";
-import {SnippetComponentListRef, SnippetComponentRef} from "./Component";
-import RichMarkdownEditor from "rich-markdown-editor";
+import React, {MutableRefObject} from 'react'
+import {EditorComponentProperties} from './EditorComponent'
+import {SnippetComponentListRef, SnippetComponentRef} from './reference'
+import RichMarkdownEditor from 'rich-markdown-editor'
 import {ThemeContext} from '../../../theme/ThemeContext'
+import * as SnippetProtocol
+  from '../../../../../protocol/generated/js-protocol/src/jsheets/api/snippet_pb'
 
 export interface TextComponentProperties {
   value: string
@@ -50,6 +52,17 @@ export default class TextComponent
 
   content = (): string | null => {
     return this.editorRef.current?.value() || null
+  }
+
+  serialize = (): SnippetProtocol.Snippet.Component =>{
+    const component = new SnippetProtocol.Snippet.Component()
+    component.setId(this.props.id)
+    component.setKind(SnippetProtocol.Snippet.Component.Kind.TEXT)
+    const content = this.content()
+    if (content) {
+      component.setContent(content)
+    }
+    return component
   }
 
   updateContent = (target: string) => { }
