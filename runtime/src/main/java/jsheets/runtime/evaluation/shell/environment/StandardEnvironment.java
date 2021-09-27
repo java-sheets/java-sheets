@@ -7,9 +7,9 @@ import jdk.jshell.spi.ExecutionControl;
 import jdk.jshell.spi.ExecutionControlProvider;
 import jdk.jshell.spi.ExecutionEnv;
 
-public final class StandardExecution implements ExecutionEnvironment {
+public final class StandardEnvironment implements ExecutionEnvironment {
   public static ExecutionEnvironment create() {
-    return new StandardExecution();
+    return new StandardEnvironment();
   }
 
   @Override

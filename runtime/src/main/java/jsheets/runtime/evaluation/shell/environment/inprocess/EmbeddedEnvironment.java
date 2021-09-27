@@ -12,14 +12,14 @@ import jsheets.runtime.evaluation.shell.environment.ExecutionEnvironment;
  * side effects because the java library is generally not designed in a
  * way to support multi tenancy.
  */
-public final class InProcessExecution implements ExecutionEnvironment {
-  public static InProcessExecution create() {
-    return new InProcessExecution(MultiTenancy.create());
+public final class EmbeddedEnvironment implements ExecutionEnvironment {
+  public static EmbeddedEnvironment create() {
+    return new EmbeddedEnvironment(MultiTenancy.create());
   }
 
   private final Tenancy tenancy;
 
-  private InProcessExecution(Tenancy tenancy) {
+  private EmbeddedEnvironment(Tenancy tenancy) {
     this.tenancy = tenancy;
   }
 

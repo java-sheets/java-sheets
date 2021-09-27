@@ -6,7 +6,7 @@ import jsheets.StartEvaluationRequest;
 import jsheets.runtime.evaluation.Evaluation;
 import jsheets.runtime.evaluation.EvaluationEngine;
 import jsheets.runtime.evaluation.shell.environment.ExecutionEnvironment;
-import jsheets.runtime.evaluation.shell.environment.StandardExecution;
+import jsheets.runtime.evaluation.shell.environment.StandardEnvironment;
 
 import java.time.Clock;
 import java.time.Duration;
@@ -116,7 +116,7 @@ public final class ShellEvaluationEngine implements EvaluationEngine {
     }
 
     private ExecutionEnvironment selectEnvironment() {
-      return environment == null ? StandardExecution.create() : environment;
+      return environment == null ? StandardEnvironment.create() : environment;
     }
 
     private Executor selectWorkerPool() {

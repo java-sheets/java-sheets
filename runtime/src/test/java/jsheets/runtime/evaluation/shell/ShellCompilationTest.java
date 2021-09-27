@@ -2,7 +2,7 @@ package jsheets.runtime.evaluation.shell;
 
 import jdk.jshell.JShell;
 import jdk.jshell.Snippet;
-import jsheets.runtime.evaluation.shell.environment.inprocess.InProcessExecution;
+import jsheets.runtime.evaluation.shell.environment.inprocess.EmbeddedEnvironment;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -12,7 +12,7 @@ public final class ShellCompilationTest {
   @Test
   public void testMultiline() {
     var shell = JShell.builder()
-      .executionEngine(InProcessExecution.create().control("test"), Map.of())
+      .executionEngine(EmbeddedEnvironment.create().control("test"), Map.of())
       .err(System.err)
       .out(System.out)
       .build();
