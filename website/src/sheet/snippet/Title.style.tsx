@@ -12,15 +12,15 @@ export const Title = styled.span`
 `
 
 export const IconBox = styled.span`
-	padding: 8px;
-	display: flex;
-	border-radius: 5px;
-	margin: auto 5px auto 0;
-	background: ${themed('snippet.card.icon.background')};
-	.anticon {
-		color: ${themed('base.primary')};
-		margin: auto 0;
-	}
+  padding: 8px;
+  display: flex;
+  border-radius: 5px;
+  margin: auto 5px auto 0;
+  background: ${themed('snippet.card.icon.background')};
+  .anticon {
+    color: ${themed('base.primary')};
+    margin: auto 0;
+  }
 `
 
 export const Input = styled(AntdInput)`

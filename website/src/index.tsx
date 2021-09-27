@@ -10,20 +10,20 @@ import i18n from './i18n'
 import ThemeProvider, {installThemes} from './theme/ThemeContext'
 
 installThemes().then(() => {
-	ReactDOM.render(
-		<React.StrictMode>
-			<Provider store={store}>
-				<React.Suspense fallback={<></>}>
-					<I18nextProvider i18n={i18n}>
-						<ThemeProvider>
-							<App/>
-						</ThemeProvider>
-					</I18nextProvider>
-				</React.Suspense>
-			</Provider>
-		</React.StrictMode>,
-		document.getElementById('root')
-	);
+  ReactDOM.render(
+    <React.StrictMode>
+      <Provider store={store}>
+        <React.Suspense fallback={<></>}>
+          <I18nextProvider i18n={i18n}>
+            <ThemeProvider>
+              <App/>
+            </ThemeProvider>
+          </I18nextProvider>
+        </React.Suspense>
+      </Provider>
+    </React.StrictMode>,
+    document.getElementById('root')
+  );
 })
 
 reportWebVitals().catch(details => {
