@@ -1,4 +1,4 @@
-package jsheets.runtime.evaluation.shell.environment.inprocess;
+package jsheets.shell.environment.inprocess;
 
 /**
  * Thrown when the execution is preempted using {@link InProcessExecutionControl#stop()}.

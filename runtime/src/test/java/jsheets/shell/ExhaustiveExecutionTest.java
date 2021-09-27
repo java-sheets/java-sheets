@@ -1,6 +1,7 @@
-package jsheets.runtime.evaluation.shell.execution;
+package jsheets.shell;
 
 import jdk.jshell.JShell;
+import jsheets.shell.execution.ExhaustiveExecution;
 import org.junit.jupiter.api.Test;
 
 public final class ExhaustiveExecutionTest {

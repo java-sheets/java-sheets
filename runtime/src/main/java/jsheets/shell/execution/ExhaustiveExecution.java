@@ -1,4 +1,4 @@
-package jsheets.runtime.evaluation.shell.execution;
+package jsheets.shell.execution;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -11,6 +11,7 @@ import com.google.common.flogger.FluentLogger;
 
 import jdk.jshell.JShell;
 import jdk.jshell.Snippet;
+import jdk.jshell.SnippetEvent;
 
 /**
  * Executes all statements and binds all declaration in a source,
@@ -38,6 +39,10 @@ public final class ExhaustiveExecution implements ExecutionMethod {
     }
   }
 
+  public static boolean isSupported() {
+    return wrapAccessor != null & wrapType != null;
+  }
+
   public static ExhaustiveExecution create(JShell shell) {
     return create(shell, Config.createDefault());
   }
@@ -45,12 +50,12 @@ public final class ExhaustiveExecution implements ExecutionMethod {
   public static ExhaustiveExecution create(JShell shell, Config config) {
     Objects.requireNonNull(shell, "shell");
     Objects.requireNonNull(config, "config");
-    ensureResolved();
+    ensureSupported();
     return new ExhaustiveExecution(shell, config);
   }
 
-  private static void ensureResolved() {
-    if (wrapAccessor == null || wrapType == null) {
+  private static void ensureSupported() {
+    if (!isSupported()) {
       throw new IllegalStateException("failed to initialize component: " + resolveError);
     }
   }
@@ -64,7 +69,7 @@ public final class ExhaustiveExecution implements ExecutionMethod {
   }
 
   @Override
-  public Collection<Snippet> execute(String source) {
+  public Collection<SnippetEvent> execute(String source) {
     return executeForPreprocessed(preprocess(source));
   }
 
@@ -72,25 +77,25 @@ public final class ExhaustiveExecution implements ExecutionMethod {
     return source.trim();
   }
 
-  private Collection<Snippet> executeForPreprocessed(String source) {
+  private Collection<SnippetEvent> executeForPreprocessed(String source) {
     var reducedSource = source;
-    var evaluated = new ArrayList<Snippet>();
+    var allEvents = new ArrayList<SnippetEvent>();
     for (int index = 0; index < config.statementLimit() && !reducedSource.isEmpty(); index++) {
       var events = shell.eval(reducedSource);
       if (events.isEmpty()) {
         break;
       }
       for (var event : events) {
+        allEvents.add(event);
         var snippet = event.snippet();
         var range = rangeInText(snippet);
-        evaluated.add(snippet);
         if (range.end() >= reducedSource.length()) {
           break;
         }
         reducedSource = source.substring(range.end());
       }
     }
-    return evaluated;
+    return allEvents;
   }
 
   private record Range(int start, int end) {}
@@ -119,6 +124,11 @@ public final class ExhaustiveExecution implements ExecutionMethod {
         failure
       );
     }
+  }
+
+  @Override
+  public String toString() {
+    return "ExhaustiveExecution(shell=%s, config=%s)".formatted(shell, config);
   }
 
   private record WrapType(MethodHandle firstIndex, MethodHandle lastIndex) {}

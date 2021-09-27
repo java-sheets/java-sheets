@@ -1,4 +1,4 @@
-package jsheets.runtime.evaluation.shell;
+package jsheets.output;
 
 import java.io.OutputStream;
 import java.util.function.Consumer;

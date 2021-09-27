@@ -1,4 +1,4 @@
-package jsheets.runtime.evaluation.shell.environment;
+package jsheets.shell.environment;
 
 import java.net.InetAddress;
 import java.util.Map;

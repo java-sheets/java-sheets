@@ -1,11 +1,12 @@
-package jsheets.runtime.evaluation.shell.environment.inprocess;
+package jsheets.shell.environment.inprocess;
 
 import java.util.Map;
 
 import jdk.jshell.spi.ExecutionControl;
 import jdk.jshell.spi.ExecutionControlProvider;
 import jdk.jshell.spi.ExecutionEnv;
-import jsheets.runtime.evaluation.shell.environment.ExecutionEnvironment;
+import jsheets.output.TenantBasedOutput;
+import jsheets.shell.environment.ExecutionEnvironment;
 
 /**
  * Executing multiple shells in a shared process can have many negative
