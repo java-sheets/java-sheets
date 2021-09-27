@@ -1,6 +1,6 @@
-<p align="center">
-  <img src="/assets/logo.svg" align="center" width="150" alt="JSheets Logo">
-</p>
+<div style="text-align:center">
+  <img src="/assets/logo.svg" width="150" alt="JSheets Logo">
+</div>
 
 #JSheets
 
@@ -8,9 +8,12 @@
 
 Jsheet lets you create and share Java snippets, ranging from small expressions
 
-<img src="/assets/screenshots/small-light.png" align="center"
-width="200"alt="Small">
+<div style="text-align:center">
+  <img src="/assets/screenshots/small-light.png" style="width: 200px" alt="Small">
+</div>
 
 to methods, classes and even rich Markdown comments.
 
-<img src="/assets/screenshots/small-light.png" align="center" width="350"alt="Large">
+<div style="text-align:center">
+  <img src="/assets/screenshots/small-light.png" style="width: 350px" alt="Large">
+</div>
