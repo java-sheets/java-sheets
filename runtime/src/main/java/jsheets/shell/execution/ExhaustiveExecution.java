@@ -7,14 +7,17 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
 
+import com.google.common.base.Strings;
 import com.google.common.flogger.FluentLogger;
 
+import javax.annotation.Nullable;
+import jdk.jshell.DeclarationSnippet;
 import jdk.jshell.JShell;
 import jdk.jshell.Snippet;
 import jdk.jshell.SnippetEvent;
 
 /**
- * Executes all statements and binds all declaration in a source,
+ * Executes all statements and binds all declarations in a source,
  * to support real scripting experience in JShell.
  * <p>
  * The {@link JShell#eval(String)} does not accept sources that contain
@@ -31,6 +34,9 @@ import jdk.jshell.SnippetEvent;
  *  until the (not yet executed part of the) source is empty.
  */
 public final class ExhaustiveExecution implements ExecutionMethod {
+  // TODO: This mechanism has problems with declarations
+  //  it is still useful for simple statement blocks (that contain variables).
+
   private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
   public record Config(int statementLimit) {
@@ -40,7 +46,7 @@ public final class ExhaustiveExecution implements ExecutionMethod {
   }
 
   public static boolean isSupported() {
-    return wrapAccessor != null & wrapType != null;
+    return gutsAccessor != null & wrapType != null;
   }
 
   public static ExhaustiveExecution create(JShell shell) {
@@ -51,7 +57,7 @@ public final class ExhaustiveExecution implements ExecutionMethod {
     Objects.requireNonNull(shell, "shell");
     Objects.requireNonNull(config, "config");
     ensureSupported();
-    return new ExhaustiveExecution(shell, config);
+    return new ExhaustiveExecution(shell::eval, config);
   }
 
   private static void ensureSupported() {
@@ -61,49 +67,116 @@ public final class ExhaustiveExecution implements ExecutionMethod {
   }
 
   private final Config config;
-  private final JShell shell;
+  private final ExecutionMethod delegate;
 
-  private ExhaustiveExecution(JShell shell, Config config) {
+  private ExhaustiveExecution(ExecutionMethod delegate, Config config) {
     this.config = config;
-    this.shell = shell;
+    this.delegate = delegate;
   }
 
   @Override
   public Collection<SnippetEvent> execute(String source) {
-    return executeForPreprocessed(preprocess(source));
+    return new Evaluation(preprocess(source)).run();
   }
 
   private String preprocess(String source) {
     return source.trim();
   }
 
-  private Collection<SnippetEvent> executeForPreprocessed(String source) {
-    var reducedSource = source;
-    var allEvents = new ArrayList<SnippetEvent>();
-    for (int index = 0; index < config.statementLimit() && !reducedSource.isEmpty(); index++) {
-      var events = shell.eval(reducedSource);
-      if (events.isEmpty()) {
-        break;
+  final class Evaluation {
+    private final String originalSource;
+    private String reducedSource;
+    private final Collection<SnippetEvent> reportedEvents = new ArrayList<>();
+    private int iteration;
+    private boolean stopped;
+
+    private Evaluation(String originalSource) {
+      this.originalSource = originalSource;
+      this.reducedSource = originalSource;
+    }
+
+    private Collection<SnippetEvent> run() {
+      while (shouldContinue()) {
+        iteration++;
+        process();
       }
-      for (var event : events) {
-        allEvents.add(event);
-        var snippet = event.snippet();
-        var range = rangeInText(snippet);
-        if (range.end() >= reducedSource.length()) {
-          break;
-        }
-        reducedSource = source.substring(range.end());
+      return reportedEvents;
+    }
+
+    private boolean shouldContinue() {
+      return !stopped
+        && !Strings.isNullOrEmpty(reducedSource)
+        && iteration < config.statementLimit();
+    }
+
+    private void stop() {
+      stopped = true;
+    }
+
+    private void process() {
+      var events = delegate.execute(reducedSource);
+      if (events.isEmpty()) {
+        stop();
+      } else {
+        processEvents(events);
       }
     }
-    return allEvents;
+
+    private void processEvents(Collection<SnippetEvent> events) {
+      for (var event : events) {
+        if (event.status().equals(Snippet.Status.REJECTED)) {
+          processRejectedSnippet(event);
+        } else {
+          processValidSnippet(event);
+        }
+      }
+    }
+
+    private void processRejectedSnippet(SnippetEvent event) {
+      var range = rangeInText(event.snippet());
+      if (range != null) {
+        removeRangeFromSource(range);
+        if (event.snippet() instanceof DeclarationSnippet) {
+          reportedEvents.addAll(retryRange(originalSource, range));
+          return;
+        }
+      }
+      reportedEvents.add(event);
+    }
+
+    /*
+     * Retries evaluating a rejected snippet but only for the range that
+     * has been resolved in the previous compilation. Certain declarations need
+     * to be evaluated in isolation.
+     */
+    private Collection<SnippetEvent> retryRange(String source, Range region) {
+      var failedSource = source.substring(region.start(), region.end());
+      return delegate.execute(failedSource);
+    }
+
+    private void processValidSnippet(SnippetEvent event) {
+      reportedEvents.add(event);
+      var snippet = event.snippet();
+      var range = rangeInText(snippet);
+      if (range == null || range.end() >= originalSource.length()) {
+        stop();
+        return;
+      }
+      removeRangeFromSource(range);
+    }
+
+    private void removeRangeFromSource(Range range) {
+      reducedSource = originalSource.substring(range.end());
+    }
   }
 
   private record Range(int start, int end) {}
 
+  @Nullable
   private Range rangeInText(Snippet snippet) {
     try {
-      var wrap = wrapAccessor.invoke(snippet);
-      return rangeInWrap(wrap);
+      var wrap = gutsAccessor.invoke(snippet);
+      return wrap == null ? null : rangeInWrap(wrap);
     } catch (Throwable failedAccess) {
       throw new RuntimeException(
         "failed to access wrap in: " + snippet,
@@ -128,7 +201,7 @@ public final class ExhaustiveExecution implements ExecutionMethod {
 
   @Override
   public String toString() {
-    return "ExhaustiveExecution(shell=%s, config=%s)".formatted(shell, config);
+    return "ExhaustiveExecution(delegate=%s, config=%s)".formatted(delegate, config);
   }
 
   private record WrapType(MethodHandle firstIndex, MethodHandle lastIndex) {}
@@ -137,7 +210,7 @@ public final class ExhaustiveExecution implements ExecutionMethod {
   private static final String generalWrapClass = "jdk.jshell.GeneralWrap";
 
   private static WrapType resolveWrapType() {
-    try {
+    return ResolveTask.run(() -> {
       var wrapType = Class.forName(generalWrapClass);
       var lookup = MethodHandles.privateLookupIn(wrapType, MethodHandles.lookup());
       var methodType = MethodType.methodType(int.class);
@@ -145,38 +218,45 @@ public final class ExhaustiveExecution implements ExecutionMethod {
         lookup.findVirtual(wrapType, "firstSnippetIndex", methodType),
         lookup.findVirtual(wrapType, "lastSnippetIndex", methodType)
       );
-    } catch (IllegalAccessException missingAccess) {
-      throw new RuntimeException("could not open " + generalWrapClass, missingAccess);
-    } catch (ClassNotFoundException | NoSuchMethodException incompatible) {
-      throw new RuntimeException("incompatible JShell version", incompatible);
-    }
+    });
   }
 
   /* This class has tob e used to support the Snippet.guts() signature */
   private static final String wrapClass = "jdk.jshell.Wrap";
 
-  private static MethodHandle resolveWrapAccessor() {
-    try {
+  private static MethodHandle resolveGutsAccessor() {
+    return ResolveTask.run(() -> {
       var wrapType = Class.forName(wrapClass);
       var lookup = MethodHandles.privateLookupIn(Snippet.class, MethodHandles.lookup());
       return lookup.findVirtual(Snippet.class, "guts", MethodType.methodType(wrapType));
-    } catch (IllegalAccessException missingAccess) {
-      throw new RuntimeException("could not open " + wrapClass, missingAccess);
-    } catch (ClassNotFoundException | NoSuchMethodException incompatible) {
-      throw new RuntimeException("incompatible JShell version", incompatible);
-    }
+    });
   }
 
   private static WrapType wrapType;
-  private static MethodHandle wrapAccessor;
+  private static MethodHandle gutsAccessor;
 
   /* Possible error message from resolveWrapType() and resolveWrapAccessor() */
   private static String resolveError;
 
+  @FunctionalInterface
+  interface ResolveTask<T> {
+    T resolve() throws IllegalAccessException, ClassNotFoundException, NoSuchMethodException;
+
+    static <T> T run(ResolveTask<T> task) {
+      try {
+        return task.resolve();
+      } catch (IllegalAccessException missingAccess) {
+        throw new RuntimeException("could not open " + wrapClass, missingAccess);
+      } catch (ClassNotFoundException | NoSuchMethodException incompatible) {
+        throw new RuntimeException("incompatible JShell version", incompatible);
+      }
+    }
+  }
+
   static {
     try {
       wrapType = resolveWrapType();
-      wrapAccessor = resolveWrapAccessor();
+      gutsAccessor = resolveGutsAccessor();
     } catch (Throwable failure) {
       resolveError = failure.getMessage();
       log.atWarning().withCause(failure).log("failed to initialize");
