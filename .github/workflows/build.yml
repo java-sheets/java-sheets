@@ -25,7 +25,7 @@ jobs:
         working-directory: 'protocol'
     # The protocol is build before other java packages, as they depend on the website.
     - name: Build with Gradle
-      run: ./gradlew :protocol:generateProto :protocol:buildJavascriptPackage
+      run: ./gradlew :protocol:generateProto :protocol:generateJavascriptPackage
     # The website has to be build after the buildJavascriptPackage task has been run.
     - name: Npm Install Website
       uses: bahmutov/npm-install@v1.6.0
