@@ -1,4 +1,4 @@
-import React, {useCallback} from 'react'
+import React, {useCallback, useState} from 'react'
 import {Layout} from 'antd'
 import {Content} from 'antd/lib/layout/layout'
 import Sheet from './sheet/Sheet'
@@ -11,16 +11,28 @@ import {
 } from 'react-router-dom'
 import {useShare} from './sheet/useShare'
 import ImportedSheet from './sheet/ImportedSheet'
+import ShareModal from './sheet/ShareModal'
 
 export default function App() {
   const [evaluate, evaluating] = useEvaluate()
   const history = useHistory()
-  const callback = useCallback(created => history.push(`/s/${created.id}`), [history])
+  const [sharedId, setSharedId] = useState('')
+  const [shareVisible, setShareVisible] = useState(false)
+  const callback = useCallback(created => {
+    history.push(`/s/${created.id}`)
+    setShareVisible(true)
+    setSharedId(created.id)
+  }, [history])
   const [share, captureSnippet] = useShare(callback)
   return (
     <Layout>
       <Header onShare={share}/>
       <Content style={{padding: '0 50px 50px 50px'}}>
+          <ShareModal
+            visible={shareVisible}
+            onVisibilityChange={setShareVisible}
+            sheetId={sharedId}
+          />
           <Switch>
             <Route path="/s/:sheetId">
               <ImportedSheet

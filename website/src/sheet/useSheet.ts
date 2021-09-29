@@ -1,5 +1,10 @@
 import {useDispatch, useSelector} from 'react-redux'
-import {Sheet, SheetSnippet, SheetSnippetComponent} from './index'
+import {
+  SheetState,
+  SnippetState,
+  ComponentState,
+  findSnippetByIdInState, findComponentByIdInState
+} from './index'
 import {RootState} from '../store'
 import {
   addComponent,
@@ -11,11 +16,11 @@ import {
 } from './state'
 
 export interface UseSheet {
-  sheet: Sheet
-  update: (target: Sheet) => void
+  sheet: SheetState
+  update: (target: SheetState) => void
   moveSnippet: (id: string, direction: 'up' | 'down') => void
   reorderSnippet: (from: number, to: number) => void
-  addSnippet: (snippet: Partial<SheetSnippet>) => void
+  addSnippet: (snippet: Partial<SnippetState>) => void
   deleteSnippet: (id: string) => void
 }
 
@@ -33,10 +38,10 @@ export function useSheet(): UseSheet {
 }
 
 export interface UseSnippet {
-  snippet: SheetSnippet | undefined
+  snippet: SnippetState | undefined
   changeDetails: (details: {title: string}) => void
   reorderComponent: (from: number, to: number) => void
-  addComponent: (component: Partial<SheetSnippetComponent>) => void
+  addComponent: (component: Partial<ComponentState>) => void
   deleteComponent: (id: string) => void
   delete: () => void
 }
@@ -44,7 +49,7 @@ export interface UseSnippet {
 export function useSnippet(id: string): UseSnippet {
   const dispatch = useDispatch()
   const snippet = useSelector(
-    (state: RootState) => state.sheet.snippets.find(snippet => snippet.id === id)
+    (state: RootState) => findSnippetByIdInState(state.sheet, id)
   )
   return {
     snippet,
@@ -59,10 +64,11 @@ export function useSnippet(id: string): UseSnippet {
 export function useComponent(
   snippetId: string,
   componentId: string
-): SheetSnippetComponent | undefined {
+): ComponentState | undefined {
   return useSelector(
-    (state: RootState) =>
-      state.sheet.snippets.find(snippet => snippet.id === snippetId)
-        ?.components.find(component => component.id === componentId)
+    (state: RootState) => {
+      const snippet = findSnippetByIdInState(state.sheet, snippetId)
+      return snippet ? findComponentByIdInState(snippet, componentId) : undefined
+    }
   )
 }

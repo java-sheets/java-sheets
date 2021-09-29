@@ -1,9 +1,9 @@
 import * as Styled from './OutputText.style'
-import {ErrorOutput, SheetSnippetComponentOutput} from "../../index";
+import {ErrorOutput, SnippetComponentOutput} from "../../index";
 import {CloseCircleFilled} from '@ant-design/icons'
 
 export interface OutputTextProperties {
-  output?: SheetSnippetComponentOutput
+  output?: SnippetComponentOutput
   onClose?: () => void
 }
 

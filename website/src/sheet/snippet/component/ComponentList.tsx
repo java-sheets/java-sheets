@@ -5,9 +5,9 @@ import TextComponent from "./TextComponent";
 import EditorComponent from "./EditorComponent";
 import {useDispatch} from "react-redux";
 import {reorderComponent} from "../../state";
-import {SheetSnippetComponent} from "../../index";
+import {ComponentState} from '../../index'
 import {SnippetComponentReference} from './reference'
-import {useDraggableId, useDraggableIds} from '../draggableId'
+import {useDraggableId} from '../draggableId'
 
 function useReorder(snippetId: string): (result: DropResult) => void {
   const dispatch = useDispatch()
@@ -25,16 +25,16 @@ type CaptureComponent = (id: string, reference: SnippetComponentReference) => vo
 
 export interface ComponentListProperties {
   snippetId: string
-  components: SheetSnippetComponent[]
+  components: Record<string, ComponentState>
   deleteComponent: (id: string) => void
   capture?: CaptureComponent
 }
 
 function useComponents(
-  components: SheetSnippetComponent[],
+  components: Record<string, ComponentState>,
   captureComponent?: CaptureComponent
 ): ComponentNode[] {
-  return useMemo(() => [...components]
+  return useMemo(() => Object.values(components)
     .sort((left, right) => left.order - right.order)
     .map(component => {
       const {id, type, content} = component

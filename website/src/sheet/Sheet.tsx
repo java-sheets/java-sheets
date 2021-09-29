@@ -12,7 +12,7 @@ import {
 import {useDispatch} from 'react-redux'
 import {StartEvaluationRequest} from "@jsheets/protocol/src/jsheets/api/snippet_runtime_pb";
 import {reorderSnippet} from './state'
-import {SheetSnippet} from './index'
+import {listSnippetsInState, SnippetState} from './index'
 import Snippet, {SnippetReference} from './snippet/Snippet'
 import {useDraggableIds} from './snippet/draggableId'
 
@@ -30,16 +30,19 @@ function useReorder(): (result: DropResult) => void {
   }, [dispatch])
 }
 
-const newSnippetTemplate: () => Partial<SheetSnippet> = () => ({
-  components: [
-    {
-      id: uuid(),
-      type: 'code',
-      order: 0,
-      content: '// TODO: Write Code'
+function newSnippetTemplate(): Partial<SnippetState> {
+  const componentId = uuid()
+  return {
+    components: {
+      [componentId]: {
+        id: componentId,
+        type: 'code',
+        order: 0,
+        content: '// TODO: Write Code'
+      }
     }
-  ]
-})
+  }
+}
 
 export type CaptureSnippetReference = (id: string, snippet: SnippetReference) => void
 
@@ -54,7 +57,7 @@ export default function Sheet(properties: SheetProperties) {
   const reorder = useReorder()
 
   const snippets = useMemo(() => {
-    const snippets = [...sheet.snippets]
+    const snippets = listSnippetsInState(sheet)
     snippets.sort((left, right) => left.order - right.order)
     const lowestOrder = snippets[0]?.order
     const highestOrder = snippets[snippets.length - 1]?.order
