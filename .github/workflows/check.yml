@@ -1,4 +1,4 @@
-name: CI
+name: Check
 on: [push, pull_request]
 jobs:
   check:
@@ -13,4 +13,4 @@ jobs:
       - name: Validate Gradle wrapper
         uses: gradle/wrapper-validation-action@e6e38bacfdf1a337459f332974bb2327a31aaf4b
       - name: Build with Gradle
-        run: ./gradlew generateProto build
+        run: JSHEETS_PROTOCOL_BUILD_NO_TYPESCRIPT=true ./gradlew generateProto build
