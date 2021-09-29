@@ -34,7 +34,7 @@ jobs:
         useLockFile: true    
     # Builds the actual website for production 
     - name: Build Website
-      run: npm run build
+      run: npm run build-all
       working-directory: website
     # Builds the backend (will include the websites generated code in the apps classpath)
     - name: Build Server
