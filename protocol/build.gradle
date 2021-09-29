@@ -29,6 +29,11 @@ sourceSets {
 
 def extension = Os.isFamily(Os.FAMILY_WINDOWS) ? '.cmd' : ''
 
+// This is an optimization for the CI test workflow, allowing us not to run
+// npm install on each test. The typescript files are only relevant when
+// building the protocol for use in the website module.
+def shouldUseTypescript = System.getenv("JSHEETS_PROTOCOL_BUILD_NO_TYPESCRIPT") != "true"
+
 protobuf {
   protoc {
     artifact = "com.google.protobuf:protoc:3.11.4"
@@ -37,17 +42,21 @@ protobuf {
     grpc {
       artifact = 'io.grpc:protoc-gen-grpc-java:1.29.0'
     }
-    "ts" {
-      def binary = project.projectDir.toPath().resolve(
-        "node_modules/.bin/protoc-gen-ts${extension}")
-      path = binary
+    if (shouldUseTypescript) {
+      "ts" {
+        def binary = project.projectDir.toPath().resolve(
+          "node_modules/.bin/protoc-gen-ts${extension}")
+        path = binary
+      }
     }
   }
   generateProtoTasks {
     all()*.plugins {
-      "ts" {
-        option 'service=grpc-web'
-        outputSubDir = 'js'
+      if (shouldUseTypescript) {
+        "ts" {
+          option 'service=grpc-web'
+          outputSubDir = 'js'
+        }
       }
     }
     all()*.builtins {
