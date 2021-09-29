@@ -1,4 +1,4 @@
-package jsheets.runtime.evaluation.shell.environment.inprocess;
+package jsheets.output;
 
 import com.google.common.util.concurrent.Uninterruptibles;
 

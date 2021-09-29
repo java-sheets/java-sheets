@@ -1,25 +1,26 @@
-package jsheets.runtime.evaluation.shell.environment.inprocess;
+package jsheets.shell.environment.inprocess;
 
 import java.util.Map;
 
 import jdk.jshell.spi.ExecutionControl;
 import jdk.jshell.spi.ExecutionControlProvider;
 import jdk.jshell.spi.ExecutionEnv;
-import jsheets.runtime.evaluation.shell.environment.ExecutionEnvironment;
+import jsheets.output.TenantBasedOutput;
+import jsheets.shell.environment.ExecutionEnvironment;
 
 /**
  * Executing multiple shells in a shared process can have many negative
  * side effects because the java library is generally not designed in a
  * way to support multi tenancy.
  */
-public final class InProcessExecution implements ExecutionEnvironment {
-  public static InProcessExecution create() {
-    return new InProcessExecution(MultiTenancy.create());
+public final class EmbeddedEnvironment implements ExecutionEnvironment {
+  public static EmbeddedEnvironment create() {
+    return new EmbeddedEnvironment(MultiTenancy.create());
   }
 
   private final Tenancy tenancy;
 
-  private InProcessExecution(Tenancy tenancy) {
+  private EmbeddedEnvironment(Tenancy tenancy) {
     this.tenancy = tenancy;
   }
 

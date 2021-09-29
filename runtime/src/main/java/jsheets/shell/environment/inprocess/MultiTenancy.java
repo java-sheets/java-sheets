@@ -1,9 +1,10 @@
-package jsheets.runtime.evaluation.shell.environment.inprocess;
+package jsheets.shell.environment.inprocess;
 
 import java.io.PrintStream;
 import java.util.function.Consumer;
 
 import jdk.jshell.spi.ExecutionEnv;
+import jsheets.output.TenantBasedOutput;
 
 public final class MultiTenancy implements Tenancy {
   public static MultiTenancy create() {

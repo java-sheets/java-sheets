@@ -15,7 +15,7 @@ import {SheetSnippetComponentOutput} from "../../index";
 import OutputText from "./OutputText";
 import {useDispatch} from "react-redux";
 import {removeOutput} from "../../state";
-import {useDraggableId, useDraggableIds} from '../draggableId'
+import {useDraggableId} from '../draggableId'
 
 function fixToVerticalAxis(style: DraggingStyle | NotDraggingStyle | undefined) {
   if (style?.transform) {
@@ -43,6 +43,10 @@ interface ComponentContainerProperties {
   onDelete?: () => void
 }
 
+function shouldRenderOutput(output: SheetSnippetComponentOutput) {
+  return output.message != '' && output.message != '\n'
+}
+
 export default function ComponentContainer(properties: ComponentContainerProperties) {
   const dispatch =  useDispatch()
   const [confirmDelete, setConfirmDelete] = useTimedFlag(false, 2000)
@@ -53,7 +57,8 @@ export default function ComponentContainer(properties: ComponentContainerPropert
   }, [dispatch, item])
 
   const outputs = React.useMemo(() =>
-    item.output?.map((output, index) => (
+    item.output?.filter(output => shouldRenderOutput(output))
+      .map((output, index) => (
       <OutputText
         key={index}
         output={output}

@@ -5,13 +5,13 @@ import jsheets.EvaluationResult;
 import jsheets.EvaluationResult.Kind;
 import jsheets.runtime.evaluation.Evaluation;
 
-public final class MessageSink {
+public final class MessageLog {
   private final Evaluation.Listener output;
 
   private final StringBuffer outputBuffer = new StringBuffer();
   private final StringBuffer errorBuffer = new StringBuffer();
 
-  MessageSink(Evaluation.Listener output) {
+  MessageLog(Evaluation.Listener output) {
     this.output = output;
   }
 

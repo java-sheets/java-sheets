@@ -1,9 +1,8 @@
-package jsheets.runtime.evaluation.shell.environment.inprocess;
+package jsheets.output;
 
 import com.google.errorprone.annotations.Var;
 
 import javax.annotation.Nullable;
-import jsheets.runtime.evaluation.shell.ListeningPrintStream;
 
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -107,7 +106,7 @@ public final class TenantBasedOutput extends ListeningPrintStream {
   private final Map<String, StringBuilder> buffers = new HashMap<>();
 
   private TenantBasedOutput(Consumer<String> fallback) {
-    super(OutputStream.nullOutputStream());
+    super(new PrintStream(OutputStream.nullOutputStream()));
     this.fallback = fallback;
   }
 

@@ -1,4 +1,4 @@
-package jsheets.runtime.evaluation.shell.environment.inprocess;
+package jsheets.shell.environment.inprocess;
 
 import java.lang.reflect.Method;
 import java.util.Objects;
