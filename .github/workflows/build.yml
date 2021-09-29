@@ -22,7 +22,7 @@ jobs:
     - name: Npm Install Protocol
       uses: bahmutov/npm-install@v1.6.0
       with:
-        workingDirectory: 'protocol'
+        working-directory: 'protocol'
     # The protocol is build before other java packages, as they depend on the website.
     - name: Build with Gradle
       run: ./gradlew :protocol:generateProto :protocol:buildJavascriptPackage
@@ -30,7 +30,7 @@ jobs:
     - name: Npm Install Website
       uses: bahmutov/npm-install@v1.6.0
       with:
-        workingDirectory: 'website'
+        working-directory: 'website'
         useLockFile: true    
     # Builds the actual website for production 
     - name: Build Website
