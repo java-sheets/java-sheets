@@ -11,6 +11,7 @@ public/theme/
 # production
 /build
 
+
 # misc
 .DS_Store
 .env.local
@@ -21,3 +22,6 @@ public/theme/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+website/src/editor/java/parser.js
+website/src/editor/java/parser.terms.js
