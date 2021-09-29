@@ -53,6 +53,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
+    "build-all": "npm run build-theme && npm run build-grammar && npm run build",
+    "build-grammar": "lezer-generator src/editor/java/java.grammar -o src/editor/java/parser",
     "build-theme": "npm run build-light-theme && npm run build-dark-theme",
     "build-light-theme": "lessc src/theme/light.less public/theme/light.css -js",
     "build-dark-theme": "lessc src/theme/dark.less public/theme/dark.css -js"
