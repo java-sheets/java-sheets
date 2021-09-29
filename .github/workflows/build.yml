@@ -23,7 +23,6 @@ jobs:
       uses: bahmutov/npm-install@v1.6.0
       with:
         workingDirectory: 'protocol'
-        useLockFile: true
     # The protocol is build before other java packages, as they depend on the website.
     - name: Build with Gradle
       run: ./gradlew :protocol:generateProto :protocol:buildJavascriptPackage
