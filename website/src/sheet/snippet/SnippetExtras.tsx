@@ -9,7 +9,7 @@ import * as Styled from "./SnippetExtras.style";
 import React from "react";
 import {SheetSnippetComponent} from "../index";
 import {TFunction} from 'i18next'
-import {useTranslation, WithTranslationProps} from 'react-i18next'
+import {useTranslation} from 'react-i18next'
 
 type AddComponent = (component: Partial<SheetSnippetComponent>) => void
 

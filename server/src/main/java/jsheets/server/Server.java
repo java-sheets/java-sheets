@@ -58,6 +58,8 @@ public final class Server {
 
   private static void configure(JavalinConfig config) {
     config.showJavalinBanner = false;
+    config.ignoreTrailingSlashes = true;
+    config.addSinglePageRoot("/", "/static/index.html", Location.CLASSPATH);
     config.addStaticFiles(Server::configureStaticFiles);
   }
 

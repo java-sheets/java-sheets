@@ -1,60 +1,71 @@
 import * as Styled from './TextComponent.style'
-import {createGlobalStyle} from 'styled-components'
-import React, {MutableRefObject} from "react";
-import {EditorComponentProperties} from "./EditorComponent";
-import {SnippetComponentListRef, SnippetComponentRef} from "./Component";
-import RichMarkdownEditor from "rich-markdown-editor";
+import React from 'react'
+import {EditorComponentProperties} from './EditorComponent'
+import {SnippetComponentReference} from './reference'
+import RichMarkdownEditor from 'rich-markdown-editor'
+import {ThemeContext} from '../../../theme/ThemeContext'
+import * as SnippetProtocol from '@jsheets/protocol/src/jsheets/api/snippet_pb'
+import * as jspb from "google-protobuf";
 
 export interface TextComponentProperties {
   value: string
   id: string
-  listRef?: MutableRefObject<SnippetComponentListRef | null>
+  capture?: (reference: SnippetComponentReference) => void
 }
 
-const MarkdownEditorStyle = createGlobalStyle`
-  #block-menu-container, .heading-actions, .block-menu-trigger {
-    display: none !important;
-  }
-`
-
+// This is a hack: The accepted type of placeholder names is insufficient.
 // @ts-ignore
 const disabledExtensions: 'placeholder'[] = ['empty-placeholder', 'placeholder', 'blockmenu']
 
 export default class TextComponent
   extends React.Component<TextComponentProperties>
-  implements SnippetComponentRef {
+  implements SnippetComponentReference {
+
+  static contextType = ThemeContext
 
   private readonly editorRef = React.createRef<RichMarkdownEditor>()
 
   render() {
     return (
       <Styled.TextComponent>
-        <MarkdownEditorStyle/>
+        <Styled.GlobalMarkdown/>
         <Styled.Editor
           ref={this.editorRef}
           disableExtensions={disabledExtensions}
           placeholder={''}
           defaultValue={this.props.value}
+          dark={this.context.theme === 'dark'}
         />
       </Styled.TextComponent>
     )
   }
 
   componentDidMount() {
-    this.props.listRef?.current?.components.set(this.props.id, this)
+    this.props.capture?.(this)
   }
 
   content = (): string | null => {
     return this.editorRef.current?.value() || null
   }
 
-  updateContent = (target: string) => { }
+  serialize = (): SnippetProtocol.Snippet.Component => {
+    const component = new SnippetProtocol.Snippet.Component()
+    component.setId(this.props.id)
+    component.setKind(SnippetProtocol.Snippet.Component.Kind.TEXT)
+    const content = this.content()
+    if (content) {
+      component.setContent(content)
+    }
+    return component
+  }
+
+  updateContent = (target: string) => {}
 
   shouldComponentUpdate(
     nextProps: Readonly<EditorComponentProperties>,
     nextState: Readonly<{}>,
     nextContext: any
   ): boolean {
-    return nextProps.value !== this.props.value
+    return nextProps.id !== this.props.id || nextProps.value !== this.props.value
   }
 }

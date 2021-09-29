@@ -1,4 +1,4 @@
-import React from "react"
+import React, {useCallback} from 'react'
 import {
   Draggable,
   DraggingStyle,
@@ -15,6 +15,7 @@ import {SheetSnippetComponentOutput} from "../../index";
 import OutputText from "./OutputText";
 import {useDispatch} from "react-redux";
 import {removeOutput} from "../../state";
+import {useDraggableId} from '../draggableId'
 
 function fixToVerticalAxis(style: DraggingStyle | NotDraggingStyle | undefined) {
   if (style?.transform) {
@@ -30,39 +31,47 @@ function fixToVerticalAxis(style: DraggingStyle | NotDraggingStyle | undefined) 
   return style
 }
 
+export interface ComponentNode {
+  id: string
+  order: number
+  node: React.ReactNode
+  output?: SheetSnippetComponentOutput[]
+}
+
 interface ComponentContainerProperties {
-  item: {
-    id: string
-    order: number
-    output: SheetSnippetComponentOutput[] | undefined
-    content: React.ReactNode
-  }
+  item: ComponentNode
   onDelete?: () => void
 }
 
-export default function ComponentContainer(
-  {item, onDelete}: ComponentContainerProperties
-) {
+function shouldRenderOutput(output: SheetSnippetComponentOutput) {
+  return output.message != '' && output.message != '\n'
+}
+
+export default function ComponentContainer(properties: ComponentContainerProperties) {
   const dispatch =  useDispatch()
   const [confirmDelete, setConfirmDelete] = useTimedFlag(false, 2000)
+  const {item} = properties
 
-  const onOutputClose = () => {
+  const onOutputClose = useCallback(() => {
     dispatch(removeOutput({componentId: item.id}))
-  }
+  }, [dispatch, item])
 
   const outputs = React.useMemo(() =>
-    item.output?.map((output, index) => (
+    item.output?.filter(output => shouldRenderOutput(output))
+      .map((output, index) => (
       <OutputText
         key={index}
         output={output}
         onClose={onOutputClose}
       />
     )),
-    [item.output]
+    [item.output, onOutputClose]
   )
 
+  const draggableId = useDraggableId(properties.item.id)
+
   return (
-    <Draggable key={item.id} draggableId={item.id} index={item.order}>
+    <Draggable key={item.id} draggableId={`${draggableId}`} index={item.order}>
       {(provided, snapshot) => (
         <Styled.Component
           className={snapshot.isDragging ? 'dragging-component' : ''}
@@ -80,7 +89,7 @@ export default function ComponentContainer(
                 icon={confirmDelete ? <CheckOutlined/> : <DeleteOutlined/>}
                 onClick={() => {
                   if (confirmDelete) {
-                    onDelete?.()
+                    properties.onDelete?.()
                   } else {
                     setConfirmDelete(true)
                   }
@@ -91,7 +100,7 @@ export default function ComponentContainer(
               </Styled.DragHandle>
             </Styled.ComponentOptions>
             <Styled.ComponentContent>
-              {item.content}
+              {properties.item.node}
             </Styled.ComponentContent>
           </Styled.ComponentInputArea>
           {outputs}

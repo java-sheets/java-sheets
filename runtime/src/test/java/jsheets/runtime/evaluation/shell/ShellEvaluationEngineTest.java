@@ -9,8 +9,7 @@ import jsheets.Snippet;
 import jsheets.SnippetSources;
 import jsheets.StartEvaluationRequest;
 import jsheets.runtime.evaluation.Evaluation;
-import jsheets.runtime.evaluation.shell.environment.StandardExecution;
-import org.junit.jupiter.api.Disabled;
+import jsheets.shell.environment.StandardEnvironment;
 import org.junit.jupiter.api.Test;
 
 /* This is not a Unit Test */
@@ -23,9 +22,9 @@ public class ShellEvaluationEngineTest {
   }
 
   @Test
-  @Disabled
+  // @Disabled
   public void testExecution() {
-    var environment = StandardExecution.create();
+    var environment = StandardEnvironment.create();
     var installation = environment.install();
     var engine = ShellEvaluationEngine.newBuilder()
       .useClock(Clock.systemUTC())

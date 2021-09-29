@@ -1,5 +1,6 @@
 import styled from 'styled-components'
 import {Input as AntdInput} from 'antd'
+import themed from '../../theme/themed'
 
 export const Title = styled.span`
   display: flex;
@@ -15,24 +16,23 @@ export const IconBox = styled.span`
   display: flex;
   border-radius: 5px;
   margin: auto 5px auto 0;
-  background: #f0f2f5;
+  background: ${themed('snippet.card.icon.background')};
   .anticon {
-    color: #00758f;
+    color: ${themed('base.primary')};
     margin: auto 0;
   }
 `
 
 export const Input = styled(AntdInput)`
-  margin-left: 5px;
-  margin-right: 10px;
-  font-size: 18px;
+  margin: auto 10px auto 5px !important;
   max-width: 300px;
-  height: 34px;
-  padding: 2px;
-  border: none;
-  outline: none;
+  height: 34px !important;
+  padding: 2px !important;
+  font-size: 18px !important;
+  border: none !important;
+  outline: none !important;
   &:focus {
-    outline: none;
+    outline: none !important;
   }
 `
 

@@ -23,6 +23,10 @@ message Snippet {
       TEXT = 1;
       CODE = 2;
     }
+    string id = 1;
+    Kind kind = 2;
+    string content = 3;
+    int32 order = 4;
   }
   message Reference {
     string sheet_id = 1;
@@ -59,5 +63,6 @@ message Snippet {
   /// explicitly supported nor forbidden, runtimes can choose to support
   /// them based on possibility of implementation.
   repeated Dependency dependencies = 4;
+  int32 order = 5;
   Metadata metadata = 100;
 }

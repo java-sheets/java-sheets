@@ -1,7 +1,6 @@
 import styled from "styled-components";
 import {Button} from "antd";
-
-
+import themed from '../../../theme/themed'
 
 export const ComponentOptions = styled.div`
   z-index: 20;
@@ -24,10 +23,10 @@ export const ComponentInputArea = styled.div`
 export const Component = styled.div`
   min-height: 45px; // To include the options
   transition: opacity .1s ease-in, box-shadow .1s ease-in;
-  background: rgb(253, 253, 253);
+  background: ${themed('snippet.component.background')};
 
   &:not(:first-child) {
-    border-top: 1px solid #ededed;
+    border-top: ${themed('snippet.component.borderTop')};
   }
 
   &.dragging-component {

@@ -11,10 +11,10 @@ import {SheetSnippetComponentOutput} from "./index";
 type UseEvaluate = [(start: StartEvaluationRequest) => void, boolean]
 
 export default function useEvaluate(): UseEvaluate {
-  const client = Client.create()
   const dispatch = useDispatch()
   const [evaluating, setEvaluating] = useState(false)
   const evaluate = (start: StartEvaluationRequest) => {
+    const client = Client.create()
     setEvaluating(true)
     dispatch(removeOutput({}))
     client.evaluate(

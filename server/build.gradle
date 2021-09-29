@@ -77,7 +77,7 @@ jar {
   }
 }
 
-def dockerImageName = "jsheets"
+def dockerImageName = "ehenoma/jsheets"
 def dockerImageTag = System.getenv("TARGET_IMAGE_TAG") || "latest"
 def dockerImage = "$dockerImageName:$dockerImageTag"
 

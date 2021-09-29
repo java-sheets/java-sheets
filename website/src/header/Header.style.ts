@@ -1,10 +1,14 @@
 import styled from "styled-components";
 import {Header as AntdHeader} from "antd/lib/layout/layout";
 import {Menu as AntdMenu} from "antd";
+import themed from '../theme/themed'
 
 export const Header = styled(AntdHeader)`
-  box-shadow: 0 5px 5px 0 rgb(230 230 230 / 90%);
-  background: #fff;
+  box-shadow: ${themed('header.shadow')};
+  background: ${themed('header.background')} !important;
+  ul {
+    background: none;
+  }
   .ant-menu-horizontal {
     border-bottom: none;
   }
