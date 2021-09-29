@@ -1,4 +1,7 @@
-import {Sheet as SheetModel} from './index'
+import {
+  listSnippetsInState,
+  SheetState as SheetModel
+} from './index'
 import {CaptureSnippetReference} from './Sheet'
 import React, {useCallback} from 'react'
 import {SnippetReference} from './snippet/Snippet'
@@ -12,8 +15,11 @@ export function useShare(callback?: (sheet: SheetModel) => void): [() => void, C
 
   const share = useCallback(async () => {
     const client = Client.create()
-    const snippets = [...references.current.values()]
-      .map(reference => reference.serialize().toObject())
+    const snippets = listSnippetsInState(sheet)
+      .flatMap(snippet => {
+        const reference = references.current.get(snippet.id)
+        return reference ? [reference.serialize().toObject()] : []
+      })
     try {
       const created = await client.sheets().post({
         title: sheet.title,
@@ -25,7 +31,7 @@ export function useShare(callback?: (sheet: SheetModel) => void): [() => void, C
       console.error(error)
       message.error(`Failed to share sheet: ${error}`)
     }
-  }, [references, callback])
+  }, [references, sheet, callback])
 
   return [
     share,

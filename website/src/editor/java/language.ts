@@ -10,7 +10,7 @@ import {
 import {styleTags, Tag, tags as t} from "@codemirror/highlight"
 
 // Make sure that the code is generated (npm run build-grammar)
-import {parser} from "./parser";
+import {parser} from "./parser"
 
 export const customTags = {
   call: Tag.define(),

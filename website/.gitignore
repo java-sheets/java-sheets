@@ -23,5 +23,5 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-website/src/editor/java/parser.js
-website/src/editor/java/parser.terms.js
+parser.js
+parser.terms.js

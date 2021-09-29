@@ -3,7 +3,7 @@ import {ExperimentOutlined} from '@ant-design/icons'
 import React from 'react'
 import Title from './Title'
 import {UseSnippet, useSnippet} from '../useSheet'
-import {SheetSnippet} from '../index'
+import {SnippetState} from '../index'
 import ComponentList from "./component/ComponentList";
 import SnippetExtras from "./SnippetExtras";
 import {
@@ -12,7 +12,7 @@ import {
 } from './component/reference'
 import * as SnippetProtocol from "@jsheets/protocol/src/jsheets/api/snippet_pb";
 import {StartEvaluationRequest} from "@jsheets/protocol/src/jsheets/api/snippet_runtime_pb";
-import createEvaluateRequest from './createEvauateRequest'
+import createEvaluateRequest from './createEvaluateREquest'
 
 export interface SnippetPosition {
   highestOrder: number
@@ -23,7 +23,7 @@ export interface SnippetPosition {
 
 interface ExistingSnippetProperties extends UseSnippet {
   sheetId: string
-  snippet: SheetSnippet
+  snippet: SnippetState
   position: SnippetPosition
   headProperties?: any
   running?: boolean
@@ -127,7 +127,7 @@ class ExistingSnippet
     if (!references) {
       return output
     }
-    for (const component of this.props.snippet.components) {
+    for (const component of Object.values(this.props.snippet.components)) {
       const reference = references.get(component.id)
       const serialized = reference?.serialize()
       if (serialized) {
@@ -144,7 +144,7 @@ class ExistingSnippet
       return new Map()
     }
     const sources = new Map<string, string>()
-    for (const component of this.props.snippet.components) {
+    for (const component of Object.values(this.props.snippet.components)) {
       if (component.type !== type) {
         continue
       }

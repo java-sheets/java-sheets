@@ -11,7 +11,7 @@ import {
   DragOutlined
 } from '@ant-design/icons'
 import useTimedFlag from "../../../util/useTimedFlag"
-import {SheetSnippetComponentOutput} from "../../index";
+import {SnippetComponentOutput} from "../../index";
 import OutputText from "./OutputText";
 import {useDispatch} from "react-redux";
 import {removeOutput} from "../../state";
@@ -35,7 +35,7 @@ export interface ComponentNode {
   id: string
   order: number
   node: React.ReactNode
-  output?: SheetSnippetComponentOutput[]
+  output?: SnippetComponentOutput[]
 }
 
 interface ComponentContainerProperties {
@@ -43,7 +43,7 @@ interface ComponentContainerProperties {
   onDelete?: () => void
 }
 
-function shouldRenderOutput(output: SheetSnippetComponentOutput) {
+function shouldRenderOutput(output: SnippetComponentOutput) {
   return output.message != '' && output.message != '\n'
 }
 

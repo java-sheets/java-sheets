@@ -6,6 +6,8 @@ import {useSheet} from './useSheet'
 import Client from '../client'
 import styled from 'styled-components'
 import {LoadingOutlined} from '@ant-design/icons'
+import {Empty} from 'antd'
+import themed from '../theme/themed'
 
 interface ImportedSheetProperties {
   evaluating?: boolean
@@ -29,9 +31,9 @@ export default function ImportedSheet(properties: ImportedSheetProperties) {
         update(sheet)
         setLoading(false)
       }).catch(error => {
-      setLoading(false)
-      setError(error)
-    })
+        setLoading(false)
+        setError(error)
+      })
   }, [sheetId])
 
   if (loading) {
@@ -44,12 +46,54 @@ export default function ImportedSheet(properties: ImportedSheetProperties) {
 
 const Centered = styled.div`
   margin: auto;
+  display: flex;
+`
+
+const ErrorBox = styled.div`
+  margin: 50px auto auto auto;
+  background: ${themed('snippet.card.background')};
+  border-radius: 5px;
+  padding: 20px;
+  max-width: 300px;
+  pre {
+    margin: 0;
+    width: 100%;
+  }
+  code {
+    background: ${themed('snippet.card.icon.background')};
+    width: 100%;
+    padding: 10px;
+  }
 `
 
 const Failed = ({error}: {error: any}) => (
-  <Centered>{JSON.stringify(error)}</Centered>
+  <Centered>
+    <ErrorBox>
+      <Empty
+        description="Could not find the sheet"
+      >
+        <pre>
+          <code>{JSON.stringify(error)}</code>
+        </pre>
+      </Empty>
+    </ErrorBox>
+  </Centered>
 )
 
+const LoadingBox = styled.div`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  .anticon {
+    font-size: 20px;
+  }
+`
+
 const Loading = () => (
-  <Centered><LoadingOutlined/></Centered>
+  <Centered>
+    <LoadingBox>
+      <LoadingOutlined/>
+    </LoadingBox>
+  </Centered>
+
 )

@@ -8,7 +8,7 @@ import {
   EvaluateRequest
 } from "@jsheets/protocol/src/jsheets/api/snippet_runtime_pb";
 import * as SheetProtocol from "@jsheets/protocol/src/jsheets/api/sheet_pb";
-import {Sheet} from '../sheet'
+import {ComponentState, SheetState, SnippetState} from '../sheet'
 
 export interface EvaluationListener {
   onEnd(): void
@@ -108,7 +108,7 @@ class WebSocketEvaluation implements Evaluation {
 export class SheetClient {
   constructor(private readonly baseUrl: string) { }
 
-  async find(id: string): Promise<Sheet> {
+  async find(id: string): Promise<SheetState> {
     const call = await fetch(`${this.baseUrl}/api/v1/sheets/${id}`)
     if (call.ok) {
       const body = await call.json()
@@ -117,7 +117,7 @@ export class SheetClient {
     throw new Error(`${call.status}`)
   }
 
-  async post(snippet: Partial<SheetProtocol.Sheet.AsObject>): Promise<Sheet> {
+  async post(snippet: Partial<SheetProtocol.Sheet.AsObject>): Promise<SheetState> {
     convertRequest(snippet)
     const call = await fetch(`${this.baseUrl}/api/v1/sheets`, {
       method: 'POST',
@@ -131,28 +131,34 @@ export class SheetClient {
   }
 }
 
-function createSheetFromResponse(response: Record<string, any>): Sheet {
+function createSheetFromResponse(response: Record<string, any>): SheetState {
   convertResponse(response)
   const message = response as SheetProtocol.Sheet.AsObject
+  const snippets: Record<string, SnippetState> = {}
+  for (const snippet of message.snippetsList) {
+    const components: Record<string, ComponentState> = {}
+    for (const component of snippet.componentsList) {
+      const kind = (component.kind as unknown) as string
+      components[component.id] = {
+        id: component.id,
+        order: component.order,
+        type: kind.toLowerCase() === "code" ? "code" : "text",
+        content: component.content
+      }
+    }
+    snippets[snippet.id] = {
+      id: snippet.id,
+      order: snippet.order,
+      title: snippet.name,
+      components
+    }
+  }
   return {
     id: message.id,
     title: message.title,
     description: message.description,
-    snippets: message.snippetsList.map(snippet => ({
-      id: snippet.id,
-      order: snippet.order,
-      title: snippet.name,
-      components: snippet.componentsList.map(component => {
-        const kind = (component.kind as unknown) as string
-        return {
-          id: component.id,
-          order: component.order,
-          type: kind.toLowerCase(),
-          content: component.content
-        }
-      })
-    }))
-  } as Sheet
+    snippets: snippets
+  } as SheetState
 }
 
 function convertResponse(object: Record<string, any>) {
