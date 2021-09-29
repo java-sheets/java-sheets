@@ -1,6 +1,6 @@
 import * as Styled from './Snippet.style'
 import {ExperimentOutlined} from '@ant-design/icons'
-import React, {MutableRefObject} from 'react'
+import React from 'react'
 import Title from './Title'
 import {UseSnippet, useSnippet} from '../useSheet'
 import {SheetSnippet} from '../index'
@@ -116,6 +116,7 @@ class ExistingSnippet
     const message = new SnippetProtocol.Snippet()
     message.setId(this.props.snippet.id)
     message.setName(this.props.snippet.title)
+    message.setOrder(this.props.snippet.order)
     message.setComponentsList(this.serializeComponents())
     return message
   }

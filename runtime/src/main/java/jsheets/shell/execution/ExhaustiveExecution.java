@@ -141,6 +141,7 @@ public final class ExhaustiveExecution implements ExecutionMethod {
           return;
         }
       }
+      stop();
       reportedEvents.add(event);
     }
 
@@ -151,7 +152,14 @@ public final class ExhaustiveExecution implements ExecutionMethod {
      */
     private Collection<SnippetEvent> retryRange(String source, Range region) {
       var failedSource = source.substring(region.start(), region.end());
-      return delegate.execute(failedSource);
+      var events = delegate.execute(failedSource);
+      for (var event : events) {
+        if (event.status().equals(Snippet.Status.REJECTED)) {
+          // The snippet failed again. We can terminate the execution.
+          stop();
+        }
+      }
+      return events;
     }
 
     private void processValidSnippet(SnippetEvent event) {
@@ -166,7 +174,7 @@ public final class ExhaustiveExecution implements ExecutionMethod {
     }
 
     private void removeRangeFromSource(Range range) {
-      reducedSource = originalSource.substring(range.end());
+      reducedSource = reducedSource.substring(range.end());
     }
   }
 

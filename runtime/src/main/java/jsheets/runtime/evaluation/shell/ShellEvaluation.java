@@ -138,7 +138,6 @@ final class ShellEvaluation implements Evaluation {
     );
   }
 
-
   private JShell createShell() {
     var engine = environment.control(UUID.randomUUID().toString());
     return JShell.builder()
@@ -147,7 +146,6 @@ final class ShellEvaluation implements Evaluation {
       .executionEngine(engine, Map.of())
       .build();
   }
-
 
   @Override
   public void stop() {

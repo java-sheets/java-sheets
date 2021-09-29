@@ -92,8 +92,8 @@ const slice = createSlice({
     },
     reorderSnippet(state, action: PayloadAction<{from: number, to: number}>) {
       const {from, to} = action.payload
-      const current = state.snippets.find(snippet => snippet.order === from)
-      const target = state.snippets.find(snippet => snippet.order === to)
+      const current = state.snippets.find(snippet => snippet.order == from)
+      const target = state.snippets.find(snippet => snippet.order == to)
       if (current && target) {
         current.order = to
         target.order = from
@@ -131,7 +131,7 @@ const slice = createSlice({
       if (!snippet) {
         return
       }
-      const current = snippet.components.find(component => component.order === from)
+      const current = snippet.components.find(component => component.order == from)
       if (!current) {
         return
       }

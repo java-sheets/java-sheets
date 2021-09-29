@@ -1,6 +1,7 @@
 package jsheets.output;
 
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.function.Consumer;
 
 public class CapturingOutput extends ListeningPrintStream {
@@ -11,7 +12,7 @@ public class CapturingOutput extends ListeningPrintStream {
   private final Consumer<String> receiver;
 
   public CapturingOutput(Consumer<String> receiver) {
-    super(OutputStream.nullOutputStream());
+    super(new PrintStream(OutputStream.nullOutputStream()));
     this.receiver = receiver;
   }
 

@@ -106,7 +106,7 @@ public final class TenantBasedOutput extends ListeningPrintStream {
   private final Map<String, StringBuilder> buffers = new HashMap<>();
 
   private TenantBasedOutput(Consumer<String> fallback) {
-    super(OutputStream.nullOutputStream());
+    super(new PrintStream(OutputStream.nullOutputStream()));
     this.fallback = fallback;
   }
 

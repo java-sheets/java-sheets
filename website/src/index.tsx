@@ -18,7 +18,7 @@ installThemes().then(() => {
           <I18nextProvider i18n={i18n}>
             <ThemeProvider initialTheme={detectTheme()}>
               <BrowserRouter>
-                <App/>
+                <App />
               </BrowserRouter>
             </ThemeProvider>
           </I18nextProvider>

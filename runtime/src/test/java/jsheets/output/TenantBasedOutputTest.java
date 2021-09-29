@@ -2,7 +2,6 @@ package jsheets.output;
 
 import com.google.common.util.concurrent.Uninterruptibles;
 
-import jsheets.output.TenantBasedOutput;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
