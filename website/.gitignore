@@ -1,5 +1,5 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
+public/theme/
 # dependencies
 /node_modules
 /.pnp
@@ -11,6 +11,7 @@
 # production
 /build
 
+
 # misc
 .DS_Store
 .env.local
@@ -21,3 +22,6 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+parser.js
+parser.terms.js

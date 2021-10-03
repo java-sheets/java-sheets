@@ -28,6 +28,8 @@ import java.util.Map;
 import jdk.jshell.execution.LoaderDelegate;
 import jdk.jshell.spi.ExecutionControl;
 import jsheets.sandbox.SandboxBytecodeCheck;
+import jsheets.sandbox.validation.Analysis;
+import jsheets.sandbox.validation.ForbiddenMethodFilter;
 
 public final class SandboxLoader implements LoaderDelegate {
   private final SandboxLoader.RemoteClassLoader loader;
@@ -49,9 +51,11 @@ public final class SandboxLoader implements LoaderDelegate {
   private void loadBinaries(ExecutionControl.ClassBytecodes[] binaries)
     throws ExecutionControl.ClassInstallException
   {
+    var analysis = Analysis.create();
+    var check = SandboxBytecodeCheck.withRules(ForbiddenMethodFilter.create());
     try {
       for (var binary : binaries) {
-        SandboxBytecodeCheck.create().run(binary.bytecodes());
+        check.run(analysis, binary.bytecodes());
         loader.declare(binary.name(), binary.bytecodes());
       }
     } catch (Throwable failure) {

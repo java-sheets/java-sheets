@@ -1,6 +1,7 @@
 package jsheets.sandbox;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 import jsheets.sandbox.validation.Analysis;
@@ -11,6 +12,11 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
 public final class SandboxBytecodeCheck {
+  public static SandboxBytecodeCheck withRules(Rule... rules) {
+    Objects.requireNonNull(rules, "rules");
+    return withRules(List.of(rules));
+  }
+
   public static SandboxBytecodeCheck withRules(Collection<Rule> rules) {
     Objects.requireNonNull(rules, "rules");
     return new SandboxBytecodeCheck(rules);
@@ -22,7 +28,7 @@ public final class SandboxBytecodeCheck {
     this.rules = rules;
   }
 
-  public void run(byte[] classCode, Analysis analysis) {
+  public void run(Analysis analysis, byte[] classCode) {
     var reader = new ClassReader(classCode);
     reader.accept(new ClassCheck(rules, analysis), 0);
   }

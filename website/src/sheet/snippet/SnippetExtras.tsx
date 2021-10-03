@@ -7,11 +7,11 @@ import {
 } from "@ant-design/icons";
 import * as Styled from "./SnippetExtras.style";
 import React from "react";
-import {SheetSnippetComponent} from "../index";
+import {ComponentState} from "../index";
 import {TFunction} from 'i18next'
-import {useTranslation, WithTranslationProps} from 'react-i18next'
+import {useTranslation} from 'react-i18next'
 
-type AddComponent = (component: Partial<SheetSnippetComponent>) => void
+type AddComponent = (component: Partial<ComponentState>) => void
 
 export interface SnippetExtrasProperties {
   editingTitle: boolean

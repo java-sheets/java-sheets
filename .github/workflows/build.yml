@@ -1,0 +1,56 @@
+name: Build
+
+on: 
+  push:
+    branches: [main, dev]
+    tags: ['*']
+    
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    # Setup Java Installation
+    - name: Set up JDK
+      uses: actions/setup-java@v2
+      with:
+        java-version: '16'
+        distribution: 'adopt'
+    - name: Validate Gradle wrapper
+      uses: gradle/wrapper-validation-action@e6e38bacfdf1a337459f332974bb2327a31aaf4b
+    # Before building the protocol, the required protobuf plugins need to be installed.
+    - name: Npm Install Protocol
+      uses: bahmutov/npm-install@v1.6.0
+      with:
+        working-directory: 'protocol'
+    # The protocol is build before other java packages, as they depend on the website.
+    - name: Build with Gradle
+      run: ./gradlew :protocol:generateProto :protocol:generateJavascriptPackage
+    # The website has to be build after the buildJavascriptPackage task has been run.
+    - name: Npm Install Website
+      uses: bahmutov/npm-install@v1.6.0
+      with:
+        working-directory: 'website'
+        useLockFile: true    
+    # Builds the actual website for production 
+    - name: Build Website
+      run: CI='' npm run build-all
+      working-directory: website
+    # Builds the backend (will include the websites generated code in the apps classpath)
+    - name: Build Server
+      run: ./gradlew build copyDependencies
+    # Login to Docker Registry
+    - name: Docker Login
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKER_USER }}
+        password: ${{ secrets.DOCKER_TOKEN }}
+    # Build the image and push it to the registry
+    - name: Build the Docker image
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        file: ./server/deploy/Dockerfile
+        platforms: linux/amd64,linux/arm64,linux/386
+        push: true
+        tags: ehenoma/jsheets:${{ env.BRANCH }}

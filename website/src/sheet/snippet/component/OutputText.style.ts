@@ -20,7 +20,7 @@ export const CloseButton = styled(Button)`
   }
 `
 
-const OutputText = styled.code`
+const OutputText = styled.pre`
   position: relative;
   font-size: 13px;
   color: #fff;
@@ -31,6 +31,7 @@ const OutputText = styled.code`
   width: 100%;
   max-height: 200px;
   padding: 10px 35px;
+  margin: 0;
   :empty {
     transition: max-height 2s ease-in;
     max-height: 0;

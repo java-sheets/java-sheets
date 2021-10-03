@@ -8,7 +8,9 @@ import {
   LRLanguage
 } from "@codemirror/language"
 import {styleTags, Tag, tags as t} from "@codemirror/highlight"
-import {parser} from "./parser";
+
+// Make sure that the code is generated (npm run build-grammar)
+import {parser} from "./parser"
 
 export const customTags = {
   call: Tag.define(),

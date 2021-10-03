@@ -1,8 +1,0 @@
-package jsheets.runtime.evaluation.shell.environment.sandbox;
-
-/**
- * Thrown when the execution is preempted using {@link InProcessExecutionControl#stop()}.
- */
-public final class Preemption extends RuntimeException {
-  Preemption() {}
-}

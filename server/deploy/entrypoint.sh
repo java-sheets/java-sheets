@@ -5,7 +5,13 @@ then
   java -version
 fi
 
-jre/bin/java -jar app.jar \
+# jdk.jshell is opened to support the exhaustive-execution
+# feature of EvaluationEngines on the server. It can be removed if
+# the server itself does not evaluate snippets.
+
+jre/bin/java \
+  --add-opens jdk.jshell/jdk.jshell=ALL-UNNAMED \
+  -jar app.jar \
   -XX:+UseZGC \
   -XX:+UseZGC \
   -Xmx"$APP_HEAP_LIMIT" \

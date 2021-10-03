@@ -1,9 +1,16 @@
-import styled from 'styled-components'
+import styled, {createGlobalStyle} from 'styled-components'
 import RichMarkdownEditor from 'rich-markdown-editor'
+import themed from '../../../theme/themed'
 
 export const TextComponent = styled.div`
   padding: 0;
   margin: 0;
+`
+
+export const GlobalMarkdown = createGlobalStyle`
+  #block-menu-container, .heading-actions, .block-menu-trigger {
+    display: none !important;
+  }
 `
 
 export const Editor = styled(RichMarkdownEditor)`
@@ -12,9 +19,9 @@ export const Editor = styled(RichMarkdownEditor)`
   :first-child {
     padding: 10px !important;
   }
-  background: rgb(253, 253, 253) !important;
+  background: ${themed('snippet.textComponent.background')} !important;
   * > div {
-    background: rgb(253, 253, 253) !important;
+    background: ${themed('snippet.textComponent.background')} !important;
   }
   & > :first-child h1 {
     margin: 0 0 0.25em;

@@ -9,7 +9,7 @@ import jsheets.Snippet;
 import jsheets.SnippetSources;
 import jsheets.StartEvaluationRequest;
 import jsheets.runtime.evaluation.Evaluation;
-import jsheets.runtime.evaluation.shell.environment.sandbox.InProcessExecution;
+import jsheets.shell.environment.StandardEnvironment;
 import org.junit.jupiter.api.Test;
 
 /* This is not a Unit Test */
@@ -22,9 +22,9 @@ public class ShellEvaluationEngineTest {
   }
 
   @Test
- // @Disabled
+  // @Disabled
   public void testExecution() {
-    var environment = InProcessExecution.create();
+    var environment = StandardEnvironment.create();
     var installation = environment.install();
     var engine = ShellEvaluationEngine.newBuilder()
       .useClock(Clock.systemUTC())
@@ -54,9 +54,9 @@ public class ShellEvaluationEngineTest {
           .addCodeComponents(code("1", "1 + 2"))
           .addCodeComponents(code("2", "int x = 10;"))
           .addCodeComponents(code("3", "x * x"))
-          .addCodeComponents(code("6", "new Test().toString()"))
           .addCodeComponents(code("4", "lol"))
           .addCodeComponents(code("5", "class Test {  }"))
+          .addCodeComponents(code("6", "new Test().toString()"))
           .addCodeComponents(code("7", """
             System.out.println("Hello, World!");
             System.out.println("Hello, World!");

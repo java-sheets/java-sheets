@@ -6,33 +6,33 @@ import Client, {EvaluationListener} from "../client";
 import {useDispatch} from "react-redux";
 import {useState} from "react";
 import {removeOutput, reportOutput} from "./state";
-import {SheetSnippetComponentOutput} from "./index";
+import {SnippetComponentOutput} from "./index";
 
 type UseEvaluate = [(start: StartEvaluationRequest) => void, boolean]
 
 export default function useEvaluate(): UseEvaluate {
-  const client = Client.create()
   const dispatch = useDispatch()
   const [evaluating, setEvaluating] = useState(false)
   const evaluate = (start: StartEvaluationRequest) => {
+    const client = Client.create()
     setEvaluating(true)
     dispatch(removeOutput({}))
     client.evaluate(
       start,
       new Listener({
-          reportOutput(componentId, output) {
-            dispatch(reportOutput({componentId, output}))
-          },
-          close() {
-            setEvaluating(false)
-          }
+        reportOutput(componentId, output) {
+          dispatch(reportOutput({componentId, output}))
+        },
+        close() {
+          setEvaluating(false)
         }
-      ))
+      })
+    )
   }
   return [evaluate, evaluating]
 }
 
-type ReportOutput = (componentId: string, output: SheetSnippetComponentOutput) => void
+type ReportOutput = (componentId: string, output: SnippetComponentOutput) => void
 
 class Listener implements EvaluationListener {
   constructor(
