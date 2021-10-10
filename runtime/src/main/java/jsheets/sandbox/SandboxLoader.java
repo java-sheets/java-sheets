@@ -1,4 +1,4 @@
-package jsheets.runtime.evaluation.shell.environment.sandbox;
+package jsheets.sandbox;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -12,9 +12,7 @@ import java.net.URLClassLoader;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
 import java.security.CodeSource;
-import java.time.Instant;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,16 +25,22 @@ import java.util.Map;
 
 import jdk.jshell.execution.LoaderDelegate;
 import jdk.jshell.spi.ExecutionControl;
-import jsheets.sandbox.SandboxBytecodeCheck;
 import jsheets.sandbox.validation.Analysis;
 import jsheets.sandbox.validation.ForbiddenMethodFilter;
 
 public final class SandboxLoader implements LoaderDelegate {
+  public static SandboxLoader create() {
+    return new SandboxLoader();
+  }
+
   private final SandboxLoader.RemoteClassLoader loader;
   private final Map<String, Class<?>> types = new HashMap<>();
 
-  public SandboxLoader() {
+  private SandboxLoader() {
     this.loader = new RemoteClassLoader();
+  }
+
+  public void install() {
     Thread.currentThread().setContextClassLoader(loader);
   }
 
@@ -116,78 +120,77 @@ public final class SandboxLoader implements LoaderDelegate {
     return type;
   }
 
-  private record ClassFile(byte[] data, long timestamp) {}
+  private record FileRecord(byte[] content, long timestamp) {}
 
   private static class RemoteClassLoader extends URLClassLoader {
-    private final Map<String, ClassFile> classFiles = new HashMap<>();
+    private final Map<String, FileRecord> files = new HashMap<>();
 
     RemoteClassLoader() {
       super(new URL[0]);
     }
 
     void declare(String name, byte[] bytes) {
-      classFiles.put(toResourceString(name),
-        new ClassFile(bytes, System.currentTimeMillis())
+      files.put(
+        createResourceKeyForClassName(name),
+        new FileRecord(bytes, System.currentTimeMillis())
       );
     }
 
-    private String toResourceString(String className) {
-      return className.replace('.', '/') + ".class";
+    private String createResourceKeyForClassName(String name) {
+      return name.replace('.', '/') + ".class";
     }
 
     @Override
     protected Class<?> findClass(String name) throws ClassNotFoundException {
-      var file = classFiles.get(toResourceString(name));
+      var file = files.get(createResourceKeyForClassName(name));
       if (file == null) {
         return super.findClass(name);
       }
       return super.defineClass(
         name,
-        file.data,
+        file.content,
         0,
-        file.data.length,
+        file.content.length,
         (CodeSource) null
       );
     }
 
     @Override
     public URL findResource(String name) {
-      URL u = doFindResource(name);
-      return u != null ? u : super.findResource(name);
+      var resource = lookupResource(name);
+      return resource != null ? resource : super.findResource(name);
     }
 
-    private URL doFindResource(String name) {
-      if (classFiles.containsKey(name)) {
-        try {
-          return new URL(null,
-            new URI("jshell", null, "/" + name, null).toString(),
-            new RemoteClassLoader.ResourceURLStreamHandler(name)
-          );
-        } catch (MalformedURLException | URISyntaxException ex) {
-          throw new InternalError(ex);
-        }
+    private URL lookupResource(String name) {
+      if (!files.containsKey(name)) {
+        return null;
       }
-
-      return null;
+      try {
+        return new URL(
+          /* context */ null,
+          new URI("jshell", null, "/" + name, null).toString(),
+          new ResourceUrlStreamHandler(name)
+        );
+      } catch (MalformedURLException | URISyntaxException failure) {
+        throw new InternalError(failure);
+      }
     }
 
     @Override
     public Enumeration<URL> findResources(String name) throws IOException {
-      URL u = doFindResource(name);
-      Enumeration<URL> sup = super.findResources(name);
+      var resource = lookupResource(name);
+      var parentResources = super.findResources(name);
+      return resource == null
+        ? parentResources
+        : plus(parentResources, resource);
+    }
 
-      if (u == null) {
-        return sup;
+    private static <T> Enumeration<T> plus(Enumeration<T> enumeration, T element) {
+      var result = new ArrayList<T>();
+      while (enumeration.hasMoreElements()) {
+        result.add(enumeration.nextElement());
       }
-
-      List<URL> result = new ArrayList<>();
-
-      while (sup.hasMoreElements()) {
-        result.add(sup.nextElement());
-      }
-
-      result.add(u);
-
+      result.add(element);
       return Collections.enumeration(result);
     }
 
@@ -196,25 +199,24 @@ public final class SandboxLoader implements LoaderDelegate {
       super.addURL(url);
     }
 
-
-    private class ResourceURLStreamHandler extends URLStreamHandler {
+    private class ResourceUrlStreamHandler extends URLStreamHandler {
       private final String name;
 
-      ResourceURLStreamHandler(String name) {
+      ResourceUrlStreamHandler(String name) {
         this.name = name;
       }
 
       @Override
-      protected URLConnection openConnection(URL u) throws IOException {
-        return new URLConnection(u) {
-          private InputStream in;
+      protected URLConnection openConnection(URL resource)  {
+        return new URLConnection(resource) {
+          private InputStream input;
           private Map<String, List<String>> fields;
           private List<String> fieldNames;
 
           @Override
-          public InputStream getInputStream() throws IOException {
+          public InputStream getInputStream() {
             connect();
-            return in;
+            return input;
           }
 
           @Override
@@ -223,22 +225,28 @@ public final class SandboxLoader implements LoaderDelegate {
               return;
             }
             connected = true;
-            var file = classFiles.get(name);
-            in = new ByteArrayInputStream(file.data);
+            var file = files.get(name);
+            input = new ByteArrayInputStream(file.content);
             fields = new LinkedHashMap<>();
-            fields.put(
-              "content-length",
-              List.of(Integer.toString(file.data.length))
-            );
-            Instant instant = new Date(file.timestamp).toInstant();
-            ZonedDateTime time = ZonedDateTime.ofInstant(
-              instant,
-              ZoneId.of("GMT")
-            );
-            String timeStamp = DateTimeFormatter.RFC_1123_DATE_TIME.format(time);
-            fields.put("date", List.of(timeStamp));
-            fields.put("last-modified", List.of(timeStamp));
+            initializeHeaders(fields, file);
             fieldNames = new ArrayList<>(fields.keySet());
+          }
+
+          private void initializeHeaders(
+            Map<String, List<String>> headers,
+            FileRecord file
+          ) {
+            var length = Integer.toString(file.content.length);
+            headers.put("content-length", List.of(length));
+            var timeStamp = formatTime(file.timestamp);
+            headers.put("date", List.of(timeStamp));
+            headers.put("last-modified", List.of(timeStamp));
+          }
+
+          private String formatTime(long timeStamp) {
+            var instant = new Date(timeStamp).toInstant();
+            var time = instant.atZone(ZoneId.of("GMT"));
+            return DateTimeFormatter.RFC_1123_DATE_TIME.format(time);
           }
 
           @Override
@@ -248,15 +256,14 @@ public final class SandboxLoader implements LoaderDelegate {
           }
 
           @Override
-          public String getHeaderField(int n) {
-            String name = getHeaderFieldKey(n);
-
+          public String getHeaderField(int index) {
+            var name = getHeaderFieldKey(index);
             return name != null ? getHeaderField(name) : null;
           }
 
           @Override
-          public String getHeaderFieldKey(int n) {
-            return n < fieldNames.size() ? fieldNames.get(n) : null;
+          public String getHeaderFieldKey(int index) {
+            return index < fieldNames.size() ? fieldNames.get(index) : null;
           }
 
           @Override
@@ -267,7 +274,6 @@ public final class SandboxLoader implements LoaderDelegate {
               .findFirst()
               .orElse(null);
           }
-
         };
       }
     }

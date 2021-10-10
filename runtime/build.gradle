@@ -14,6 +14,7 @@ repositories {
 
 ext {
   asmVersion = '9.2'
+  recordBuilderVersion = '26'
 }
 
 dependencies {
@@ -24,6 +25,8 @@ dependencies {
   testImplementation "org.junit.jupiter:junit-jupiter-api:$junitPlatformVersion"
   testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitPlatformVersion"
   testRuntimeOnly "com.google.flogger:flogger-slf4j-backend:$floggerVersion"
+  compileOnly "io.soabase.record-builder:record-builder-core:$recordBuilderVersion"
+  annotationProcessor "io.soabase.record-builder:record-builder-processor:$recordBuilderVersion"
 }
 
 test {

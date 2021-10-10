@@ -1,4 +1,3 @@
+java.lang.*
 java.lang.String
-!java.lang.String.intern
-java.lang.Objects
-java.util.Arrays
+! void java.lang.String#intern()

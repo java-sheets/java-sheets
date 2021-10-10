@@ -1,6 +1,5 @@
 package jsheets.runtime.evaluation.shell;
 
-
 import java.time.Clock;
 import java.util.Comparator;
 import java.util.Locale;
