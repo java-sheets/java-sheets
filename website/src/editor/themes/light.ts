@@ -4,6 +4,7 @@ import {customTags} from '../java/language'
 
 export const theme = EditorView.theme({
   ".cm-scroller": {
+    fontVariantLigatures: 'none',
     fontFamily: `'JetBrains Mono', 'Roboto Mono', Menlo, Monaco, source-code-pro, Consolas, monospace`
   },
   "&": {

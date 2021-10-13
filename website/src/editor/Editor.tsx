@@ -1,10 +1,11 @@
 import React, {useEffect} from 'react'
-import {EditorView} from '@codemirror/view'
+import {EditorView, keymap} from '@codemirror/view'
 import {Compartment, EditorState} from '@codemirror/state'
 import {basicSetup} from '@codemirror/basic-setup'
 import {java} from "./java/language";
 import {ThemeKey, useTheme} from '../theme/ThemeContext'
 import {editorThemes, highlightingThemes} from './themes/themes'
+import {defaultKeymap, insertTab} from "@codemirror/commands"
 
 const tabSize = 2
 
@@ -15,6 +16,13 @@ function createView(initialContent: string, element: Element, theme: ThemeKey) {
       doc: initialContent,
       extensions: [
         basicSetup,
+        keymap.of([
+          ...defaultKeymap,
+          {
+            key: 'Tab',
+            run: insertTab
+          }
+        ]),
         EditorState.tabSize.of(tabSize),
         java(),
         themeState.of(editorThemes[theme]),

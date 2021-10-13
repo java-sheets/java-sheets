@@ -4,6 +4,7 @@ import {EditorView} from '@codemirror/view'
 
 export const theme = EditorView.theme({
   ".cm-scroller": {
+    fontVariantLigatures: 'none',
     fontFamily: `'JetBrains Mono', Menlo, Monaco, source-code-pro, Consolas, monospace`
   },
   "&": {
