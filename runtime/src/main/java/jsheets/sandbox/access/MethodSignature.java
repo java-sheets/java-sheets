@@ -1,14 +1,13 @@
-package jsheets.sandbox;
+package jsheets.sandbox.access;
 
 import io.soabase.recordbuilder.core.RecordBuilder;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
 
 @RecordBuilder
-record MethodSignature(
+public record MethodSignature(
   String className,
   String methodName,
   String returnType,
@@ -70,12 +69,15 @@ record MethodSignature(
   }
 
   public String format() {
-    return "%s %s#%s(%s)".formatted(
+    return "%s %s#%s".formatted(
       returnType,
       className,
-      methodName,
-      Arrays.toString(parameterTypes.toArray())
+      formatNameAndParameters()
     );
+  }
+
+  public String formatNameAndParameters() {
+    return "%s(%s)".formatted(methodName, String.join(", ", parameterTypes));
   }
 
   public String formatWithoutTypes() {

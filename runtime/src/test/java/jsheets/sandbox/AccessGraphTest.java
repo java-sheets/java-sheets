@@ -1,6 +1,9 @@
 package jsheets.sandbox;
 
 import com.google.common.base.Charsets;
+
+import jsheets.sandbox.access.AccessGraph;
+import jsheets.sandbox.access.MethodSignature;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -8,10 +11,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 
-import static jsheets.sandbox.AccessGraph.Key.*;
+import static jsheets.sandbox.access.AccessKey.*;
 
 public class AccessGraphTest {
-
   @Test
   public void testReadingFromFile() {
     var specification = readFileContent("access-graph.txt");

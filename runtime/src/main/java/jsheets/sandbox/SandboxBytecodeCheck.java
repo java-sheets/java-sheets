@@ -30,16 +30,22 @@ public final class SandboxBytecodeCheck {
 
   public void run(Analysis analysis, byte[] classCode) {
     var reader = new ClassReader(classCode);
-    reader.accept(new ClassCheck(rules, analysis), 0);
+    reader.accept(new ClassCheck(reader.getClassName(), rules, analysis), 0);
   }
 
   static final class ClassCheck extends ClassVisitor {
+    private final String className;
     private final Collection<Rule> rules;
     private final Analysis analysis;
 
-    private ClassCheck(Collection<Rule> rules, Analysis analysis) {
+    private ClassCheck(
+      String className,
+      Collection<Rule> rules,
+      Analysis analysis
+    ) {
       super(Opcodes.ASM9);
       this.rules = rules;
+      this.className = className;
       this.analysis = analysis;
     }
 
@@ -51,23 +57,26 @@ public final class SandboxBytecodeCheck {
       String signature,
       String[] exceptions
     ) {
-      return new MethodCheck(name, rules, analysis);
+      return new MethodCheck(name, className, rules, analysis);
     }
   }
 
   static final class MethodCheck extends MethodVisitor {
     private final String name;
+    private final String className;
     private final Collection<Rule> rules;
     private final Analysis analysis;
 
     private MethodCheck(
       String name,
+      String className,
       Collection<Rule> rules,
       Analysis analysis
     ) {
       super(Opcodes.ASM9);
       this.name = name;
       this.rules = rules;
+      this.className = className;
       this.analysis = analysis;
     }
 
@@ -79,10 +88,27 @@ public final class SandboxBytecodeCheck {
       String descriptor,
       boolean isInterface
     ) {
-      var call = new Rule.MethodCall(owner, name);
+      var call = new Rule.MethodCall(createAccessPoint(), owner, name);
       for (var rule : rules) {
         rule.visitCall(analysis, call);
       }
+    }
+
+    @Override
+    public void visitFieldInsn(
+      int opcode,
+      String owner,
+      String field,
+      String descriptor
+    ) {
+      var access = new Rule.FieldAccess(createAccessPoint(), owner, field);
+      for (var rule : rules) {
+        rule.visitFieldAccess(analysis, access);
+      }
+    }
+
+    private Rule.AccessPoint createAccessPoint() {
+      return new Rule.AccessPoint(className, name);
     }
   }
 }

@@ -15,6 +15,7 @@ import java.security.CodeSource;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
@@ -22,22 +23,26 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import jdk.jshell.execution.LoaderDelegate;
 import jdk.jshell.spi.ExecutionControl;
 import jsheets.sandbox.validation.Analysis;
-import jsheets.sandbox.validation.ForbiddenMethodFilter;
+import jsheets.sandbox.validation.Rule;
 
 public final class SandboxLoader implements LoaderDelegate {
-  public static SandboxLoader create() {
-    return new SandboxLoader();
+  public static SandboxLoader create(Collection<Rule> rules) {
+    Objects.requireNonNull(rules, "rules");
+    return new SandboxLoader(rules);
   }
 
   private final SandboxLoader.RemoteClassLoader loader;
   private final Map<String, Class<?>> types = new HashMap<>();
+  private final Collection<Rule> rules;
 
-  private SandboxLoader() {
+  private SandboxLoader(Collection<Rule> rules) {
     this.loader = new RemoteClassLoader();
+    this.rules = rules;
   }
 
   public void install() {
@@ -56,7 +61,20 @@ public final class SandboxLoader implements LoaderDelegate {
     throws ExecutionControl.ClassInstallException
   {
     var analysis = Analysis.create();
-    var check = SandboxBytecodeCheck.withRules(ForbiddenMethodFilter.create());
+    var check = SandboxBytecodeCheck.withRules(rules);
+    loadBinariesWithAnalysis(analysis, check, binaries);
+    checkAnalysisReport(analysis);
+  }
+
+  private void checkAnalysisReport(Analysis analysis) {
+    analysis.reportViolations();
+  }
+
+  private void loadBinariesWithAnalysis(
+    Analysis analysis,
+    SandboxBytecodeCheck check,
+    ExecutionControl.ClassBytecodes[] binaries
+  ) throws ExecutionControl.ClassInstallException{
     try {
       for (var binary : binaries) {
         check.run(analysis, binary.bytecodes());
