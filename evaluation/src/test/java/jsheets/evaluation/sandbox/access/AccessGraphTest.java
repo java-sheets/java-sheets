@@ -14,7 +14,7 @@ import static jsheets.evaluation.sandbox.access.AccessKey.*;
 public class AccessGraphTest {
   @Test
   public void testReadingFromFile() {
-    var specification = readFileContent("access-graph.txt");
+    var specification = readFileContent("accessGraph.txt");
     var graph = AccessGraph.of(specification.split("\n"));
     Assertions.assertFalse(graph.isPermitted(dotSeparated("a.b.c")));
     Assertions.assertTrue(graph.isPermitted(dotSeparated("a.b.c.Foo")));

@@ -45,7 +45,6 @@ public final class EvaluationModule extends AbstractModule {
     return underlyingExecutionMethodFactory;
   }
 
-
   @Named("underlyingExecutionMethod")
   ExecutionMethod.Factory underlyingExecutionMethodFactory(Config config) {
     return ExhaustiveExecution::create;

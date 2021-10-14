@@ -1,3 +1,0 @@
-java.lang.*
-java.lang.String
-! void java.lang.String#intern()

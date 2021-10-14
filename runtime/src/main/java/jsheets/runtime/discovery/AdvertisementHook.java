@@ -17,9 +17,9 @@ public final class AdvertisementHook implements ServerSetup.Hook {
     return new AdvertisementHook(advertisedHost, channel);
   }
 
-  private volatile ServiceAdvertisement advertisement;
   private final HostAndPort advertisedHost;
   private final ServiceAdvertisementChannel advertisementChannel;
+  private volatile ServiceAdvertisement advertisement;
 
   @Inject
   AdvertisementHook(
