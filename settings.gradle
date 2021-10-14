@@ -1,7 +1,8 @@
 rootProject.name = 'jsheets'
 
+include 'evaluation'
 include 'runtime'
 include 'protocol'
-include 'server'
 include 'website'
+include 'server'
 

@@ -1,0 +1,34 @@
+plugins {
+  id 'java'
+}
+
+group 'dev.jsheets'
+version '0.1.0'
+
+sourceCompatibility = 16
+targetCompatibility = 16
+
+repositories {
+  mavenCentral()
+}
+
+ext {
+  asmVersion = '9.2'
+}
+
+dependencies {
+  implementation project(':protocol')
+  implementation "org.ow2.asm:asm:$asmVersion"
+  implementation "com.google.protobuf:protobuf-java-util:$protobufJavaVersion"
+  implementation "com.google.flogger:flogger:$floggerVersion"
+  testImplementation "org.junit.jupiter:junit-jupiter-api:$junitPlatformVersion"
+  testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitPlatformVersion"
+  testRuntimeOnly "com.google.flogger:flogger-slf4j-backend:$floggerVersion"
+  compileOnly "io.soabase.record-builder:record-builder-core:$recordBuilderVersion"
+  annotationProcessor "io.soabase.record-builder:record-builder-processor:$recordBuilderVersion"
+}
+
+test {
+  useJUnitPlatform()
+  jvmArgs += ['--add-opens', 'jdk.jshell/jdk.jshell=ALL-UNNAMED']
+}

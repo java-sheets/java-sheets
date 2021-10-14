@@ -5,8 +5,12 @@ allprojects {
 }
 
 ext {
-  floggerVersion = '0.6'
-  junitPlatformVersion = '5.7.2'
-  protobufJavaVersion = '3.17.3'
-  micrometerVersion = 'latest.integration'
+  grpcVersion = '1.41.0'
+  floggerVersion = '0.7.1'
+  junitPlatformVersion = '5.8.1'
+  protobufJavaVersion = '3.18.1'
+  micrometerVersion = '1.7.4'
+  consuleClientVersion = '1.4.5'
+  javaxAnnotationVersion = '1.3.2'
+  recordBuilderVersion = '26'
 }

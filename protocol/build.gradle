@@ -12,6 +12,8 @@ repositories {
 }
 
 dependencies {
+  compileOnly "io.grpc:grpc-all:$grpcVersion"
+  compileOnly "javax.annotation:javax.annotation-api:$javaxAnnotationVersion"
   implementation "com.google.protobuf:protobuf-java:$protobufJavaVersion"
 }
 
@@ -58,6 +60,7 @@ protobuf {
           outputSubDir = 'js'
         }
       }
+      "grpc" {}
     }
     all()*.builtins {
       "js" {

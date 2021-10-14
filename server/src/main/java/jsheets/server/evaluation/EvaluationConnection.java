@@ -6,8 +6,8 @@ import com.google.common.flogger.MetadataKey;
 
 import io.javalin.websocket.*;
 import jsheets.*;
-import jsheets.runtime.evaluation.Evaluation;
-import jsheets.runtime.evaluation.EvaluationEngine;
+import jsheets.evaluation.Evaluation;
+import jsheets.evaluation.EvaluationEngine;
 import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.websocket.api.CloseStatus;
 import org.eclipse.jetty.websocket.api.Session;

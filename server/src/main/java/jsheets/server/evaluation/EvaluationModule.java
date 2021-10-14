@@ -7,8 +7,8 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 
-import jsheets.runtime.evaluation.EvaluationEngine;
-import jsheets.runtime.evaluation.shell.ShellEvaluationEngine;
+import jsheets.evaluation.EvaluationEngine;
+import jsheets.evaluation.shell.ShellEvaluationEngine;
 
 
 public final class EvaluationModule extends AbstractModule {
