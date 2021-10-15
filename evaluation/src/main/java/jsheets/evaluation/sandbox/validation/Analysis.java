@@ -1,6 +1,10 @@
 package jsheets.evaluation.sandbox.validation;
 
+import jsheets.EvaluationError;
+import jsheets.evaluation.failure.FailedEvaluation;
+
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
@@ -11,7 +15,7 @@ public final class Analysis {
     return new Analysis();
   }
 
-  public interface Violation {}
+  public interface Violation extends FailedEvaluation {}
 
   private final Collection<Violation> violations =
     new ConcurrentLinkedQueue<>();
@@ -28,7 +32,7 @@ public final class Analysis {
     }
   }
 
-  static final class FailedAnalysis extends RuntimeException {
+  static final class FailedAnalysis extends RuntimeException implements FailedEvaluation {
     private final Collection<Violation> violations;
 
     private FailedAnalysis(Collection<Violation> violations) {
@@ -42,6 +46,12 @@ public final class Analysis {
 
     public Stream<Violation> violations() {
       return violations.stream();
+    }
+
+    @Override
+    public Stream<EvaluationError> describe(Locale locale) {
+      return violations.stream()
+        .flatMap(violation -> violation.describe(locale));
     }
   }
 

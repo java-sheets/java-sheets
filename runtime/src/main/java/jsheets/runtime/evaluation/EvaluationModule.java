@@ -6,10 +6,20 @@ import com.google.inject.Singleton;
 
 import javax.inject.Named;
 import jsheets.evaluation.EvaluationEngine;
+import jsheets.evaluation.sandbox.access.AccessGraph;
+import jsheets.evaluation.sandbox.validation.ForbiddenMemberFilter;
 import jsheets.evaluation.shell.ShellEvaluationEngine;
+import jsheets.evaluation.shell.environment.ExecutionEnvironment;
+import jsheets.evaluation.shell.environment.SandboxedEnvironment;
+import jsheets.evaluation.shell.environment.StandardEnvironment;
+import jsheets.evaluation.shell.environment.inprocess.EmbeddedEnvironment;
+import jsheets.evaluation.shell.environment.inprocess.InProcessExecutionControl;
 import jsheets.evaluation.shell.execution.ExecutionMethod;
 import jsheets.evaluation.shell.execution.ExhaustiveExecution;
 import jsheets.config.Config;
+import jsheets.evaluation.shell.execution.SystemBasedExecutionMethodFactory;
+
+import java.util.List;
 
 import static jsheets.runtime.evaluation.SandboxConfigSource.accessGraphKey;
 import static jsheets.runtime.evaluation.SandboxConfigSource.disableSandboxKey;
@@ -23,30 +33,25 @@ public final class EvaluationModule extends AbstractModule {
 
   @Provides
   @Singleton
-  EvaluationEngine evaluationEngine(ExecutionMethod.Factory executionMethodFactory) {
+  EvaluationEngine evaluationEngine(ExecutionEnvironment environment) {
     return ShellEvaluationEngine.newBuilder()
-      .useExecutionMethodFactory(executionMethodFactory)
+      .useEnvironment(environment)
+      .useExecutionMethodFactory(SystemBasedExecutionMethodFactory.create())
       .create();
   }
 
   @Provides
   @Singleton
-  ExecutionMethod.Factory executionMethodFactory(
-    Config config,
-    @Named("underlyingExecutionMethod")
-    ExecutionMethod.Factory underlyingExecutionMethodFactory
-  ) {
+  ExecutionEnvironment executionEnvironment(Config config) {
     boolean disableSandbox =
       disableSandboxKey().in(config).orNone().orElse(false);
-    var accessGraphConfig = accessGraphKey().in(config).require();
     if (disableSandbox) {
-      return underlyingExecutionMethodFactory;
+      return StandardEnvironment.create();
     }
-    return underlyingExecutionMethodFactory;
-  }
-
-  @Named("underlyingExecutionMethod")
-  ExecutionMethod.Factory underlyingExecutionMethodFactory(Config config) {
-    return ExhaustiveExecution::create;
+    var accessGraphConfig = accessGraphKey().in(config).require();
+    var accessGraph = AccessGraph.of(accessGraphConfig.split("\n"));
+    return SandboxedEnvironment.create(
+      List.of(ForbiddenMemberFilter.create(accessGraph))
+    );
   }
 }

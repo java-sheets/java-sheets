@@ -267,7 +267,12 @@ public final class ExhaustiveExecution implements ExecutionMethod {
       gutsAccessor = resolveGutsAccessor();
     } catch (Throwable failure) {
       resolveError = failure.getMessage();
-      log.atWarning().withCause(failure).log("failed to initialize");
+      if (failure.getCause() instanceof IllegalAccessException) {
+        log.atWarning()
+          .log("ExhaustiveExecution is not possible: jdk.jshell is not open");
+      } else {
+        log.atWarning().withCause(failure).log("failed to initialize");
+      }
     }
   }
 }

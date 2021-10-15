@@ -47,8 +47,11 @@ public final class SandboxLoader implements LoaderDelegate {
     this.rules = rules;
   }
 
-  public void install() {
-    Thread.currentThread().setContextClassLoader(loader);
+  public Runnable install() {
+    var thread = Thread.currentThread();
+    var previousLoader = thread.getContextClassLoader();
+    thread.setContextClassLoader(loader);
+    return () -> thread.setContextClassLoader(previousLoader);
   }
 
   @Override

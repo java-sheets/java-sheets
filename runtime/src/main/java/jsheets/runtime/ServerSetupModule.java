@@ -1,11 +1,6 @@
 package jsheets.runtime;
 
-import java.util.Collection;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-import java.util.function.Supplier;
+import java.util.*;
 
 import com.google.common.net.HostAndPort;
 
@@ -14,6 +9,7 @@ import com.google.inject.Provides;
 
 import io.grpc.ServerServiceDefinition;
 import javax.inject.Named;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 import jsheets.config.Config;
 import jsheets.runtime.discovery.AdvertisementHook;
@@ -83,12 +79,12 @@ final class ServerSetupModule extends AbstractModule {
   @Singleton
   Collection<ServerSetup.Hook> setupHooks(
     Config config,
-    Supplier<ServiceAdvertisementChannel> advertisementChannelFactory
+    Provider<Optional<ServiceAdvertisementChannel>> advertisementChannelFactory
   ) {
     return advertisedHostKey.in(config).orNone().map(host -> {
       var hook = AdvertisementHook.create(
         host,
-        advertisementChannelFactory.get()
+        advertisementChannelFactory.get().orElseThrow()
       );
       return List.<ServerSetup.Hook>of(hook);
     }).orElse(List.of());

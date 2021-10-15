@@ -69,7 +69,6 @@ public final class ExhaustiveExecutionTest {
   public void testInvalid() {
     var events = ExhaustiveExecution.create(createSilentShell())
       .execute("callWithoutClosedParen(someArgument, 1, 2, 3");
-    System.out.println(events);
     Assertions.assertEquals(1, events.size());
   }
 }

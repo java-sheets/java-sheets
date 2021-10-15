@@ -97,6 +97,12 @@ public record MethodSignature(
     );
   }
 
+  private static final String constructorName = "<init>";
+
+  public boolean isConstructor() {
+    return methodName.equals(constructorName);
+  }
+
   public String formatNameAndParameters() {
     return "%s(%s)".formatted(methodName, String.join(", ", parameterTypes));
   }

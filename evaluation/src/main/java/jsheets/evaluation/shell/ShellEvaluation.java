@@ -21,9 +21,9 @@ import jsheets.EvaluationResult;
 import jsheets.SnippetSources;
 import jsheets.StartEvaluationRequest;
 import jsheets.evaluation.Evaluation;
+import jsheets.evaluation.failure.FailedEvaluation;
 import jsheets.evaluation.shell.environment.ExecutionEnvironment;
 import jsheets.evaluation.shell.execution.ExecutionMethod;
-import jsheets.source.SharedSources;
 
 final class ShellEvaluation implements Evaluation {
   private enum Stage { Initial, Starting, Evaluating, Terminated }
@@ -33,14 +33,12 @@ final class ShellEvaluation implements Evaluation {
   private volatile JShell shell;
   private volatile ExecutionMethod executionMethod;
   private final Evaluation.Listener listener;
-  private final SharedSources sources;
   private final ExecutionEnvironment environment;
   private final ExecutionMethod.Factory executionMethodFactory;
   private final MessageOutput messageOutput;
   private final AtomicReference<Stage> stage = new AtomicReference<>(Stage.Initial);
 
   ShellEvaluation(
-    Clock clock,
     ExecutionEnvironment environment,
     ExecutionMethod.Factory executionMethodFactory,
     Evaluation.Listener listener,
@@ -50,7 +48,6 @@ final class ShellEvaluation implements Evaluation {
     this.messageOutput = messageOutput;
     this.executionMethodFactory = executionMethodFactory;
     this.environment = environment;
-    sources = SharedSources.createEmpty(clock);
   }
 
   public void start(StartEvaluationRequest request) {
@@ -82,17 +79,47 @@ final class ShellEvaluation implements Evaluation {
         reportEvent(component.getId(), snippet, response);
       }
       messageOutput.flush();
-    } catch (Exception failedEvaluation) {
-      log.atWarning()
-        .atMostEvery(5, TimeUnit.SECONDS)
-        .withCause(failedEvaluation).log("shell evaluation failed");
-      response.addError(
-        EvaluationError.newBuilder()
-          .setComponentId(component.getId())
-          .setKind("internal")
-          .build()
-      );
+    } catch (Throwable failedEvaluation) {
+      reportError(component, response, failedEvaluation);
     }
+  }
+
+  private void reportError(
+    SnippetSources.CodeComponent component,
+    EvaluateResponse.Builder response,
+    Throwable failure
+  ) {
+    FailedEvaluation.capture(failure).ifPresentOrElse(
+      value -> reportFailedEvaluation(component, response, value),
+      () -> reportInternalFailure(component, response, failure)
+    );
+  }
+
+  private void reportFailedEvaluation(
+    SnippetSources.CodeComponent component,
+    EvaluateResponse.Builder response,
+    FailedEvaluation failedEvaluation
+  ) {
+    failedEvaluation.describe(Locale.ENGLISH)
+      .distinct()
+      .map(error -> error.toBuilder().setComponentId(component.getId()))
+      .forEach(response::addError);
+  }
+
+  private void reportInternalFailure(
+    SnippetSources.CodeComponent component,
+    EvaluateResponse.Builder response,
+    Throwable failure
+  ) {
+    log.atWarning()
+      .atMostEvery(5, TimeUnit.SECONDS)
+      .withCause(failure).log("shell evaluation failed");
+    response.addError(
+      EvaluationError.newBuilder()
+        .setComponentId(component.getId())
+        .setKind("internal")
+        .build()
+    );
   }
 
   private void reportEvent(
@@ -108,6 +135,7 @@ final class ShellEvaluation implements Evaluation {
         response.addResult(
           EvaluationResult.newBuilder()
             .setComponentId(componentId)
+            .setKind(EvaluationResult.Kind.INFO)
             .setOutput(event.value())
             .build()
         );
@@ -159,7 +187,6 @@ final class ShellEvaluation implements Evaluation {
   public String toString() {
     return MoreObjects.toStringHelper(this)
       .add("shell", shell)
-      .add("sources", sources)
       .add("environment", environment)
       .add("stage", stage)
       .toString();

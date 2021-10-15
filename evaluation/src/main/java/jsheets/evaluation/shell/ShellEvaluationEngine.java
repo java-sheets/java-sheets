@@ -2,7 +2,6 @@ package jsheets.evaluation.shell;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
-import java.time.Clock;
 import java.time.Duration;
 import java.util.Objects;
 import java.util.concurrent.Executor;
@@ -18,7 +17,6 @@ import jsheets.evaluation.shell.execution.ExecutionMethod;
 import jsheets.evaluation.shell.execution.SystemBasedExecutionMethodFactory;
 
 public final class ShellEvaluationEngine implements EvaluationEngine {
-  private final Clock clock;
   private final Executor workerPool;
   private final ScheduledExecutorService scheduler;
   private final ExecutionEnvironment executionEnvironment;
@@ -26,14 +24,12 @@ public final class ShellEvaluationEngine implements EvaluationEngine {
   private final Duration messageFlushInterval;
 
   private ShellEvaluationEngine(
-    Clock clock,
     Executor workerPool,
     ScheduledExecutorService scheduler,
     ExecutionEnvironment executionEnvironment,
     ExecutionMethod.Factory executionMethodFactory,
     Duration messageFlushInterval
   ) {
-    this.clock = clock;
     this.workerPool = workerPool;
     this.scheduler = scheduler;
     this.executionEnvironment = executionEnvironment;
@@ -53,7 +49,6 @@ public final class ShellEvaluationEngine implements EvaluationEngine {
 
   private ShellEvaluation createEvaluation(Evaluation.Listener listener) {
     return new ShellEvaluation(
-      clock,
       executionEnvironment,
       executionMethodFactory,
       listener,
@@ -70,18 +65,11 @@ public final class ShellEvaluationEngine implements EvaluationEngine {
   }
 
   public static final class Builder {
-    private Clock clock = Clock.systemUTC();
     private Executor workerPool;
     private ExecutionEnvironment environment;
     private Duration messageFlushInterval;
     private ScheduledExecutorService scheduler;
     private ExecutionMethod.Factory executionMethodFactory;
-
-    public Builder useClock(Clock clock) {
-      Objects.requireNonNull(clock, "clock");
-      this.clock = clock;
-      return this;
-    }
 
     public Builder useWorkerPool(Executor pool) {
       Objects.requireNonNull(pool, "workerPool");
@@ -115,7 +103,6 @@ public final class ShellEvaluationEngine implements EvaluationEngine {
 
     public EvaluationEngine create() {
       return new ShellEvaluationEngine(
-        clock,
         selectWorkerPool(),
         selectScheduler(),
         selectEnvironment(),

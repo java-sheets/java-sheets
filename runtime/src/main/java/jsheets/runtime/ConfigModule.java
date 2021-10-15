@@ -21,7 +21,7 @@ final class ConfigModule extends AbstractModule {
 
   private ConfigModule() {}
 
-  private static final String environmentPrefix = "JSHELL_RUNTIME";
+  private static final String environmentPrefix = "JSHEETS_RUNTIME";
 
   @Provides
   @Singleton

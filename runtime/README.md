@@ -11,6 +11,33 @@ allowing it to be scaled
 horizontally. This is beneficial, as user code evaluation poses a chance
 for *JVM crashes*.
 
+### Running
+This component should be run using the docker image: it requires some
+special startup configuration to work and has dependencies that are not bundled
+in the build *jar archive*.
+
+If you wish to run it manually, ensure that all required libraries are provided
+(in the runtime classpath) and open the `jdk.jshell` module to all unnamed modules:
+`--add-opens jdk.jshell/jdk.jshell=ALL-UNNAMED`, the latter is required to use
+the *exhaustive execution* feature.
+
+For more information inspect the image's [run script](./deploy/entrypoint.sh).
+
+### Configuration
+
+**NOTE** That every environment variable is prefixed with `JSHEETS_RUNTIME_`,
+thus `SERVER_PORT` has to be specified as `JSHEETS_RUNTIME_SERVER_PORT`.
+
+| Key | Environment Suffix | Default | Description |
+|-----|-------------|---------|-------------|
+| server.port | `SERVER_PORT` | `8080` | gRpc Server Port |
+| server.feature.enableHealthService | `FEATURE_ENABLE_HEALTH_CHECK` | `true` | Toggles the Health Service |
+| server.feature.enableGrpcReflection | `FEATURE_ENABLE_GRPC_REFLECTION` | `false` | Toggles the Health Service |
+|
+| service.id | `SERVICE_ID` | *generated* | Id that this service is advertised with |
+| service.advertisedHost | `SERVICE_ADVERTISED_HOST` | none | The endpoint that is advertised in the service discovery |
+| evaluation.sandbox.disable | `EVALUATION_SANDBOX_DISABLE` | `false` | Disables the sandbox for code execution **dangerous** |
+
 ### Sandboxing
 The JVM itself is a sufficient sandbox, if we restrict the methods
 that can be called to that of classes without side effects to the system
@@ -55,13 +82,13 @@ Given the following class `Library` in package `evilcorp.coolib`
 package evilcorp.coolib;
 
 class Library {
-  int count(int[] integers) { ... }
+  int count(int[] integers) { /*...*/ }
 
-  int count(double[] doubles) { ... }
+  int count(double[] doubles) { /*...*/ }
 
-  int count(float[] floats) { ... }
+  int count(float[] floats) { /*...*/ }
 
-  long count(int[][] twoDimensionIntegers) { ... }
+  long count(int[][] twoDimensionIntegers) { /*...*/ }
 
   void quit() {
     System.exit(-1);
@@ -96,9 +123,6 @@ fields and methods that are essential to some programs that do not pose any
 security risk (like `System#identityHashCode(Object)`), but also methods like
 `System#exit(int)`, we would thus be very careful with granting access to
 this class.
-
-
-
 
 ### Scaling
 Since the *runtime* does not save any data and its state only consists of
