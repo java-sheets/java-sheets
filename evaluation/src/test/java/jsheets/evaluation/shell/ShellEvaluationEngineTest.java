@@ -1,6 +1,5 @@
 package jsheets.evaluation.shell;
 
-import java.time.Clock;
 import java.util.UUID;
 
 import jsheets.EvaluateResponse;
@@ -27,7 +26,6 @@ public class ShellEvaluationEngineTest {
     var environment = StandardEnvironment.create();
     var installation = environment.install();
     var engine = ShellEvaluationEngine.newBuilder()
-      .useClock(Clock.systemUTC())
       .useEnvironment(environment)
       .useWorkerPool(Runnable::run)
       .create();
