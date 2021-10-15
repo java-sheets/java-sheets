@@ -12,10 +12,31 @@ horizontally. This is beneficial, as user code evaluation poses a chance
 for *JVM crashes*.
 
 ### Running
-This component should be run using the docker image: it requires some
-special startup configuration to work and has dependencies that are not bundled
-in the build *jar archive*.
+This component should be run using the docker image, since it requires
+special configuration for all features to work and does now bundle its
+dependencies in the build *jar archive*.
+#### Docker
+The image tag is `ehenoma/jsheets-runtime:latest` and is located in the
+[deploy](./deploy) folder.
 
+Following [Docker Compose](https://docs.docker.com/compose/) file is sufficient
+to run a configured instance of the runtime.
+
+```yml
+version: "3.7"
+services:
+  runtime:
+    image: ehenoma/jsheets-runtime:latest
+    container_name: jsheets-runtime
+    hostname: jsheets-runtime
+    environment:
+      JSHEETS_RUNTIME_SERVER_FEATURES_ENABLE_GRPC_REFLECTION: "true"
+      JSHEETS_RUNTIME_SERVER_SERVICE_ID: "my-only-service"
+   ports:
+    - "8080:8080"
+```
+
+#### Manual
 If you wish to run it manually, ensure that all required libraries are provided
 (in the runtime classpath) and open the `jdk.jshell` module to all unnamed modules:
 `--add-opens jdk.jshell/jdk.jshell=ALL-UNNAMED`, the latter is required to use
@@ -31,8 +52,8 @@ thus `SERVER_PORT` has to be specified as `JSHEETS_RUNTIME_SERVER_PORT`.
 | Key | Environment Suffix | Default | Description |
 |-----|-------------|---------|-------------|
 | server.port | `SERVER_PORT` | `8080` | gRpc Server Port |
-| server.feature.enableHealthService | `FEATURE_ENABLE_HEALTH_CHECK` | `true` | Toggles the Health Service |
-| server.feature.enableGrpcReflection | `FEATURE_ENABLE_GRPC_REFLECTION` | `false` | Toggles the Health Service |
+| server.features.enableHealthService | `FEATURES_ENABLE_HEALTH_CHECK` | `true` | Toggles the Health Service |
+| server.features.enableGrpcReflection | `FEATURES_ENABLE_GRPC_REFLECTION` | `false` | Toggles the Health Service |
 |
 | service.id | `SERVICE_ID` | *generated* | Id that this service is advertised with |
 | service.advertisedHost | `SERVICE_ADVERTISED_HOST` | none | The endpoint that is advertised in the service discovery |
