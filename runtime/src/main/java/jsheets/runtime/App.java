@@ -39,7 +39,7 @@ public final class App {
     return Guice.createInjector(
       ServerSetupModule.create(),
       ConfigModule.create(),
-      ConsulModule.create(),
+      ZookeeperModule.create(),
       EvaluationModule.create()
     );
   }

@@ -10,24 +10,25 @@ import jsheets.evaluation.sandbox.validation.Rule;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 public final class SandboxedEnvironment
   implements ExecutionEnvironment, ExecutionControlProvider {
 
   public static SandboxedEnvironment create(Collection<Rule> rules) {
     Objects.requireNonNull(rules);
-    return new SandboxedEnvironment(SandboxLoader.create(rules));
+    return new SandboxedEnvironment(() -> SandboxLoader.create(rules));
   }
 
-  private final SandboxLoader loader;
+  private final Supplier<SandboxLoader> loader;
 
-  private SandboxedEnvironment(SandboxLoader loader) {
+  private SandboxedEnvironment(Supplier<SandboxLoader> loader) {
     this.loader = loader;
   }
 
   @Override
   public Installation install() {
-    return loader.install()::run;
+    return loader.get().install()::run;
   }
 
   @Override
@@ -45,6 +46,6 @@ public final class SandboxedEnvironment
     ExecutionEnv environment,
     Map<String, String> parameters
   ) {
-    return new DirectExecutionControl(loader);
+    return new DirectExecutionControl(loader.get());
   }
 }

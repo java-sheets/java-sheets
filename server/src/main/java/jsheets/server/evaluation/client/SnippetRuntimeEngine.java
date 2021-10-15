@@ -21,7 +21,7 @@ import jsheets.evaluation.EvaluationEngine;
  * Client side {@link EvaluationEngine} that connects to a
  * {@code SnippetRuntime} to evaluate snippets.
  */
-final class SnippetRuntimeEngine implements EvaluationEngine {
+public final class SnippetRuntimeEngine implements EvaluationEngine {
   private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
   public static SnippetRuntimeEngine forChannel(Channel channel) {

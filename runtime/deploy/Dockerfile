@@ -38,7 +38,7 @@ WORKDIR /app
 COPY --from=link-java /usr/src/build/jre jre
 COPY --from=link-java /usr/src/build/libs/* libs/
 COPY --from=link-java /usr/src/build/app.jar app.jar
-ADD /server/deploy/entrypoint.sh entrypoint.sh
+ADD /runtime/deploy/entrypoint.sh entrypoint.sh
 ADD /website/build static/
 RUN chmod +x entrypoint.sh
 

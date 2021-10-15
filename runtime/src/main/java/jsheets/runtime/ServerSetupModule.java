@@ -79,10 +79,12 @@ final class ServerSetupModule extends AbstractModule {
   @Singleton
   Collection<ServerSetup.Hook> setupHooks(
     Config config,
+    @Named("serviceId") String serviceId,
     Provider<Optional<ServiceAdvertisementChannel>> advertisementChannelFactory
   ) {
     return advertisedHostKey.in(config).orNone().map(host -> {
       var hook = AdvertisementHook.create(
+        serviceId,
         host,
         advertisementChannelFactory.get().orElseThrow()
       );

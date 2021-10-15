@@ -5,6 +5,7 @@ allprojects {
 }
 
 ext {
+  curatorVersion = '5.2.0'
   grpcVersion = '1.41.0'
   floggerVersion = '0.7.1'
   junitPlatformVersion = '5.8.1'

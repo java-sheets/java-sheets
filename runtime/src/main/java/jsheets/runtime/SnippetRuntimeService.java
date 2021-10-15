@@ -69,6 +69,7 @@ final class SnippetRuntimeService extends SnippetRuntimeImplBase {
         return;
       }
       evaluation.stop();
+      evaluation = null;
       log.atFine().log("closed evaluation");
     }
 
@@ -92,7 +93,17 @@ final class SnippetRuntimeService extends SnippetRuntimeImplBase {
     public void onError(Throwable failure) {}
 
     @Override
-    public void onCompleted() {}
+    public void onCompleted() {
+      lock.lock();
+      try {
+        if (evaluation != null) {
+          evaluation.stop();
+          evaluation = null;
+        }
+      } finally {
+        lock.unlock();
+      }
+    }
 
     // Listens to EvaluationEngine
     @Override

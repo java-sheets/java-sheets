@@ -58,6 +58,8 @@ thus `SERVER_PORT` has to be specified as `JSHEETS_RUNTIME_SERVER_PORT`.
 | service.id | `SERVICE_ID` | *generated* | Id that this service is advertised with |
 | service.advertisedHost | `SERVICE_ADVERTISED_HOST` | none | The endpoint that is advertised in the service discovery |
 | evaluation.sandbox.disable | `EVALUATION_SANDBOX_DISABLE` | `false` | Disables the sandbox for code execution **dangerous** |
+| zookeeper.connectionString | `ZOOKEEPER_CONNECTION_STRING` | none | Connection string to zookeeper |
+| zookeeper.connectBackoff | `ZOOKEEPER_CONNECT_BACKOFF` | `1000` | Initial backoff after failed zookeeper connection |
 
 ### Sandboxing
 The JVM itself is a sufficient sandbox, if we restrict the methods

@@ -1,2 +1,13 @@
-java.lang.Object
-java.lang.Integer
+java.lang
+!java.lang.Thread
+!java.lang.reflect
+!java.lang.invoke
+java.lang.System
+!java.lang.System#exit
+!java.util.concurrent
+java.text
+java.time
+java.math
+java.io.Scanner
+java.io.PrintStream#print
+java.io.PrintStream#println

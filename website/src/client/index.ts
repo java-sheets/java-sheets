@@ -57,6 +57,7 @@ export default class Client {
 
     client.onerror = error => {
       console.log({error})
+      listener.onEnd()
     }
 
     client.onopen = () => {

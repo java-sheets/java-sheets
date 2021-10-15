@@ -25,7 +25,7 @@ ext {
 dependencies {
   implementation project(':protocol')
   implementation project(':evaluation')
-  implementation "com.ecwid.consul:consul-api:$consuleClientVersion"
+  implementation "org.apache.curator:curator-x-discovery:$curatorVersion"
   implementation "io.micrometer:micrometer-core:$micrometerVersion"
   implementation "org.mongodb:mongodb-driver-sync:$mongoDbDriverVersion"
   implementation "org.slf4j:slf4j-simple:$slf4jVersion"
@@ -62,6 +62,7 @@ processResources {
 }
 
 jar {
+  archiveName 'app.jar'
   duplicatesStrategy = DuplicatesStrategy.INCLUDE
   manifest {
     attributes(
@@ -78,7 +79,7 @@ def dockerImage = "$dockerImageName:$dockerImageTag"
 task buildDocker(type: Exec) {
   dependsOn copyDependencies, build
   workingDir "$projectDir"
-  commandLine "docker", "build", "--rm", ".", "-t", dockerImage, "-f", "./server/deploy/Dockerfile"
+  commandLine "docker", "build", "--rm", ".", "-t", dockerImage, "-f", "./runtime/deploy/Dockerfile"
 }
 
 task justRunDocker(type: Exec) {

@@ -5,8 +5,6 @@ import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 public class EnvironmentConfigTest {
   @Test
   public void testLookup() {
@@ -40,23 +38,23 @@ public class EnvironmentConfigTest {
 
   @Test
   public void testTranslateKey() {
-    assertEquals(
+    Assertions.assertEquals(
       "OPINION_THE_BEST_SONG",
       EnvironmentConfig.translateKey("opinion.theBestSong")
     );
-    assertEquals(
+    Assertions.assertEquals(
       "ARTIST_NINA_SIMONE_BLUES",
       EnvironmentConfig.translateKey("artist.nina_simone.blues")
     );
-    assertEquals(
+    Assertions.assertEquals(
       "PLAYBACK_SONG_NAME",
       EnvironmentConfig.translateKey("playback.song.name")
     );
-    assertEquals(
+    Assertions.assertEquals(
       "PLAYBACK_SONG_NAME",
       EnvironmentConfig.translateKey("playback.songName")
     );
-    assertEquals(
+    Assertions.assertEquals(
       "PLAYBACK_SONG_NAME",
       EnvironmentConfig.translateKey("playbackSongName")
     );

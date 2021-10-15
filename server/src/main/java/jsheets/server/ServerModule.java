@@ -28,8 +28,8 @@ public final class ServerModule extends AbstractModule {
   private static final int defaultPort = 8080;
 
   @Provides
-  Server.Config createConfig() {
-    return new Server.Config(
+  Server.Options createConfig() {
+    return new Server.Options(
       readIntFromEnvironment("JSHEETS_SERVER_PORT").orElse(defaultPort)
     );
   }

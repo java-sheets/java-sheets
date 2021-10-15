@@ -14,7 +14,10 @@ public final class App {
   }
 
   private static Injector configureInjector() {
-    return Guice.createInjector(ServerModule.create());
+    return Guice.createInjector(
+      ConfigModule.create(),
+      ServerModule.create()
+    );
   }
 
   private static void configureLogging() {
