@@ -28,7 +28,6 @@ dependencies {
   implementation "com.ecwid.consul:consul-api:$consuleClientVersion"
   implementation "io.micrometer:micrometer-core:$micrometerVersion"
   implementation "org.mongodb:mongodb-driver-sync:$mongoDbDriverVersion"
-  implementation "org.cfg4j:cfg4j-core:$cfg4jVersion"
   implementation "org.slf4j:slf4j-simple:$slf4jVersion"
   implementation "io.grpc:grpc-all:$grpcVersion"
   implementation "com.google.protobuf:protobuf-java-util:$protobufJavaVersion"
