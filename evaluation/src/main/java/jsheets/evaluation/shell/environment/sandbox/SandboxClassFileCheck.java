@@ -23,16 +23,20 @@ public final class SandboxClassFileCheck implements ClassFileStore {
 
   @Override
   public void redefine(ExecutionControl.ClassBytecodes[] bytecodes) {
+    analyze(bytecodes);
+  }
+
+  @Override
+  public void load(ExecutionControl.ClassBytecodes[] bytecodes) {
+    analyze(bytecodes);
+  }
+
+  private void analyze(ExecutionControl.ClassBytecodes[] bytecodes) {
     var analysis = Analysis.create();
     var check = SandboxBytecodeCheck.withRules(rules);
     for (var binary : bytecodes) {
       check.run(analysis, binary.bytecodes());
     }
     analysis.reportViolations();
-  }
-
-  @Override
-  public void load(ExecutionControl.ClassBytecodes[] bytecodes) {
-
   }
 }

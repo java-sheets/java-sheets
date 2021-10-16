@@ -24,6 +24,7 @@ public final class ForkedExecutionControl extends JdiExecutionControl {
 
   private final Lock stopLock = new ReentrantLock();
   private boolean userCodeRunning = false;
+  private volatile boolean closed;
 
   private final String remoteAgentClass;
   private final ClassFileStore classFileStore;
@@ -96,6 +97,7 @@ public final class ForkedExecutionControl extends JdiExecutionControl {
     try {
       if (userCodeRunning) {
         new RemoteInterrupt(vm(), remoteAgentClass).runInSuspendedMode();
+        closed = true;
       }
     } finally {
       stopLock.unlock();
@@ -107,6 +109,12 @@ public final class ForkedExecutionControl extends JdiExecutionControl {
   public void close() {
     super.close();
     disposeMachine();
+    stopLock.lock();
+    closed = true;
+  }
+
+  public boolean isClosed() {
+    return closed;
   }
 
   synchronized void disposeMachine() {

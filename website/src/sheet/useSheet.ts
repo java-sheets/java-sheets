@@ -14,6 +14,7 @@ import {
   moveSnippet, reorderComponent,
   reorderSnippet, updateSheet
 } from './state'
+import {useEffect} from "react";
 
 export interface UseSheet {
   sheet: SheetState
@@ -24,9 +25,14 @@ export interface UseSheet {
   deleteSnippet: (id: string) => void
 }
 
-export function useSheet(): UseSheet {
+export function useSheet(initial?: SheetState): UseSheet {
   const dispatch = useDispatch()
   const sheet = useSelector((state: RootState) => state.sheet)
+  useEffect(() => {
+    if (initial) {
+      dispatch(updateSheet(initial))
+    }
+  }, [])
   return {
     sheet,
     update: sheet => dispatch(updateSheet(sheet)),

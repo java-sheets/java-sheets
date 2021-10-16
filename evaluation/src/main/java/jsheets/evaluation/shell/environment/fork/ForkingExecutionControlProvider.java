@@ -8,15 +8,19 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import com.sun.jdi.VirtualMachine;
 import jdk.jshell.execution.JdiInitiator;
@@ -33,42 +37,55 @@ import static jdk.jshell.execution.Util.remoteInputOutput;
 public final class ForkingExecutionControlProvider
   implements ExecutionControlProvider {
 
-  private static final Duration defaultTimeout = Duration.ofMillis(3000);
-
   public static ForkingExecutionControlProvider create() {
-    return create(List.of(), EmptyClassFileStore.create());
-  }
-
-  public static ForkingExecutionControlProvider create(
-    Collection<String> rawVirtualMachineOptions,
-    ClassFileStore classFileStore
-  ) {
-    Objects.requireNonNull(classFileStore, "classFileStore");
-    Objects.requireNonNull(rawVirtualMachineOptions, "rawVirtualMachineOptions");
-    var host = InetAddress.getLoopbackAddress().getHostName();
-    return new ForkingExecutionControlProvider(
-      host,
-      defaultTimeout,
-      List.copyOf(rawVirtualMachineOptions),
-      classFileStore
+    return create(
+      List.of(),
+      EmptyClassFileStore.create(),
+      Executors.newScheduledThreadPool(
+        1,
+        new ThreadFactoryBuilder().setDaemon(true).build()
+      )
     );
   }
 
-  private final String host;
-  private final Duration timeout;
+  private static final Duration defaultTimeout = Duration.ofMillis(3000);
+  private static final Duration defaultExecutionTimeout =
+    Duration.ofSeconds(30);
+
+  public static ForkingExecutionControlProvider create(
+    Collection<String> rawVirtualMachineOptions,
+    ClassFileStore classFileStore,
+    ScheduledExecutorService scheduler
+  ) {
+    Objects.requireNonNull(classFileStore, "classFileStore");
+    Objects.requireNonNull(rawVirtualMachineOptions, "rawVirtualMachineOptions");
+    return new ForkingExecutionControlProvider(
+      defaultExecutionTimeout,
+      defaultTimeout,
+      List.copyOf(rawVirtualMachineOptions),
+      classFileStore,
+      scheduler
+    );
+  }
+
+  private final Duration connectTimeout;
+  private final Duration executionTimeout;
   private final List<String> rawVirtualMachineOptions;
+  private final ScheduledExecutorService scheduler;
   private final ClassFileStore classFileStore;
 
   private ForkingExecutionControlProvider(
-    String host,
-    Duration timeout,
+    Duration executionTimeout,
+    Duration connectTimeout,
     List<String> rawVirtualMachineOptions,
-    ClassFileStore classFileStore
+    ClassFileStore classFileStore,
+    ScheduledExecutorService scheduler
   ) {
-    this.host = host;
-    this.timeout = timeout;
+    this.executionTimeout = executionTimeout;
+    this.connectTimeout = connectTimeout;
     this.rawVirtualMachineOptions = rawVirtualMachineOptions;
     this.classFileStore = classFileStore;
+    this.scheduler = scheduler;
   }
 
   @Override
@@ -101,7 +118,7 @@ public final class ForkingExecutionControlProvider
       /* remoteAgentClassName */ remoteAgentClassName,
       /* controlledLaunch */ false,
       /* host */ "",
-      /* timeout */ (int) timeout.toMillis(),
+      /* timeout */ (int) connectTimeout.toMillis(),
       /* connectorOptions*/ Collections.emptyMap()
     );
     return new Box(
@@ -115,7 +132,7 @@ public final class ForkingExecutionControlProvider
   ExecutionControl create(ExecutionEnv environment) throws IOException {
     var address = InetAddress.getLoopbackAddress();
     try (var listener = new ServerSocket(0, backlog, address)) {
-      listener.setSoTimeout((int) timeout.toMillis());
+      listener.setSoTimeout((int) connectTimeout.toMillis());
       var box = initiate(listener.getLocalPort());
       return accept(listener, environment, box);
     }
@@ -164,8 +181,17 @@ public final class ForkingExecutionControlProvider
       );
       hooks.add(event -> environment.closeDown());
       hooks.add(event -> control.disposeMachine());
+      scheduleExecutionTimeout(control);
       return control;
     };
+  }
+
+  private void scheduleExecutionTimeout(ForkedExecutionControl control) {
+    scheduler.schedule(() -> {
+      if (!control.isClosed()) {
+        control.close();
+      }
+    }, executionTimeout.toMillis(), TimeUnit.MILLISECONDS);
   }
 
   private Map<String, OutputStream> createOutputs(ExecutionEnv environment) {
