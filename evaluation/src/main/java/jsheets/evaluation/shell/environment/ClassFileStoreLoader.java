@@ -1,4 +1,4 @@
-package jsheets.evaluation.sandbox;
+package jsheets.evaluation.shell.environment;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -15,7 +15,6 @@ import java.security.CodeSource;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
@@ -27,30 +26,26 @@ import java.util.Objects;
 
 import jdk.jshell.execution.LoaderDelegate;
 import jdk.jshell.spi.ExecutionControl;
-import jsheets.evaluation.sandbox.validation.Analysis;
-import jsheets.evaluation.sandbox.validation.Rule;
 
-public final class SandboxLoader implements LoaderDelegate {
+public final class ClassFileStoreLoader implements LoaderDelegate {
   // This class is based on Java's loader for DirectExecution.
-
-  public static SandboxLoader create(Collection<Rule> rules) {
-    Objects.requireNonNull(rules, "rules");
-    return new SandboxLoader(rules);
+  public static ClassFileStoreLoader of(ClassFileStore store) {
+    Objects.requireNonNull(store, "store");
+    return new ClassFileStoreLoader(store);
   }
 
-  private final SandboxLoader.RemoteClassLoader loader;
   private final Map<String, Class<?>> types = new HashMap<>();
-  private final Collection<Rule> rules;
+  private final ClassFileStore store;
+  private final RemoteClassLoader remote = new RemoteClassLoader();
 
-  private SandboxLoader(Collection<Rule> rules) {
-    this.loader = new RemoteClassLoader();
-    this.rules = rules;
+  private ClassFileStoreLoader(ClassFileStore store) {
+    this.store = store;
   }
 
   public Runnable install() {
     var thread = Thread.currentThread();
     var previousLoader = thread.getContextClassLoader();
-    thread.setContextClassLoader(loader);
+    thread.setContextClassLoader(remote);
     return () -> thread.setContextClassLoader(previousLoader);
   }
 
@@ -58,39 +53,11 @@ public final class SandboxLoader implements LoaderDelegate {
   public void load(ExecutionControl.ClassBytecodes[] binaries)
     throws ExecutionControl.ClassInstallException
   {
-    loadBinaries(binaries);
-    preload(binaries);
-  }
-
-  private void loadBinaries(ExecutionControl.ClassBytecodes[] binaries)
-    throws ExecutionControl.ClassInstallException
-  {
-    var analysis = Analysis.create();
-    var check = SandboxBytecodeCheck.withRules(rules);
-    loadBinariesWithAnalysis(analysis, check, binaries);
-    checkAnalysisReport(analysis);
-  }
-
-  private void checkAnalysisReport(Analysis analysis) {
-    analysis.reportViolations();
-  }
-
-  private void loadBinariesWithAnalysis(
-    Analysis analysis,
-    SandboxBytecodeCheck check,
-    ExecutionControl.ClassBytecodes[] binaries
-  ) throws ExecutionControl.ClassInstallException{
-    try {
-      for (var binary : binaries) {
-        check.run(analysis, binary.bytecodes());
-        loader.declare(binary.name(), binary.bytecodes());
-      }
-    } catch (Throwable failure) {
-      throw new ExecutionControl.ClassInstallException(
-        "declare: " + failure.getMessage(),
-        new boolean[0]
-      );
+    store.load(binaries);
+    for (var binary : binaries) {
+      remote.declare(binary.name(), binary.bytecodes());
     }
+    preload(binaries);
   }
 
   private void preload(ExecutionControl.ClassBytecodes[] binaries)
@@ -100,7 +67,7 @@ public final class SandboxLoader implements LoaderDelegate {
     try {
       for ( int index = 0; index < binaries.length; ++index ) {
         var code = binaries[index];
-        var type = loader.loadClass(code.name());
+        var type = remote.loadClass(code.name());
         types.put(code.name(), type);
         loaded[index] = true;
         preload(type);
@@ -118,8 +85,9 @@ public final class SandboxLoader implements LoaderDelegate {
 
   @Override
   public void classesRedefined(ExecutionControl.ClassBytecodes[] binaries) {
+    store.redefine(binaries);
     for (var binary : binaries) {
-      loader.declare(binary.name(), binary.bytecodes());
+      remote.declare(binary.name(), binary.bytecodes());
     }
   }
 
@@ -127,7 +95,7 @@ public final class SandboxLoader implements LoaderDelegate {
   public void addToClasspath(String classPath) throws ExecutionControl.InternalException {
     try {
       for (var path : classPath.split(File.pathSeparator)) {
-        loader.addURL(new File(path).toURI().toURL());
+        remote.addURL(new File(path).toURI().toURL());
       }
     } catch (Exception failure) {
       throw new ExecutionControl.InternalException(failure.toString());
@@ -192,7 +160,7 @@ public final class SandboxLoader implements LoaderDelegate {
         return new URL(
           /* context */ null,
           new URI("jshell", null, "/" + name, null).toString(),
-          new ResourceUrlStreamHandler(name)
+          new RemoteClassLoader.ResourceUrlStreamHandler(name)
         );
       } catch (MalformedURLException | URISyntaxException failure) {
         throw new InternalError(failure);

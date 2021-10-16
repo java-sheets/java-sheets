@@ -4,7 +4,7 @@ import jdk.jshell.JShell;
 import jsheets.evaluation.sandbox.access.AccessGraph;
 import jsheets.evaluation.sandbox.validation.Analysis;
 import jsheets.evaluation.sandbox.validation.ForbiddenMemberFilter;
-import jsheets.evaluation.shell.environment.SandboxedEnvironment;
+import jsheets.evaluation.shell.environment.sandbox.SandboxedEnvironment;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

@@ -10,7 +10,7 @@ import javax.inject.Named;
 import jsheets.config.CombinedConfig;
 import jsheets.config.Config;
 import jsheets.config.EnvironmentConfig;
-import jsheets.runtime.evaluation.SandboxConfigSource;
+import jsheets.runtime.evaluation.EvaluationConfigSource;
 
 final class ConfigModule extends AbstractModule {
   static ConfigModule create() {
@@ -26,7 +26,7 @@ final class ConfigModule extends AbstractModule {
   Config createConfig(@Named("environment") Config environment) {
     var configs = new ArrayList<Config>();
     configs.add(environment);
-    configs.add(SandboxConfigSource.fromClassPath().load());
+    configs.add(EvaluationConfigSource.fromClassPath().load());
     return CombinedConfig.of(configs.toArray(Config[]::new));
   }
 

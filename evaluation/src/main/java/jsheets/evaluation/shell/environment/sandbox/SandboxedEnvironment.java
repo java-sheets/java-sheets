@@ -1,10 +1,12 @@
-package jsheets.evaluation.shell.environment;
+package jsheets.evaluation.shell.environment.sandbox;
 
 import jdk.jshell.execution.DirectExecutionControl;
 import jdk.jshell.spi.ExecutionControl;
 import jdk.jshell.spi.ExecutionControlProvider;
 import jdk.jshell.spi.ExecutionEnv;
-import jsheets.evaluation.sandbox.SandboxLoader;
+import jsheets.evaluation.shell.environment.ClassFileStore;
+import jsheets.evaluation.shell.environment.ClassFileStoreLoader;
+import jsheets.evaluation.shell.environment.ExecutionEnvironment;
 import jsheets.evaluation.sandbox.validation.Rule;
 
 import java.util.Collection;
@@ -17,18 +19,18 @@ public final class SandboxedEnvironment
 
   public static SandboxedEnvironment create(Collection<Rule> rules) {
     Objects.requireNonNull(rules);
-    return new SandboxedEnvironment(() -> SandboxLoader.create(rules));
+    return new SandboxedEnvironment(() -> SandboxClassFileCheck.of(rules));
   }
 
-  private final Supplier<SandboxLoader> loader;
+  private final Supplier<ClassFileStore> loader;
 
-  private SandboxedEnvironment(Supplier<SandboxLoader> loader) {
+  private SandboxedEnvironment(Supplier<ClassFileStore> loader) {
     this.loader = loader;
   }
 
   @Override
   public Installation install() {
-    return loader.get().install()::run;
+    return () -> {};
   }
 
   @Override
@@ -46,6 +48,6 @@ public final class SandboxedEnvironment
     ExecutionEnv environment,
     Map<String, String> parameters
   ) {
-    return new DirectExecutionControl(loader.get());
+    return new DirectExecutionControl(ClassFileStoreLoader.of(loader.get()));
   }
 }
