@@ -6,14 +6,17 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.io.OutputStream;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 
 import com.sun.jdi.VirtualMachine;
 import jdk.jshell.execution.JdiInitiator;
@@ -23,6 +26,7 @@ import jdk.jshell.spi.ExecutionControl;
 import jdk.jshell.spi.ExecutionControlProvider;
 import jdk.jshell.spi.ExecutionEnv;
 import jsheets.evaluation.shell.environment.ClassFileStore;
+import jsheets.evaluation.shell.environment.EmptyClassFileStore;
 
 import static jdk.jshell.execution.Util.remoteInputOutput;
 
@@ -30,6 +34,10 @@ public final class ForkingExecutionControlProvider
   implements ExecutionControlProvider {
 
   private static final Duration defaultTimeout = Duration.ofMillis(3000);
+
+  public static ForkingExecutionControlProvider create() {
+    return create(List.of(), EmptyClassFileStore.create());
+  }
 
   public static ForkingExecutionControlProvider create(
     Collection<String> rawVirtualMachineOptions,
@@ -91,10 +99,10 @@ public final class ForkingExecutionControlProvider
       /* port */ port,
       /* options */ rawVirtualMachineOptions,
       /* remoteAgentClassName */ remoteAgentClassName,
-      /* controlledLaunch */ true,
-      /* host */ host,
+      /* controlledLaunch */ false,
+      /* host */ "",
       /* timeout */ (int) timeout.toMillis(),
-      /* connectorOptions*/ Map.of()
+      /* connectorOptions*/ Collections.emptyMap()
     );
     return new Box(
       initiator.vm(),
@@ -118,6 +126,7 @@ public final class ForkingExecutionControlProvider
     ExecutionEnv environment,
     Box box
   ) throws IOException {
+    var hooks = registerCloseHooks(box.machine());
     var socket = listener.accept();
     var output = socket.getOutputStream();
     return remoteInputOutput(
@@ -125,13 +134,24 @@ public final class ForkingExecutionControlProvider
       output,
       createOutputs(environment),
       createInputs(environment),
-      createControl(box, environment)
+      createControl(box, environment, hooks)
     );
+  }
+
+  private Collection<Consumer<String>> registerCloseHooks(VirtualMachine machine) {
+    var hooks = new CopyOnWriteArrayList<Consumer<String>>();
+    Util.detectJdiExitEvent(machine, event -> {
+      for (var hook : hooks) {
+        hook.accept(event);
+      }
+    });
+    return hooks;
   }
 
   private BiFunction<ObjectInput, ObjectOutput, ExecutionControl> createControl(
     Box box,
-    ExecutionEnv environment
+    ExecutionEnv environment,
+    Collection<Consumer<String>> hooks
   ) {
     return (input, output) -> {
       var control = new ForkedExecutionControl(
@@ -142,7 +162,8 @@ public final class ForkingExecutionControlProvider
         remoteAgentClassName,
         classFileStore
       );
-      registerCloseHooks(box.machine(), environment, control);
+      hooks.add(event -> environment.closeDown());
+      hooks.add(event -> control.disposeMachine());
       return control;
     };
   }
@@ -156,16 +177,5 @@ public final class ForkingExecutionControlProvider
 
   private Map<String, InputStream> createInputs(ExecutionEnv environment) {
     return Map.of("in", environment.userIn());
-  }
-
-  private void registerCloseHooks(
-    VirtualMachine machine,
-    ExecutionEnv environment,
-    ForkedExecutionControl control
-  ) {
-    Util.detectJdiExitEvent(machine, event -> {
-      environment.closeDown();
-      control.disposeMachine();
-    });
   }
 }
