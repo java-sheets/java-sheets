@@ -1,0 +1,3 @@
+-Xmx8M
+-Xms8M
+-XX:+UseSerialGC

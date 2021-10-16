@@ -6,8 +6,8 @@ import com.google.common.flogger.MetadataKey;
 
 import io.javalin.websocket.*;
 import jsheets.*;
-import jsheets.runtime.evaluation.Evaluation;
-import jsheets.runtime.evaluation.EvaluationEngine;
+import jsheets.evaluation.Evaluation;
+import jsheets.evaluation.EvaluationEngine;
 import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.websocket.api.CloseStatus;
 import org.eclipse.jetty.websocket.api.Session;
@@ -138,18 +138,36 @@ public final class EvaluationConnection {
     establishConnection(context, request);
   }
 
-  private static final CloseStatus CANCELLED =
+  private static final CloseStatus cancelledStatus =
     new CloseStatus(HttpStatus.BAD_REQUEST_400, "cancelled");
+
+  private static final CloseStatus runtimeUnavailableStatus =
+    new CloseStatus(HttpStatus.ENHANCE_YOUR_CALM_420, "runtime unavailable");
 
   private void establishConnection(
     WsContext context,
     StartEvaluationRequest request
   ) {
     var listener = new UpstreamListener(context);
-    var upstream = engine.start(request, listener);
-    if (!completeConnecting(upstream)) {
-      ensureSessionIsClosed(context.session, CANCELLED);
+    Evaluation upstream;
+    try {
+      upstream = engine.start(request, listener);
+    } catch (Throwable failure) {
+      reportFailedStart(context, failure);
+      return;
     }
+    if (!completeConnecting(upstream)) {
+      ensureSessionIsClosed(context.session, cancelledStatus);
+    }
+  }
+
+  private void reportFailedStart(WsContext context, Throwable failure) {
+    log.atWarning()
+      .with(sessionIdMetadata, context.getSessionId())
+      .withCause(failure)
+      .atMostEvery(5, TimeUnit.SECONDS)
+      .log("failed to start evaluation");
+    ensureSessionIsClosed(context.session, cancelledStatus);
   }
 
   private boolean completeConnecting(Evaluation upstream) {
@@ -209,6 +227,8 @@ public final class EvaluationConnection {
 
   private void ensureSessionIsClosed(Session session, CloseStatus status) {
     // close does not throw an exception if the session is already closed
+    stage.set(Stage.Terminated);
+    closeHook.run();
     session.close(status);
   }
 

@@ -1,27 +1,95 @@
 plugins {
   id 'java'
+  id 'application'
 }
 
 group 'dev.jsheets'
 version '0.1.0'
 
-sourceCompatibility = 16
-targetCompatibility = 16
-
 repositories {
   mavenCentral()
 }
 
+sourceCompatibility = 16
+targetCompatibility = 16
+
+ext {
+  mongoDbDriverVersion = '4.3.2'
+  cfg4jVersion = '4.4.1'
+  slf4jVersion = '1.7.32'
+  javalinVersion = '4.1.1'
+  argsParseVersion = '0.9.0'
+  guiceVersion = '5.0.1'
+}
+
 dependencies {
   implementation project(':protocol')
+  implementation project(':evaluation')
+  implementation "org.apache.curator:curator-x-discovery:$curatorVersion"
+  implementation "io.micrometer:micrometer-core:$micrometerVersion"
+  implementation "org.mongodb:mongodb-driver-sync:$mongoDbDriverVersion"
+  implementation "org.slf4j:slf4j-simple:$slf4jVersion"
+  implementation "io.grpc:grpc-all:$grpcVersion"
   implementation "com.google.protobuf:protobuf-java-util:$protobufJavaVersion"
+  implementation "net.sourceforge.argparse4j:argparse4j:$argsParseVersion"
+  implementation "javax.annotation:javax.annotation-api:$javaxAnnotationVersion"
   implementation "com.google.flogger:flogger:$floggerVersion"
+  implementation "com.google.flogger:flogger-slf4j-backend:$floggerVersion"
+  implementation "com.google.inject:guice:$guiceVersion"
+  compileOnly "io.soabase.record-builder:record-builder-core:$recordBuilderVersion"
+  annotationProcessor "io.soabase.record-builder:record-builder-processor:$recordBuilderVersion"
   testImplementation "org.junit.jupiter:junit-jupiter-api:$junitPlatformVersion"
   testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitPlatformVersion"
-  testRuntimeOnly "com.google.flogger:flogger-slf4j-backend:$floggerVersion"
 }
 
 test {
   useJUnitPlatform()
-  jvmArgs += ['--add-opens', 'jdk.jshell/jdk.jshell=ALL-UNNAMED']
 }
+
+mainClassName = 'jsheets.runtime.App'
+
+task copyDependencies(type: Copy) {
+  from configurations.runtimeClasspath
+  into "$buildDir/libs"
+}
+
+private def listClassPath() {
+  return configurations.runtimeClasspath.collect { "libs/${it.name}" }.join(" ")
+}
+
+processResources {
+  duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+
+jar {
+  archiveName 'app.jar'
+  duplicatesStrategy = DuplicatesStrategy.INCLUDE
+  manifest {
+    attributes(
+      "Main-Class": "jsheets.runtime.App",
+      "Class-Path": listClassPath()
+    )
+  }
+}
+
+def dockerImageName = "ehenoma/jsheets-runtime"
+def dockerImageTag = System.getenv("TARGET_IMAGE_TAG") || "latest"
+def dockerImage = "$dockerImageName:$dockerImageTag"
+
+task buildDocker(type: Exec) {
+  dependsOn copyDependencies, build
+  workingDir "$projectDir"
+  commandLine "docker", "build", "--rm", ".", "-t", dockerImage, "-f", "./runtime/deploy/Dockerfile"
+}
+
+task justRunDocker(type: Exec) {
+  workingDir "$projectDir"
+  commandLine "docker", "run", dockerImage, "-p", "8080:8080"
+}
+
+task runDocker(type: Exec) {
+  dependsOn buildDocker
+  workingDir "$projectDir"
+  commandLine "docker", "run", dockerImage, "-p", "8080:8080"
+}
+

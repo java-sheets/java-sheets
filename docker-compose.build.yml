@@ -1,0 +1,13 @@
+# Make sure to run 'gradle build copyDependencies' before building this
+version: '3.7'
+services:
+  server:
+    image: ehenoma/jsheets:latest
+    build:
+      dockerfile: server/deploy/Dockerfile
+      context: .
+  runtime:
+    image: ehenoma/jsheets-latest:latest
+    build:
+      dockerfile: runtime/deploy/Dockerfile
+      context: .

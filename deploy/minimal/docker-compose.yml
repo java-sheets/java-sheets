@@ -1,0 +1,66 @@
+version: '3.7'
+services:
+  server:
+    image: ehenoma/jsheets:latest
+    build:
+      context: ../../
+      dockerfile: ./server/deploy/Dockerfile
+    restart: always
+    environment:
+      JSHEETS_SERVER_PORT: 8080
+      JSHEETS_MONGODB_URI: mongodb://root:root@document-store/jsheets
+      JSHEETS_ZOOKEEPER_CONNECTION_STRING: zookeeper:2181
+    ports:
+      - "8080:8080"
+    networks:
+      - document-store
+      - zookeeper
+      - runtime
+  document-store:
+    image: mongo:latest
+    container_name: document-store
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+    networks:
+      - document-store
+  zookeeper:
+    image: zookeeper
+    restart: always
+    hostname: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOO_MY_ID: 1
+      ZOO_PORT: 2181
+    networks:
+      - zookeeper
+  zookeeper-web:
+    image: elkozmon/zoonavigator:latest
+    restart: unless-stopped
+    environment:
+      HTTP_PORT: 9000
+    ports:
+      - "9000:9000"
+    networks:
+    - zookeeper
+  runtime:
+    image: ehenoma/jsheets-runtime:latest
+    build:
+      context: ../../
+      dockerfile: ./runtime/deploy/Dockerfile
+    restart: always
+    container_name: runtime
+    hostname: runtime
+    environment:
+      JSHEETS_RUNTIME_SERVER_PORT: 8080
+      JSHEETS_RUNTIME_ZOOKEEPER_CONNECTION_STRING: zookeeper:2181
+      JSHEETS_RUNTIME_SERVICE_ADVERTISED_HOST: runtime:8080
+    networks:
+      - zookeeper
+      - runtime
+networks:
+  document-store:
+  zookeeper:
+  runtime:

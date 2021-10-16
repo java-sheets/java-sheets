@@ -19,17 +19,17 @@ import com.google.inject.Injector;
 public final class Server {
   private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
-  public record Config(int port) { }
+  public record Options(int port) { }
 
   private final Injector injector;
-  private final Config config;
+  private final Options options;
   private final AtomicReference<Javalin> runningServer =
     new AtomicReference<>(null);
 
   @Inject
-  Server(Injector injector, Config config) {
+  Server(Injector injector, Options options) {
     this.injector = injector;
-    this.config = config;
+    this.options = options;
   }
 
   public void start() {
@@ -38,7 +38,7 @@ public final class Server {
       throw new IllegalStateException("already running");
     }
     log.atInfo().log("starting...");
-    server.start(config.port());
+    server.start(options.port());
   }
 
   public void stop() {
