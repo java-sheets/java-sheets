@@ -73,6 +73,9 @@ public final class ForkedExecutionControl extends JdiExecutionControl {
     throws RunException, EngineTerminationException, InternalException
   {
     String result;
+    if (isClosed()) {
+      throw new IllegalStateException("closed");
+    }
     updateUserCodeRunning(true);
     try {
       result = super.invoke(classname, methodName);

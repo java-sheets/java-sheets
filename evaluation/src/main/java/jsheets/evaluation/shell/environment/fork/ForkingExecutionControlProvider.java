@@ -20,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
+import com.google.common.flogger.FluentLogger;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import com.sun.jdi.VirtualMachine;
@@ -36,6 +37,8 @@ import static jdk.jshell.execution.Util.remoteInputOutput;
 
 public final class ForkingExecutionControlProvider
   implements ExecutionControlProvider {
+
+  private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
   public static ForkingExecutionControlProvider create() {
     return create(
@@ -189,6 +192,15 @@ public final class ForkingExecutionControlProvider
   private void scheduleExecutionTimeout(ForkedExecutionControl control) {
     scheduler.schedule(() -> {
       if (!control.isClosed()) {
+        log.atInfo().log("stopping long running remote");
+        try {
+          control.stop();
+        } catch (Exception failedStop) {
+          log.atWarning()
+            .withCause(failedStop)
+            .atMostEvery(5, TimeUnit.SECONDS)
+            .log("failed to stop long running remote");
+        }
         control.close();
       }
     }, executionTimeout.toMillis(), TimeUnit.MILLISECONDS);

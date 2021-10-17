@@ -63,5 +63,4 @@ public final class EvaluationModule extends AbstractModule {
       virtualMachineOptionsKey().in(config).or("").trim().split("\n")
     );
   }
-
 }
