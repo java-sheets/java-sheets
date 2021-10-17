@@ -12,6 +12,10 @@ import {
 import {useShare} from './sheet/useShare'
 import ImportedSheet from './sheet/ImportedSheet'
 import ShareModal from './sheet/ShareModal'
+import {createBlankSheet, createWelcomeSheet} from './sheet/defaultSheet'
+
+const welcomeSheet = createWelcomeSheet()
+const blankSheet = createBlankSheet()
 
 export default function App() {
   const [evaluate, evaluating] = useEvaluate()
@@ -41,8 +45,17 @@ export default function App() {
                 captureSnippet={captureSnippet}
               />
             </Route>
+            <Route path={['/new', '/blank']}>
+              <Sheet
+                initial={blankSheet}
+                evaluating={evaluating}
+                evaluate={evaluate}
+                captureSnippet={captureSnippet}
+              />
+            </Route>
             <Route path="/">
               <Sheet
+                initial={welcomeSheet}
                 evaluating={evaluating}
                 evaluate={evaluate}
                 captureSnippet={captureSnippet}

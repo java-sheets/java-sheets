@@ -12,7 +12,7 @@ import {
 import {useDispatch} from 'react-redux'
 import {StartEvaluationRequest} from "@jsheets/protocol/src/jsheets/api/snippet_runtime_pb";
 import {reorderSnippet} from './state'
-import {listSnippetsInState, SnippetState} from './index'
+import {listSnippetsInState, SheetState, SnippetState} from './index'
 import Snippet, {SnippetReference} from './snippet/Snippet'
 import {useDraggableIds} from './snippet/draggableId'
 
@@ -47,13 +47,14 @@ function newSnippetTemplate(): Partial<SnippetState> {
 export type CaptureSnippetReference = (id: string, snippet: SnippetReference) => void
 
 export interface SheetProperties {
+  initial?: SheetState
   evaluating?: boolean
   evaluate: (request: StartEvaluationRequest) => void
   captureSnippet?: CaptureSnippetReference
 }
 
 export default function Sheet(properties: SheetProperties) {
-  const {sheet, addSnippet, moveSnippet} = useSheet()
+  const {sheet, addSnippet, moveSnippet} = useSheet(properties.initial)
   const reorder = useReorder()
 
   const snippets = useMemo(() => {
