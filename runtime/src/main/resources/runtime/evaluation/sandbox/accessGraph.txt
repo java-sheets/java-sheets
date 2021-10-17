@@ -4,6 +4,12 @@ java.lang
 !java.lang.invoke
 java.lang.System
 !java.lang.System#exit
+!java.lang.Runtime
+!java.lang.Process
+!java.lang.ProcessBuilder
+!java.lang.SecurityManager
+!java.lang.ThreadDeath
+!java.lang.ThreadGroup
 !java.util.concurrent
 java.text
 java.time

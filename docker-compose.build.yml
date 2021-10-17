@@ -7,7 +7,7 @@ services:
       dockerfile: server/deploy/Dockerfile
       context: .
   runtime:
-    image: ehenoma/jsheets-latest:latest
+    image: ehenoma/jsheets-runtime:latest
     build:
       dockerfile: runtime/deploy/Dockerfile
       context: .

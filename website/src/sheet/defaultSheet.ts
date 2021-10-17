@@ -1,7 +1,7 @@
 import {SheetState} from "./index";
 import {v4 as uuid} from "uuid";
 
-export default function createDefaultSheet(): SheetState {
+export function createWelcomeSheet(): SheetState {
   const id = uuid()
   const firstComponentId = uuid()
   const secondComponentId = uuid()
@@ -27,6 +27,31 @@ export default function createDefaultSheet(): SheetState {
             content: `Math.min(420, 1337)`,
             type: 'code'
           }
+        }
+      }
+    }
+  }
+}
+
+export function createBlankSheet(): SheetState {
+  const id = uuid()
+  const componentId = uuid()
+  return {
+    id: uuid(),
+    title: 'Welcome!',
+    description: '',
+    snippets: {
+      [id]: {
+        id: id,
+        title: 'Welcome!',
+        order: 0,
+        components: {
+          [componentId]: {
+            id: componentId,
+            order: 0,
+            content: ``,
+            type: 'code'
+          },
         }
       }
     }
