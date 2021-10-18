@@ -60,6 +60,11 @@ thus `SERVER_PORT` has to be specified as `JSHEETS_RUNTIME_SERVER_PORT`.
 | evaluation.sandbox.disable | `EVALUATION_SANDBOX_DISABLE` | `false` | Disables the sandbox for code execution **dangerous** |
 | zookeeper.connectionString | `ZOOKEEPER_CONNECTION_STRING` | none | Connection string to zookeeper |
 | zookeeper.connectBackoff | `ZOOKEEPER_CONNECT_BACKOFF` | `1000` | Initial backoff after failed zookeeper connection |
+| monitoring.backend | `MONITORING_BACKEND` | none | Backend used for monitoring. If no backend is configured, monitoring is disabled |
+| monitoring.influx.authToken | `MONITORING_INFLUX_AUTH_TOKEN` | none | Influx auth token |
+| monitoring.influx.org | `MONITORING_INFLUX_ORG` | none | Influx org |
+| monitoring.influx.bucket | `MONITORING_INFLUX_BUCKET ` | `jsheets` | Influx bucket |
+| monitoring.influx.step | `MONITORING_INFLUX_STEP` | `10` | Influx reporting interval in seconds |
 
 ### Sandboxing
 The JVM itself is a sufficient sandbox, if we restrict the methods
@@ -155,6 +160,18 @@ instances.
 It is important to keep the evaluations per instance fairly low to
 reduce the amount of evaluations that are affected by crashes and
 lower usage of system resources (such as processors and memory).
+
+### Monitoring
+Monitoring can be enabled by specifying a monitoring backend.
+Currently, only `influx` is supported.
+
+Set the `JSHEETS_RUNTIME_MONITORING_BACKEND=influx` and configure influx
+credentials using
+```dotenv
+JSHEETS_RUNTIME_MONITORING_INFLUX_ORG=${YOUR_ORG}
+JSHEETS_RUNTIME_MONITORING_INFLUX_AUTH_TOKEN=${YOUR_TOKEN}
+JSHEETS_RUNTIME_MONITORING_INFLUX_BUCKET=${YOUR_BUCKET}
+```
 
 
 ### Handling Crashes

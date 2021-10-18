@@ -2,6 +2,7 @@ package jsheets.evaluation.shell;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
+import java.time.Clock;
 import java.time.Duration;
 import java.util.Objects;
 import java.util.concurrent.Executor;
@@ -15,6 +16,7 @@ import jsheets.evaluation.shell.environment.ExecutionEnvironment;
 import jsheets.evaluation.shell.environment.StandardEnvironment;
 import jsheets.evaluation.shell.execution.ExecutionMethod;
 import jsheets.evaluation.shell.execution.SystemBasedExecutionMethodFactory;
+import jsheets.event.EventSink;
 
 public final class ShellEvaluationEngine implements EvaluationEngine {
   private final Executor workerPool;
@@ -22,19 +24,25 @@ public final class ShellEvaluationEngine implements EvaluationEngine {
   private final ExecutionEnvironment executionEnvironment;
   private final ExecutionMethod.Factory executionMethodFactory;
   private final Duration messageFlushInterval;
+  private final EventSink events;
+  private final Clock clock;
 
   private ShellEvaluationEngine(
+    Clock clock,
     Executor workerPool,
     ScheduledExecutorService scheduler,
     ExecutionEnvironment executionEnvironment,
     ExecutionMethod.Factory executionMethodFactory,
-    Duration messageFlushInterval
+    Duration messageFlushInterval,
+    EventSink events
   ) {
+    this.clock = clock;
     this.workerPool = workerPool;
     this.scheduler = scheduler;
     this.executionEnvironment = executionEnvironment;
     this.messageFlushInterval = messageFlushInterval;
     this.executionMethodFactory = executionMethodFactory;
+    this.events = events;
   }
 
   @Override
@@ -49,9 +57,11 @@ public final class ShellEvaluationEngine implements EvaluationEngine {
 
   private ShellEvaluation createEvaluation(Evaluation.Listener listener) {
     return new ShellEvaluation(
+      clock,
       executionEnvironment,
       executionMethodFactory,
       listener,
+      events,
       new MessageOutput(
         messageFlushInterval,
         scheduler,
@@ -70,10 +80,24 @@ public final class ShellEvaluationEngine implements EvaluationEngine {
     private Duration messageFlushInterval;
     private ScheduledExecutorService scheduler;
     private ExecutionMethod.Factory executionMethodFactory;
+    private EventSink events;
+    private Clock clock;
 
     public Builder useWorkerPool(Executor pool) {
       Objects.requireNonNull(pool, "workerPool");
       workerPool = pool;
+      return this;
+    }
+
+    public Builder withClock(Clock clock) {
+      Objects.requireNonNull(clock, "clock");
+      this.clock = clock;
+      return this;
+    }
+
+    public Builder withEventSink(EventSink sink) {
+      Objects.requireNonNull(sink, "sink");
+      events = sink;
       return this;
     }
 
@@ -103,12 +127,22 @@ public final class ShellEvaluationEngine implements EvaluationEngine {
 
     public EvaluationEngine create() {
       return new ShellEvaluationEngine(
+        selectClock(),
         selectWorkerPool(),
         selectScheduler(),
         selectEnvironment(),
         selectExecutionMethodFactory(),
-        selectMessageFlushInterval()
+        selectMessageFlushInterval(),
+        selectEventSink()
       );
+    }
+
+    private Clock selectClock() {
+      return clock == null ? Clock.systemUTC() : clock;
+    }
+
+    private EventSink selectEventSink() {
+      return events == null ? EventSink.ignore() : events;
     }
 
     private ExecutionMethod.Factory selectExecutionMethodFactory() {

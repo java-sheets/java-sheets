@@ -1,6 +1,8 @@
 package jsheets.runtime;
 
 import java.util.ArrayList;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
@@ -26,7 +28,7 @@ final class ConfigModule extends AbstractModule {
   Config createConfig(@Named("environment") Config environment) {
     var configs = new ArrayList<Config>();
     configs.add(environment);
-    configs.add(EvaluationConfigSource.fromClassPath().load());
+    configs.add(EvaluationConfigSource.create().load());
     return CombinedConfig.of(configs.toArray(Config[]::new));
   }
 
@@ -35,5 +37,11 @@ final class ConfigModule extends AbstractModule {
   @Named("environment")
   Config environmentConfig() {
     return EnvironmentConfig.prefixed(environmentPrefix).load();
+  }
+
+  @Provides
+  @Singleton
+  Executor executor() {
+    return Executors.newCachedThreadPool();
   }
 }

@@ -16,6 +16,7 @@ import jsheets.evaluation.sandbox.validation.ForbiddenMemberFilter;
 import jsheets.evaluation.shell.environment.fork.ForkingExecutionControlProvider;
 import jsheets.evaluation.shell.environment.sandbox.SandboxClassFileCheck;
 import jsheets.runtime.evaluation.EvaluationModule;
+import jsheets.runtime.monitoring.MonitoringModule;
 
 public final class App {
   private static final FluentLogger log = FluentLogger.forEnclosingClass();
@@ -48,7 +49,8 @@ public final class App {
       ServerSetupModule.create(),
       ConfigModule.create(),
       ZookeeperModule.create(),
-      EvaluationModule.create()
+      EvaluationModule.create(),
+      MonitoringModule.create()
     );
   }
 

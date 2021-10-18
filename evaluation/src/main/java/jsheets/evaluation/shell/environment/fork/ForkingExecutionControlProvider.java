@@ -32,6 +32,7 @@ import jdk.jshell.spi.ExecutionControlProvider;
 import jdk.jshell.spi.ExecutionEnv;
 import jsheets.evaluation.shell.environment.ClassFileStore;
 import jsheets.evaluation.shell.environment.EmptyClassFileStore;
+import jsheets.event.EventSink;
 
 import static jdk.jshell.execution.Util.remoteInputOutput;
 
@@ -47,7 +48,8 @@ public final class ForkingExecutionControlProvider
       Executors.newScheduledThreadPool(
         1,
         new ThreadFactoryBuilder().setDaemon(true).build()
-      )
+      ),
+      EventSink.ignore()
     );
   }
 
@@ -58,7 +60,8 @@ public final class ForkingExecutionControlProvider
   public static ForkingExecutionControlProvider create(
     Collection<String> rawVirtualMachineOptions,
     ClassFileStore classFileStore,
-    ScheduledExecutorService scheduler
+    ScheduledExecutorService scheduler,
+    EventSink events
   ) {
     Objects.requireNonNull(classFileStore, "classFileStore");
     Objects.requireNonNull(rawVirtualMachineOptions, "rawVirtualMachineOptions");
@@ -67,7 +70,8 @@ public final class ForkingExecutionControlProvider
       defaultTimeout,
       List.copyOf(rawVirtualMachineOptions),
       classFileStore,
-      scheduler
+      scheduler,
+      events
     );
   }
 
@@ -76,19 +80,22 @@ public final class ForkingExecutionControlProvider
   private final List<String> rawVirtualMachineOptions;
   private final ScheduledExecutorService scheduler;
   private final ClassFileStore classFileStore;
+  private final EventSink events;
 
   private ForkingExecutionControlProvider(
     Duration executionTimeout,
     Duration connectTimeout,
     List<String> rawVirtualMachineOptions,
     ClassFileStore classFileStore,
-    ScheduledExecutorService scheduler
+    ScheduledExecutorService scheduler,
+    EventSink events
   ) {
     this.executionTimeout = executionTimeout;
     this.connectTimeout = connectTimeout;
     this.rawVirtualMachineOptions = rawVirtualMachineOptions;
     this.classFileStore = classFileStore;
     this.scheduler = scheduler;
+    this.events = events;
   }
 
   @Override
@@ -124,10 +131,25 @@ public final class ForkingExecutionControlProvider
       /* timeout */ (int) connectTimeout.toMillis(),
       /* connectorOptions*/ Collections.emptyMap()
     );
-    return new Box(
-      initiator.vm(),
-      initiator.process()
-    );
+    var box =  new Box(initiator.vm(), initiator.process());
+    postLifecycleEvent(box, BoxLifecycleEvent.Stage.Starting);
+    return box;
+  }
+
+  private void postLifecycleEvent(Box box, BoxLifecycleEvent.Stage stage) {
+    events.postIfEnabled(() -> {
+      var labels = Map.<String, Object>of(
+        "executionTimeout", executionTimeout.toMillis(),
+        "connectTimeout", connectTimeout.toMillis(),
+        "remoteAgentClassName", remoteAgentClassName,
+        "virtualMachineOptions", String.join(" ", rawVirtualMachineOptions)
+      );
+      return BoxLifecycleEventBuilder.builder()
+        .processId(box.process.pid())
+        .stage(stage)
+        .labels(labels)
+        .build();
+    });
   }
 
   private static final int backlog = 1;
@@ -140,6 +162,7 @@ public final class ForkingExecutionControlProvider
       return accept(listener, environment, box);
     }
   }
+
 
   private ExecutionControl accept(
     ServerSocket listener,
@@ -182,8 +205,10 @@ public final class ForkingExecutionControlProvider
         remoteAgentClassName,
         classFileStore
       );
+      postLifecycleEvent(box, BoxLifecycleEvent.Stage.Running);
       hooks.add(event -> environment.closeDown());
       hooks.add(event -> control.disposeMachine());
+      hooks.add(event -> postLifecycleEvent(box, BoxLifecycleEvent.Stage.Stopping));
       scheduleExecutionTimeout(control);
       return control;
     };

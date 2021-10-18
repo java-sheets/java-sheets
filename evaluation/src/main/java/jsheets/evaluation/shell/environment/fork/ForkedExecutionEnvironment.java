@@ -10,18 +10,21 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import jdk.jshell.spi.ExecutionControlProvider;
 import jsheets.evaluation.shell.environment.ClassFileStore;
 import jsheets.evaluation.shell.environment.ExecutionEnvironment;
+import jsheets.event.EventSink;
 
 public final class ForkedExecutionEnvironment implements ExecutionEnvironment {
   public static ForkedExecutionEnvironment create(
     ClassFileStore store,
-    Collection<String> virtualMachineOptions
+    Collection<String> virtualMachineOptions,
+    EventSink events
   ) {
     Objects.requireNonNull(store, "store");
     Objects.requireNonNull(virtualMachineOptions, "virtualMachineOptions");
     return new ForkedExecutionEnvironment(
       store,
       virtualMachineOptions,
-      createDaemonScheduler()
+      createDaemonScheduler(),
+      events
     );
   }
 
@@ -33,15 +36,18 @@ public final class ForkedExecutionEnvironment implements ExecutionEnvironment {
   private final ClassFileStore store;
   private final Collection<String> virtualMachineOptions;
   private final ScheduledExecutorService scheduler;
+  private final EventSink events;
 
   private ForkedExecutionEnvironment(
     ClassFileStore store,
     Collection<String> virtualMachineOptions,
-    ScheduledExecutorService scheduler
+    ScheduledExecutorService scheduler,
+    EventSink events
   ) {
     this.store = store;
     this.virtualMachineOptions = virtualMachineOptions;
     this.scheduler = scheduler;
+    this.events = events;
   }
 
   @Override
@@ -49,7 +55,8 @@ public final class ForkedExecutionEnvironment implements ExecutionEnvironment {
     return ForkingExecutionControlProvider.create(
       virtualMachineOptions,
       store,
-      scheduler
+      scheduler,
+      events
     );
   }
 

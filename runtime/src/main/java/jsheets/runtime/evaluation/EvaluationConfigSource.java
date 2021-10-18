@@ -1,19 +1,19 @@
 package jsheets.runtime.evaluation;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.util.Optional;
+import java.nio.file.Path;
 
-import com.google.common.flogger.FluentLogger;
-
+import com.google.api.client.util.Strings;
 import jsheets.config.Config;
-import jsheets.config.RawConfig;
+import jsheets.config.Configs;
+import jsheets.config.FileConfigSource;
 
 /**
  * Reads the {@code AccessGraph} configuration from the classpath.
  */
 public final class EvaluationConfigSource implements Config.Source {
-  private static final FluentLogger log = FluentLogger.forEnclosingClass();
+  public static EvaluationConfigSource create() {
+    return new EvaluationConfigSource();
+  }
 
   private EvaluationConfigSource() {}
 
@@ -38,10 +38,6 @@ public final class EvaluationConfigSource implements Config.Source {
     return accessGraphKey;
   }
 
-  public static EvaluationConfigSource fromClassPath() {
-    return new EvaluationConfigSource();
-  }
-
   private static final Config.Key<String> virtualMachineOptionsKey =
     Config.Key.ofString("evaluation.fork.virtualMachineOptions");
 
@@ -49,44 +45,35 @@ public final class EvaluationConfigSource implements Config.Source {
     return virtualMachineOptionsKey;
   }
 
-  private static final String accessGraphFilePath =
-    "runtime/evaluation/sandbox/accessGraph.txt";
-
-  private static final String virtualMachineOptionsFilePath =
-    "runtime/evaluation/fork/virtualMachineOptions.txt";
-
-  private static final String defaultImportsFilePath =
-    "runtime/evaluation/defaultImportsKey.txt";
-
   @Override
   public Config load() {
-    var config = RawConfig.newBuilder();
-    readFullFile(accessGraphFilePath).ifPresent(value ->
-      config.with(accessGraphKey, value)
+    var directory = determineConfigPath();
+    return Configs.loadAll(
+      new FileConfigSource(
+        accessGraphKey,
+        Path.of("runtime/evaluation/sandbox/accessGraph.txt"),
+        directory
+      ),
+      new FileConfigSource(
+        virtualMachineOptionsKey,
+        Path.of("runtime/evaluation/fork/virtualMachineOptions.txt"),
+        directory
+      ),
+      new FileConfigSource(
+        defaultImportsKey,
+        Path.of("runtime/evaluation/defaultImports.txt"),
+        directory
+      )
     );
-    readFullFile(virtualMachineOptionsFilePath).ifPresent(value ->
-      config.with(virtualMachineOptionsKey, value)
-    );
-    readFullFile(defaultImportsFilePath).ifPresent(value ->
-      config.with(defaultImportsKey, value)
-    );
-    return config.create();
   }
 
-  private static Optional<String> readFullFile(String path) {
-    var resources = Thread.currentThread().getContextClassLoader();
-    var file = resources.getResourceAsStream(path);
-    if (file == null) {
-      log.atConfig().log("could not find %s in classpath", path);
-      return Optional.empty();
-    }
-    try (var input = new BufferedInputStream(file)) {
-      return Optional.of(new String(input.readAllBytes()));
-    } catch (IOException failedRead) {
-      log.atWarning()
-        .withCause(failedRead)
-        .log("failed to read %s", path);
-    }
-    return Optional.empty();
+  private static final String configPathOverrideField =
+    "JSHEETS_RUNTIME_CONFIG_PATH";
+
+  private static Path determineConfigPath() {
+    var specialPath = System.getenv(configPathOverrideField);
+    return Strings.isNullOrEmpty(specialPath)
+      ? Path.of(System.getProperty("user.dir"))
+      : Path.of(specialPath);
   }
 }

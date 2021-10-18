@@ -28,6 +28,7 @@ dependencies {
   implementation project(':common')
   implementation "org.apache.curator:curator-x-discovery:$curatorVersion"
   implementation "io.micrometer:micrometer-core:$micrometerVersion"
+  implementation "io.micrometer:micrometer-registry-influx:$micrometerVersion"
   implementation "org.mongodb:mongodb-driver-sync:$mongoDbDriverVersion"
   implementation "org.slf4j:slf4j-simple:$slf4jVersion"
   implementation "io.grpc:grpc-all:$grpcVersion"
