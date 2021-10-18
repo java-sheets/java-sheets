@@ -107,7 +107,6 @@ public final class ForkedExecutionControl extends JdiExecutionControl {
     }
   }
 
-
   @Override
   public void close() {
     super.close();

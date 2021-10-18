@@ -26,6 +26,7 @@ ext {
 dependencies {
   implementation project(':protocol')
   implementation project(':evaluation')
+  implementation project(':common')
   implementation "org.apache.curator:curator-x-discovery:$curatorVersion"
   implementation "io.micrometer:micrometer-core:$micrometerVersion"
   implementation "org.mongodb:mongodb-driver-sync:$mongoDbDriverVersion"

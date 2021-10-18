@@ -4,7 +4,6 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 
-import javax.inject.Named;
 import jsheets.evaluation.EvaluationEngine;
 import jsheets.evaluation.sandbox.access.AccessGraph;
 import jsheets.evaluation.sandbox.validation.ForbiddenMemberFilter;
@@ -12,7 +11,6 @@ import jsheets.evaluation.shell.ShellEvaluationEngine;
 import jsheets.evaluation.shell.environment.ExecutionEnvironment;
 import jsheets.evaluation.shell.environment.fork.ForkedExecutionEnvironment;
 import jsheets.evaluation.shell.environment.sandbox.SandboxClassFileCheck;
-import jsheets.evaluation.shell.environment.sandbox.SandboxedEnvironment;
 import jsheets.evaluation.shell.environment.StandardEnvironment;
 import jsheets.config.Config;
 import jsheets.evaluation.shell.execution.SystemBasedExecutionMethodFactory;

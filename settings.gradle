@@ -5,4 +5,5 @@ include 'runtime'
 include 'protocol'
 include 'website'
 include 'server'
+include 'common'
 

@@ -2,18 +2,12 @@ package jsheets.runtime.evaluation;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
 import com.google.common.flogger.FluentLogger;
 
-import com.google.inject.Provides;
-
-import javax.inject.Named;
 import jsheets.config.Config;
 import jsheets.config.RawConfig;
-import jsheets.runtime.ServerSetup;
 
 /**
  * Reads the {@code AccessGraph} configuration from the classpath.

@@ -17,6 +17,7 @@ import org.apache.curator.x.discovery.ServiceDiscoveryBuilder;
 import org.apache.curator.x.discovery.ServiceProvider;
 
 import java.util.Optional;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 public final class EvaluationModule extends AbstractModule {
@@ -31,13 +32,18 @@ public final class EvaluationModule extends AbstractModule {
   @Provides
   @Singleton
   EvaluationEngine evaluationEngine(
-    Optional<CuratorFramework> curatorBinding
+    Optional<CuratorFramework> curatorBinding,
+    Executor executor
   ) {
-    return curatorBinding.map(this::createRemoteEvaluationEngine)
+    return curatorBinding
+      .map(client -> createRemoteEvaluationEngine(client , executor))
       .orElseGet(this::createEmbeddedEvaluationEngine);
   }
 
-  private EvaluationEngine createRemoteEvaluationEngine(CuratorFramework client) {
+  private EvaluationEngine createRemoteEvaluationEngine(
+    CuratorFramework client,
+    Executor executor
+  ) {
     var provider = createServiceProvider(client);
     try {
       provider.start();
@@ -51,7 +57,9 @@ public final class EvaluationModule extends AbstractModule {
         log.atWarning().withCause(failure).log("failed to close service discovery");
       }
     }));
-    return PooledEvaluationEngine.of(ZookeeperEngineDiscovery.create(provider));
+    return PooledEvaluationEngine.of(
+      ZookeeperEngineDiscovery.create(executor, provider)
+    );
   }
 
   private EvaluationEngine createEmbeddedEvaluationEngine() {
