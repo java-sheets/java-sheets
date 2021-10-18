@@ -10,8 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    # Setup Java Installation
-    - name: Set up JDK
+    - name: Set up JDK 
       uses: actions/setup-java@v2
       with:
         java-version: '16'
@@ -46,7 +45,7 @@ jobs:
         username: ${{ secrets.DOCKER_USER }}
         password: ${{ secrets.DOCKER_TOKEN }}
     # Build the image and push it to the registry
-    - name: Build the Docker image
+    - name: Build Server
       uses: docker/build-push-action@v2
       with:
         context: .
@@ -54,3 +53,11 @@ jobs:
         platforms: linux/amd64,linux/arm64,linux/386
         push: true
         tags: ehenoma/jsheets:${{ env.BRANCH }}
+    - name: Build Runtime
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        file: ./runtime/deploy/Dockerfile
+        platforms: linux/amd64,linux/arm64,linux/386
+        push: true
+        tags: ehenoma/jsheets-runtime:${{ env.BRANCH }}
