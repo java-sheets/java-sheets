@@ -5,10 +5,12 @@ services:
     restart: always
     environment:
       JSHEETS_SERVER_PORT: 8080
-      JSHEETS_MONGODB_URI: mongodb://root:root@document-store/jsheets
+      JSHEETS_MONGODB_URI: mongodb://root:root@document-store/jsheets?authSource=admin
       JSHEETS_ZOOKEEPER_CONNECTION_STRING: zookeeper:2181
     ports:
       - "8080:8080"
+    depends_on:
+      - document-store
     networks:
       - document-store
       - zookeeper
@@ -38,13 +40,23 @@ services:
     restart: always
     container_name: runtime
     hostname: runtime
+    build:
+      context: ../../
+      dockerfile: ./runtime/deploy/Dockerfile
     environment:
       JSHEETS_RUNTIME_SERVER_PORT: 8080
       JSHEETS_RUNTIME_ZOOKEEPER_CONNECTION_STRING: zookeeper:2181
       JSHEETS_RUNTIME_SERVICE_ADVERTISED_HOST: runtime:8080
+      JSHEETS_RUNTIME_MONITORING_BACKEND: influx
+      JSHEETS_RUNTIME_MONITORING_INFLUX_URI: "http://influxdb:8086"
+      JSHEETS_RUNTIME_MONITORING_INFLUX_USER_NAME: ${INFLUXDB_USERNAME}
+      JSHEETS_RUNTIME_MONITORING_INFLUX_PASSWORD: ${INFLUXDB_PASSWORD}
+    depends_on:
+      - zookeeper
     networks:
       - zookeeper
       - runtime
+      - influxdb
 networks:
   document-store:
   zookeeper:

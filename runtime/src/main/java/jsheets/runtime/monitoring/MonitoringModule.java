@@ -61,32 +61,36 @@ public final class MonitoringModule extends AbstractModule {
 
   @RecordBuilder
   record FixedInfluxConfig(
-    String authToken,
+    String password,
     String org,
     String userName,
     String bucket,
     String uri,
+    String db,
     Duration step
   ) implements InfluxConfig {
 
     static final Key<String> orgKey = ofString("monitoring.influx.org");
     static final Key<String> bucketKey = ofString("monitoring.influx.bucket");
     static final Key<String> userNameKey = ofString("monitoring.influx.userName");
-    static final Key<String> authTokenKey = ofString("monitoring.influx.authToken");
+    static final Key<String> passwordKey = ofString("monitoring.influx.password");
+    static final Key<String> databaseKey = ofString("monitoring.influx.db");
     static final Key<String> uriKey = ofString("monitoring.influx.uri");
     static final Key<Integer> stepKey = ofInt("monitoring.influx.step");
 
     private static final String defaultInfluxBucket = "jsheets";
+    private static final String defaultDatabase = "jsheets";
     private static final String defaultUri = "http://localhost:8086";
     private static final int defaultStep = 10;
 
     static InfluxConfig fromConfig(Config config) {
       return MonitoringModuleFixedInfluxConfigBuilder.builder()
-        .authToken(authTokenKey.in(config).require())
-        .org(orgKey.in(config).or(null))
+        .password(passwordKey.in(config).require())
+        .org(orgKey.in(config).or(""))
         .bucket(bucketKey.in(config).or(defaultInfluxBucket))
         .userName(userNameKey.in(config).require())
         .uri(uriKey.in(config).or(defaultUri))
+        .db(databaseKey.in(config).or(defaultDatabase))
         .step(Duration.ofSeconds(stepKey.in(config).or(defaultStep)))
         .build();
     }

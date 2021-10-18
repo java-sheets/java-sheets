@@ -38,7 +38,7 @@ export default function ShareModal(properties: ShareModalProperties) {
       onOk={() => properties.onVisibilityChange?.(false)}
       footer={[]}
     >
-      <p>Your Sheet has been saved. You can use the link too share it.</p>
+      <p>Your Sheet has been saved. You can use the link to share it.</p>
       <Styled.LinkText
         value={link}
         suffix={

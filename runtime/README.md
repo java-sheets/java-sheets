@@ -62,7 +62,8 @@ thus `SERVER_PORT` has to be specified as `JSHEETS_RUNTIME_SERVER_PORT`.
 | zookeeper.connectBackoff | `ZOOKEEPER_CONNECT_BACKOFF` | `1000` | Initial backoff after failed zookeeper connection |
 | monitoring.backend | `MONITORING_BACKEND` | none | Backend used for monitoring. If no backend is configured, monitoring is disabled |
 | monitoring.influx.userName | `MONITORING_INFLUX_USER_NAME` | none | Influx user name |
-| monitoring.influx.authToken | `MONITORING_INFLUX_AUTH_TOKEN` | none | Influx auth token |
+| monitoring.influx.password | `MONITORING_INFLUX_PASSWORD` | none | Influx password |
+| monitoring.influx.db | `MONITORING_INFLUX_DB` | `jsheets` | Name of the influx database |
 | monitoring.influx.uri | `MONITORING_INFLUX_URI` | `http://localhost:8086` | URI of the influx service |
 | monitoring.influx.org | `MONITORING_INFLUX_ORG` | none | Influx org |
 | monitoring.influx.bucket | `MONITORING_INFLUX_BUCKET ` | `jsheets` | Influx bucket |
@@ -170,8 +171,8 @@ Currently, only `influx` is supported.
 Set the `JSHEETS_RUNTIME_MONITORING_BACKEND=influx` and configure influx
 credentials using
 ```dotenv
-JSHEETS_RUNTIME_MONITORING_INFLUX_USER_NAMKE=${YOUR_USER_NAME}
-JSHEETS_RUNTIME_MONITORING_INFLUX_AUTH_TOKEN=${YOUR_TOKEN}
+JSHEETS_RUNTIME_MONITORING_INFLUX_USER_NAME=${YOUR_USER_NAME}
+JSHEETS_RUNTIME_MONITORING_INFLUX_PASSWORD=${YOUR_PASSWORD}
 JSHEETS_RUNTIME_MONITORING_INFLUX_BUCKET=${YOUR_BUCKET}
 ```
 
