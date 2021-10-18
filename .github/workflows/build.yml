@@ -35,7 +35,11 @@ jobs:
     - name: Build Website
       run: CI='' npm run build-all
       working-directory: website
-    # Builds the backend (will include the websites generated code in the apps classpath)
+  build-docker:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+  # Builds the backend (will include the websites generated code in the apps classpath)
     - name: Build Server
       run: ./gradlew build copyDependencies
     # Login to Docker Registry
@@ -45,19 +49,39 @@ jobs:
         username: ${{ secrets.DOCKER_USER }}
         password: ${{ secrets.DOCKER_TOKEN }}
     # Build the image and push it to the registry
+    - name: Create Server Docker Meta
+      id: docker_server_meta
+      uses: crazy-max/ghaction-docker-meta@v2
+      with:
+        images: ehenoma/jsheets
+        tags: |
+          type=raw,value=latest,enable=${{ endsWith(GitHub.ref, 'main') }}
+          type=ref,event=tag
+        flavor: |
+          latest=false
     - name: Build Server
       uses: docker/build-push-action@v2
       with:
         context: .
         file: ./server/deploy/Dockerfile
-        platforms: linux/amd64,linux/arm64,linux/386
         push: true
-        tags: ehenoma/jsheets:${{ env.BRANCH }}
+        tags: ${{ steps.docker_server_meta.outputs.tags }}
+        labels: ${{ steps.docker_server_meta.outputs.labels }}
+    - name: Create Runtime Docker Meta
+      id: docker_runtime_meta
+      uses: crazy-max/ghaction-docker-meta@v2
+      with:
+        images: ehenoma/jsheets
+        tags: |
+          type=raw,value=latest,enable=${{ endsWith(GitHub.ref, 'main') }}
+          type=ref,event=tag
+        flavor: |
+          latest=false
     - name: Build Runtime
       uses: docker/build-push-action@v2
       with:
         context: .
         file: ./runtime/deploy/Dockerfile
-        platforms: linux/amd64,linux/arm64,linux/386
         push: true
-        tags: ehenoma/jsheets-runtime:${{ env.BRANCH }}
+        tags: ${{ steps.docker_runtime_meta.outputs.tags }}
+        labels: ${{ steps.docker_runtime_meta.outputs.labels }}
