@@ -14,9 +14,15 @@ import io.micrometer.core.instrument.Clock;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.influx.InfluxConfig;
 import io.micrometer.influx.InfluxMeterRegistry;
+import io.soabase.recordbuilder.core.RecordBuilder;
+
 import jsheets.config.Config;
+import jsheets.config.Config.Key;
 import jsheets.event.EventSink;
 import jsheets.event.GuavaEventSink;
+
+import static jsheets.config.Config.Key.ofInt;
+import static jsheets.config.Config.Key.ofString;
 
 public final class MonitoringModule extends AbstractModule {
   public static MonitoringModule create() {
@@ -25,12 +31,11 @@ public final class MonitoringModule extends AbstractModule {
 
   private MonitoringModule() {}
 
-  private final Config.Key<String> monitoringBackendKey =
-    Config.Key.ofString("monitoring.backend");
+  private final Key<String> monitoringBackendKey = ofString("monitoring.backend");
 
   @Provides
   @Singleton
-  private EventSink eventSink(Executor executor, Config config) {
+  EventSink eventSink(Executor executor, Config config) {
     return selectRegistry(config).map(registry -> {
       var bus = new AsyncEventBus("monitoring", executor);
       bus.register(EvaluationEngineMonitoring.register(registry));
@@ -54,40 +59,36 @@ public final class MonitoringModule extends AbstractModule {
     );
   }
 
+  @RecordBuilder
   record FixedInfluxConfig(
     String authToken,
     String org,
+    String userName,
     String bucket,
+    String uri,
     Duration step
   ) implements InfluxConfig {
 
-    private static final Config.Key<String> influxAuthTokenKey =
-      Config.Key.ofString("monitoring.influx.authToken");
-
-    private static final Config.Key<Integer> stepKey =
-      Config.Key.ofInt("monitoring.influx.step");
-
-    private static final Config.Key<String> influxOrgKey =
-      Config.Key.ofString("monitoring.influx.org");
-
-    private static final Config.Key<String> influxBucketKey =
-      Config.Key.ofString("monitoring.influx.bucket");
+    static final Key<String> orgKey = ofString("monitoring.influx.org");
+    static final Key<String> bucketKey = ofString("monitoring.influx.bucket");
+    static final Key<String> userNameKey = ofString("monitoring.influx.userName");
+    static final Key<String> authTokenKey = ofString("monitoring.influx.authToken");
+    static final Key<String> uriKey = ofString("monitoring.influx.uri");
+    static final Key<Integer> stepKey = ofInt("monitoring.influx.step");
 
     private static final String defaultInfluxBucket = "jsheets";
-
+    private static final String defaultUri = "http://localhost:8086";
     private static final int defaultStep = 10;
 
     static InfluxConfig fromConfig(Config config) {
-      var authToken = influxAuthTokenKey.in(config).require();
-      var org = influxOrgKey.in(config).require();
-      var bucket = influxBucketKey.in(config).or(defaultInfluxBucket);
-      var step = Duration.ofSeconds(stepKey.in(config).or(defaultStep));
-      return new FixedInfluxConfig(authToken, org, bucket, step);
-    }
-
-    @Override
-    public Duration step() {
-      return InfluxConfig.super.step();
+      return MonitoringModuleFixedInfluxConfigBuilder.builder()
+        .authToken(authTokenKey.in(config).require())
+        .org(orgKey.in(config).or(null))
+        .bucket(bucketKey.in(config).or(defaultInfluxBucket))
+        .userName(userNameKey.in(config).require())
+        .uri(uriKey.in(config).or(defaultUri))
+        .step(Duration.ofSeconds(stepKey.in(config).or(defaultStep)))
+        .build();
     }
 
     @Override
