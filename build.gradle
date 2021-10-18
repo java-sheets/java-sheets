@@ -15,4 +15,5 @@ ext {
   javaxAnnotationVersion = '1.3.2'
   recordBuilderVersion = '28'
   guavaVersion = '31.0.1-jre'
+  bucket4jVersion = '6.3.0'
 }

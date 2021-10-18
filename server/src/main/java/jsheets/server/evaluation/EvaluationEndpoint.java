@@ -1,28 +1,44 @@
 package jsheets.server.evaluation;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+import io.github.bucket4j.Bandwidth;
 import io.javalin.Javalin;
 import io.javalin.websocket.WsConfig;
 import io.javalin.websocket.WsContext;
 import jsheets.server.endpoint.Endpoint;
+import jsheets.server.endpoint.WebSocketRateLimit;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
+import javax.inject.Named;
 
 public final class EvaluationEndpoint implements Endpoint {
   private final ConnectionTable table;
+  @Nullable
+  private final Bandwidth bandwidth;
 
   @Inject
-  EvaluationEndpoint(ConnectionTable table) {
+  EvaluationEndpoint(
+    ConnectionTable table,
+    @Named("evaluationBandwidth") @Nullable Bandwidth bandwidth
+  ) {
     this.table = table;
+    this.bandwidth = bandwidth;
   }
+
+  private static final String route = "/api/v1/evaluate";
 
   @Override
   public void configure(Javalin server) {
-    server.ws("/api/v1/evaluate", table::listen);
+    if (bandwidth != null) {
+      server.wsBefore(route, WebSocketRateLimit.withBandwith(bandwidth));
+    }
+    server.ws(route, table::listen);
   }
 
   static final class ConnectionTable {

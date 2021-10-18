@@ -26,6 +26,7 @@ interface ExistingSnippetProperties extends UseSnippet {
   snippet: SnippetState
   position: SnippetPosition
   headProperties?: any
+  isCooldown?: boolean
   running?: boolean
   evaluate: (request: StartEvaluationRequest) => void
   capture?: (reference: SnippetReference) => void
@@ -80,6 +81,7 @@ class ExistingSnippet
           />
           <MemoizedExtras
             running={this.props.running}
+            isCooldown={this.props.isCooldown}
             editingTitle={this.state.editingTitle}
             setEditingTitle={this.changeEditingTitle}
             delete={this.props.delete}
@@ -164,6 +166,7 @@ export interface SnippetProperties {
   position: SnippetPosition
   dragHandleProps?: any
   running?: boolean
+  isCooldown?: boolean
   evaluate: (request: StartEvaluationRequest) => void
   capture?: (reference: SnippetReference) => void
 }
@@ -177,6 +180,7 @@ export default function Snippet(properties: SnippetProperties) {
     <ExistingSnippet
       {...snippetContext}
       running={properties.running}
+      isCooldown={properties.isCooldown}
       evaluate={properties.evaluate}
       sheetId={properties.sheetId}
       capture={properties.capture}

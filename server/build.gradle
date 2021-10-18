@@ -33,6 +33,7 @@ dependencies {
   implementation "com.ecwid.consul:consul-api:$consuleClientVersion"
   implementation "io.javalin:javalin:$javalinVersion"
   implementation "org.slf4j:slf4j-simple:$slf4jVersion"
+  implementation "com.github.vladimir-bukhtoyarov:bucket4j-core:$bucket4jVersion"
   implementation "com.google.protobuf:protobuf-java-util:$protobufJavaVersion"
   implementation "net.sourceforge.argparse4j:argparse4j:$argsParseVersion"
   implementation "javax.annotation:javax.annotation-api:$javaxAnnotationVersion"

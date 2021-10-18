@@ -62,8 +62,9 @@ public final class MonitoringModule extends AbstractModule {
   @RecordBuilder
   record FixedInfluxConfig(
     String password,
-    String org,
     String userName,
+    String token,
+    String org,
     String bucket,
     String uri,
     String db,
@@ -72,6 +73,7 @@ public final class MonitoringModule extends AbstractModule {
 
     static final Key<String> orgKey = ofString("monitoring.influx.org");
     static final Key<String> bucketKey = ofString("monitoring.influx.bucket");
+    static final Key<String> tokenKey = ofString("monitoring.influx.token");
     static final Key<String> userNameKey = ofString("monitoring.influx.userName");
     static final Key<String> passwordKey = ofString("monitoring.influx.password");
     static final Key<String> databaseKey = ofString("monitoring.influx.db");
@@ -84,15 +86,18 @@ public final class MonitoringModule extends AbstractModule {
     private static final int defaultStep = 10;
 
     static InfluxConfig fromConfig(Config config) {
-      return MonitoringModuleFixedInfluxConfigBuilder.builder()
-        .password(passwordKey.in(config).require())
+      var influx = MonitoringModuleFixedInfluxConfigBuilder.builder()
+        .password(passwordKey.in(config).or(""))
         .org(orgKey.in(config).or(""))
+        .token(tokenKey.in(config).or(""))
         .bucket(bucketKey.in(config).or(defaultInfluxBucket))
-        .userName(userNameKey.in(config).require())
+        .userName(userNameKey.in(config).or(""))
         .uri(uriKey.in(config).or(defaultUri))
         .db(databaseKey.in(config).or(defaultDatabase))
         .step(Duration.ofSeconds(stepKey.in(config).or(defaultStep)))
         .build();
+      System.out.println(influx);
+      return influx;
     }
 
     @Override

@@ -7,16 +7,26 @@ import {useDispatch} from "react-redux";
 import {useState} from "react";
 import {removeOutput, reportOutput} from "./state";
 import {SnippetComponentOutput} from "./index";
+import modal from "antd/lib/modal";
+import useTimedFlag from "../util/useTimedFlag";
 
-type UseEvaluate = [(start: StartEvaluationRequest) => void, boolean]
+type UseEvaluate = [(start: StartEvaluationRequest) => void, boolean, boolean]
+
+const clientSideCooldown = 1500
 
 export default function useEvaluate(): UseEvaluate {
   const dispatch = useDispatch()
   const [evaluating, setEvaluating] = useState(false)
+  const [isCooldown, setCooldown] = useTimedFlag(false, clientSideCooldown)
+
   const evaluate = (start: StartEvaluationRequest) => {
+    if (evaluating || isCooldown) {
+      return
+    }
     const client = Client.create()
     setEvaluating(true)
     dispatch(removeOutput({}))
+    setCooldown(true)
     client.evaluate(
       start,
       new Listener({
@@ -29,10 +39,12 @@ export default function useEvaluate(): UseEvaluate {
       })
     )
   }
-  return [evaluate, evaluating]
+  return [evaluate, evaluating, isCooldown]
 }
 
 type ReportOutput = (componentId: string, output: SnippetComponentOutput) => void
+
+const tooManyRequestsCode = 429
 
 class Listener implements EvaluationListener {
   constructor(
@@ -44,7 +56,17 @@ class Listener implements EvaluationListener {
     this.callback.close()
   }
 
-  onError = (error: EvaluationError) => {
+  onServiceError = (code: number) =>{
+    if (code == tooManyRequestsCode) {
+      modal.error({
+        title: 'Too many requests',
+        content: 'The server is receiving too many evaluation requests right' +
+          'now, please try again in a few seconds.'
+      })
+    }
+  }
+
+  onEvaluationError = (error: EvaluationError) => {
     this.callback.reportOutput(error.getComponentId(), {
       span: {
         start: error.getSpan()?.getStart() || 0,
