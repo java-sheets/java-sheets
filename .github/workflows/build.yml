@@ -67,7 +67,7 @@ jobs:
       id: docker_runtime_meta
       uses: crazy-max/ghaction-docker-meta@v2
       with:
-        images: ehenoma/jsheets
+        images: ehenoma/jsheets-runtime
         tags: |
           type=raw,value=latest,enable=${{ endsWith(GitHub.ref, 'main') }}
           type=ref,event=tag
