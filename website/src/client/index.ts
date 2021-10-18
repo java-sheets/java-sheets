@@ -13,7 +13,8 @@ import {ComponentState, SheetState, SnippetState} from '../sheet'
 export interface EvaluationListener {
   onEnd(): void
   onResult(result: EvaluationResult): void
-  onError(error: EvaluationError): void
+  onServiceError(code: number): void
+  onEvaluationError(error: EvaluationError): void
   onMissingSources(sources: MissingSources): void
 }
 
@@ -55,8 +56,7 @@ export default class Client {
   evaluate(start: StartEvaluationRequest, listener: EvaluationListener): Evaluation {
     const client = new WebSocket(`${this.webSocketUrl}/api/v1/evaluate`)
 
-    client.onerror = error => {
-      console.log({error})
+    client.onerror = () => {
       listener.onEnd()
     }
 
@@ -78,14 +78,17 @@ export default class Client {
       } catch (error) {
         throw new Error(JSON.stringify({error, note: 'received invalid message', message: message.data}))
       }
-      response.getErrorList()?.forEach(listener.onError)
+      response.getErrorList()?.forEach(listener.onEvaluationError)
       response.getMissingSourcesList()?.forEach(listener.onMissingSources)
       response.getResultList()?.forEach(listener.onResult)
     }
 
     client.onclose = event => {
+      console.log({message: 'evaluation was closed', event})
+      if (isWebSocketErrorCode(event.code)) {
+        listener.onServiceError(event.code)
+      }
       listener.onEnd()
-      console.log({event})
     }
 
     return new WebSocketEvaluation(client)
@@ -94,6 +97,10 @@ export default class Client {
   sheets(): SheetClient {
     return this.sheets_
   }
+}
+
+function isWebSocketErrorCode(code: number) {
+  return code >= 400 && code < 600
 }
 
 class WebSocketEvaluation implements Evaluation {

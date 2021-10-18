@@ -4,7 +4,6 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 
-import javax.inject.Named;
 import jsheets.evaluation.EvaluationEngine;
 import jsheets.evaluation.sandbox.access.AccessGraph;
 import jsheets.evaluation.sandbox.validation.ForbiddenMemberFilter;
@@ -12,10 +11,10 @@ import jsheets.evaluation.shell.ShellEvaluationEngine;
 import jsheets.evaluation.shell.environment.ExecutionEnvironment;
 import jsheets.evaluation.shell.environment.fork.ForkedExecutionEnvironment;
 import jsheets.evaluation.shell.environment.sandbox.SandboxClassFileCheck;
-import jsheets.evaluation.shell.environment.sandbox.SandboxedEnvironment;
 import jsheets.evaluation.shell.environment.StandardEnvironment;
 import jsheets.config.Config;
 import jsheets.evaluation.shell.execution.SystemBasedExecutionMethodFactory;
+import jsheets.event.EventSink;
 
 import java.util.Collection;
 import java.util.List;
@@ -42,7 +41,7 @@ public final class EvaluationModule extends AbstractModule {
 
   @Provides
   @Singleton
-  ExecutionEnvironment executionEnvironment(Config config) {
+  ExecutionEnvironment executionEnvironment(Config config, EventSink events) {
     boolean disableSandbox =
       disableSandboxKey().in(config).orNone().orElse(false);
     if (disableSandbox) {
@@ -54,7 +53,8 @@ public final class EvaluationModule extends AbstractModule {
       SandboxClassFileCheck.of(
         List.of(ForbiddenMemberFilter.create(accessGraph))
       ),
-     listVirtualMachineOptions(config)
+     listVirtualMachineOptions(config),
+      events
     );
   }
 

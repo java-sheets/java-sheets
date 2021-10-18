@@ -11,6 +11,7 @@ import themed from '../theme/themed'
 
 interface ImportedSheetProperties {
   evaluating?: boolean
+  isCooldown?: boolean
   evaluate: (start: StartEvaluationRequest) => void
   captureSnippet: CaptureSnippetReference
 }

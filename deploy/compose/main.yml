@@ -3,12 +3,19 @@ services:
   server:
     image: ehenoma/jsheets:latest
     restart: always
+    build:
+      context: ../../
+      dockerfile: ./server/deploy/Dockerfile
     environment:
       JSHEETS_SERVER_PORT: 8080
-      JSHEETS_MONGODB_URI: mongodb://root:root@document-store/jsheets
+      JSHEETS_MONGODB_URI: mongodb://root:root@document-store/jsheets?authSource=admin
       JSHEETS_ZOOKEEPER_CONNECTION_STRING: zookeeper:2181
+      JSHEETS_SERVER_RATE_LIMIT_CAPACITY: 100
+      JSHEETS_SERVER_RATE_LIMIT_REFILL_PER_SECOND: 50
     ports:
       - "8080:8080"
+    depends_on:
+      - document-store
     networks:
       - document-store
       - zookeeper
@@ -38,10 +45,15 @@ services:
     restart: always
     container_name: runtime
     hostname: runtime
+    build:
+      context: ../../
+      dockerfile: ./runtime/deploy/Dockerfile
     environment:
       JSHEETS_RUNTIME_SERVER_PORT: 8080
       JSHEETS_RUNTIME_ZOOKEEPER_CONNECTION_STRING: zookeeper:2181
       JSHEETS_RUNTIME_SERVICE_ADVERTISED_HOST: runtime:8080
+    depends_on:
+      - zookeeper
     networks:
       - zookeeper
       - runtime

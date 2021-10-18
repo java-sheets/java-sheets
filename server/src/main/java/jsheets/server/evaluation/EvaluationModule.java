@@ -5,6 +5,8 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 
+import io.github.bucket4j.Bandwidth;
+import io.github.bucket4j.Refill;
 import jsheets.config.Config;
 import jsheets.evaluation.EvaluationEngine;
 import jsheets.evaluation.shell.ShellEvaluationEngine;
@@ -16,7 +18,11 @@ import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.curator.x.discovery.ServiceDiscoveryBuilder;
 import org.apache.curator.x.discovery.ServiceProvider;
 
+import javax.annotation.Nullable;
+import javax.inject.Named;
+import java.time.Duration;
 import java.util.Optional;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 public final class EvaluationModule extends AbstractModule {
@@ -31,13 +37,52 @@ public final class EvaluationModule extends AbstractModule {
   @Provides
   @Singleton
   EvaluationEngine evaluationEngine(
-    Optional<CuratorFramework> curatorBinding
+    Optional<CuratorFramework> curatorBinding,
+    Executor executor
   ) {
-    return curatorBinding.map(this::createRemoteEvaluationEngine)
+    return curatorBinding
+      .map(client -> createRemoteEvaluationEngine(client , executor))
       .orElseGet(this::createEmbeddedEvaluationEngine);
   }
 
-  private EvaluationEngine createRemoteEvaluationEngine(CuratorFramework client) {
+  @Provides
+  Executor executor() {
+    return Executors.newCachedThreadPool();
+  }
+
+  private static final Config.Key<Boolean> disableRateLimitKey =
+    Config.Key.ofFlag("server.rateLimit.disable");
+
+  private static final Config.Key<Integer> bandwidthCapacityKey =
+    Config.Key.ofInt("server.rateLimit.capacity");
+
+  private static final Config.Key<Integer> refillPerSecondKey =
+    Config.Key.ofInt("server.rateLimit.refillPerSecond");
+
+  private static final int defaultBandwidthCapacity = 100;
+  private static final int defaultRefillPerSecond = 50;
+
+  @Provides
+  @Singleton
+  @Nullable
+  @Named("evaluationBandwidth")
+  Bandwidth evaluationBandwidth(Config config) {
+    if (disableRateLimitKey.in(config).or(false)) {
+      return null;
+    }
+    return Bandwidth.classic(
+      bandwidthCapacityKey.in(config).or(defaultBandwidthCapacity),
+      Refill.greedy(
+        refillPerSecondKey.in(config).or(defaultRefillPerSecond),
+        Duration.ofSeconds(1)
+      )
+    );
+  }
+
+  private EvaluationEngine createRemoteEvaluationEngine(
+    CuratorFramework client,
+    Executor executor
+  ) {
     var provider = createServiceProvider(client);
     try {
       provider.start();
@@ -51,7 +96,9 @@ public final class EvaluationModule extends AbstractModule {
         log.atWarning().withCause(failure).log("failed to close service discovery");
       }
     }));
-    return PooledEvaluationEngine.of(ZookeeperEngineDiscovery.create(provider));
+    return PooledEvaluationEngine.of(
+      ZookeeperEngineDiscovery.create(executor, provider)
+    );
   }
 
   private EvaluationEngine createEmbeddedEvaluationEngine() {

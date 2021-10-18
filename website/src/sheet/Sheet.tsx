@@ -49,6 +49,7 @@ export type CaptureSnippetReference = (id: string, snippet: SnippetReference) =>
 export interface SheetProperties {
   initial?: SheetState
   evaluating?: boolean
+  isCooldown?: boolean
   evaluate: (request: StartEvaluationRequest) => void
   captureSnippet?: CaptureSnippetReference
 }
@@ -85,6 +86,7 @@ export default function Sheet(properties: SheetProperties) {
                     >
                       <MemoizedSnippet
                         key={snippet.id}
+                        isCooldown={properties.isCooldown}
                         running={properties.evaluating}
                         sheetId={sheet.id}
                         evaluate={properties.evaluate}

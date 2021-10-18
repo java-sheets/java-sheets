@@ -18,7 +18,7 @@ const welcomeSheet = createWelcomeSheet()
 const blankSheet = createBlankSheet()
 
 export default function App() {
-  const [evaluate, evaluating] = useEvaluate()
+  const [evaluate, evaluating, cooldown] = useEvaluate()
   const history = useHistory()
   const [sharedId, setSharedId] = useState('')
   const [shareVisible, setShareVisible] = useState(false)
@@ -41,6 +41,7 @@ export default function App() {
             <Route path="/s/:sheetId">
               <ImportedSheet
                 evaluating={evaluating}
+                isCooldown={cooldown}
                 evaluate={evaluate}
                 captureSnippet={captureSnippet}
               />
@@ -48,6 +49,7 @@ export default function App() {
             <Route path={['/new', '/blank']}>
               <Sheet
                 initial={blankSheet}
+                isCooldown={cooldown}
                 evaluating={evaluating}
                 evaluate={evaluate}
                 captureSnippet={captureSnippet}
@@ -56,6 +58,7 @@ export default function App() {
             <Route path="/">
               <Sheet
                 initial={welcomeSheet}
+                isCooldown={cooldown}
                 evaluating={evaluating}
                 evaluate={evaluate}
                 captureSnippet={captureSnippet}

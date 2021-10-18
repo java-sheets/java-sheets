@@ -12,24 +12,14 @@ repositories {
   mavenCentral()
 }
 
-ext {
-  asmVersion = '9.2'
-}
-
 dependencies {
-  implementation project(':protocol')
-  implementation project(':common')
-  implementation "org.ow2.asm:asm:$asmVersion"
-  implementation "com.google.protobuf:protobuf-java-util:$protobufJavaVersion"
-  implementation "com.google.flogger:flogger:$floggerVersion"
-  testRuntimeOnly "com.google.flogger:flogger-slf4j-backend:$floggerVersion"
   testImplementation "org.junit.jupiter:junit-jupiter-api:$junitPlatformVersion"
   testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitPlatformVersion"
+  implementation "com.google.guava:guava:$guavaVersion"
   compileOnly "io.soabase.record-builder:record-builder-core:$recordBuilderVersion"
   annotationProcessor "io.soabase.record-builder:record-builder-processor:$recordBuilderVersion"
 }
 
 test {
   useJUnitPlatform()
-  jvmArgs += ['--add-opens', 'jdk.jshell/jdk.jshell=ALL-UNNAMED']
 }

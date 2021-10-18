@@ -1,5 +1,6 @@
 import {Button, Dropdown, Menu} from "antd";
 import {
+  ClockCircleOutlined,
   CodeOutlined,
   CommentOutlined, DeleteOutlined, EditOutlined,
   FireOutlined, MoreOutlined,
@@ -20,6 +21,7 @@ export interface SnippetExtrasProperties {
   addComponent: AddComponent
   onRun: () => void
   running?: boolean
+  isCooldown?: boolean
 }
 
 const AddMenu: React.FC<{addComponent: AddComponent, t: TFunction}> = ({addComponent, t}) =>  (
@@ -76,7 +78,8 @@ export default function SnippetExtras(properties: SnippetExtrasProperties) {
       <AddMenu t={t} key="add" addComponent={properties.addComponent}/>
       <Button
         type="primary"
-        icon={<FireOutlined/>}
+        icon={properties.isCooldown ? <ClockCircleOutlined/> : <FireOutlined/>}
+        disabled={properties.isCooldown}
         loading={properties.running}
         onClick={properties.onRun}
       >{t('snippet.menu.run.button')}</Button>
