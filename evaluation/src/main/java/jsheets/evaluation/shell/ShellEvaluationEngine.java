@@ -4,6 +4,8 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import java.time.Clock;
 import java.time.Duration;
+import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -26,6 +28,7 @@ public final class ShellEvaluationEngine implements EvaluationEngine {
   private final Duration messageFlushInterval;
   private final EventSink events;
   private final Clock clock;
+  private final Collection<String> builtinImports;
 
   private ShellEvaluationEngine(
     Clock clock,
@@ -34,7 +37,8 @@ public final class ShellEvaluationEngine implements EvaluationEngine {
     ExecutionEnvironment executionEnvironment,
     ExecutionMethod.Factory executionMethodFactory,
     Duration messageFlushInterval,
-    EventSink events
+    EventSink events,
+    Collection<String> builtinImports
   ) {
     this.clock = clock;
     this.workerPool = workerPool;
@@ -43,6 +47,7 @@ public final class ShellEvaluationEngine implements EvaluationEngine {
     this.messageFlushInterval = messageFlushInterval;
     this.executionMethodFactory = executionMethodFactory;
     this.events = events;
+    this.builtinImports = builtinImports;
   }
 
   @Override
@@ -66,7 +71,8 @@ public final class ShellEvaluationEngine implements EvaluationEngine {
         messageFlushInterval,
         scheduler,
         listener
-      )
+      ),
+      builtinImports
     );
   }
 
@@ -82,6 +88,7 @@ public final class ShellEvaluationEngine implements EvaluationEngine {
     private ExecutionMethod.Factory executionMethodFactory;
     private EventSink events;
     private Clock clock;
+    private Collection<String> builtinImports;
 
     public Builder useWorkerPool(Executor pool) {
       Objects.requireNonNull(pool, "workerPool");
@@ -113,6 +120,12 @@ public final class ShellEvaluationEngine implements EvaluationEngine {
       return this;
     }
 
+    public Builder useBuiltinImports(Collection<String> builtinImports) {
+      Objects.requireNonNull(builtinImports, "builtinImports");
+      this.builtinImports = builtinImports;
+      return this;
+    }
+
     public Builder useScheduler(ScheduledExecutorService scheduler) {
       Objects.requireNonNull(scheduler, "scheduler");
       this.scheduler = scheduler;
@@ -133,7 +146,8 @@ public final class ShellEvaluationEngine implements EvaluationEngine {
         selectEnvironment(),
         selectExecutionMethodFactory(),
         selectMessageFlushInterval(),
-        selectEventSink()
+        selectEventSink(),
+        selectBuiltinImports()
       );
     }
 
@@ -169,6 +183,10 @@ public final class ShellEvaluationEngine implements EvaluationEngine {
 
     private Executor selectWorkerPool() {
       return workerPool == null ? createDefaultWorkerPool() : workerPool;
+    }
+
+    private Collection<String> selectBuiltinImports() {
+      return builtinImports == null ? List.of() : builtinImports;
     }
 
     private Executor createDefaultWorkerPool() {

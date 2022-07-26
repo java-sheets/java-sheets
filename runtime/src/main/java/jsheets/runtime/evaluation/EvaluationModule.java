@@ -19,23 +19,37 @@ import jsheets.event.EventSink;
 import java.util.Collection;
 import java.util.List;
 
-import static jsheets.runtime.evaluation.EvaluationConfigSource.accessGraphKey;
-import static jsheets.runtime.evaluation.EvaluationConfigSource.disableSandboxKey;
-import static jsheets.runtime.evaluation.EvaluationConfigSource.virtualMachineOptionsKey;
+import static jsheets.runtime.evaluation.EvaluationConfigSource.*;
 
 public final class EvaluationModule extends AbstractModule {
   public static EvaluationModule create() {
     return new EvaluationModule();
   }
 
-  private EvaluationModule() {}
+  private EvaluationModule() {
+  }
+
+  private static final String fallbackDefaultImports = """
+    java.lang.*
+    java.math.*
+    java.time.*
+    java.text.*
+    java.util.*
+    java.util.function.*
+    java.util.stream.*
+    """;
 
   @Provides
   @Singleton
-  EvaluationEngine evaluationEngine(ExecutionEnvironment environment) {
+  EvaluationEngine evaluationEngine(Config config, ExecutionEnvironment environment) {
+    var builtinImports = defaultImportsKey().in(config)
+      .or(fallbackDefaultImports)
+      .lines()
+      .toList();
     return ShellEvaluationEngine.newBuilder()
       .useEnvironment(environment)
       .useExecutionMethodFactory(SystemBasedExecutionMethodFactory.create())
+      .useBuiltinImports(builtinImports)
       .create();
   }
 
@@ -53,7 +67,7 @@ public final class EvaluationModule extends AbstractModule {
       SandboxClassFileCheck.of(
         List.of(ForbiddenMemberFilter.create(accessGraph))
       ),
-     listVirtualMachineOptions(config),
+      listVirtualMachineOptions(config),
       events
     );
   }

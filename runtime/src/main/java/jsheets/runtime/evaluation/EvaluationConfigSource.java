@@ -34,6 +34,10 @@ public final class EvaluationConfigSource implements Config.Source {
   private static final Config.Key<String> defaultImportsKey =
     Config.Key.ofString("evaluation.defaultImports");
 
+  public static Config.Key<String> defaultImportsKey() {
+    return defaultImportsKey;
+  }
+
   public static Config.Key<String> accessGraphKey() {
     return accessGraphKey;
   }

@@ -21,6 +21,7 @@ import org.apache.curator.x.discovery.ServiceProvider;
 import javax.annotation.Nullable;
 import javax.inject.Named;
 import java.time.Duration;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -32,7 +33,8 @@ public final class EvaluationModule extends AbstractModule {
     return new EvaluationModule();
   }
 
-  private EvaluationModule() {}
+  private EvaluationModule() {
+  }
 
   @Provides
   @Singleton
@@ -41,7 +43,7 @@ public final class EvaluationModule extends AbstractModule {
     Executor executor
   ) {
     return curatorBinding
-      .map(client -> createRemoteEvaluationEngine(client , executor))
+      .map(client -> createRemoteEvaluationEngine(client, executor))
       .orElseGet(this::createEmbeddedEvaluationEngine);
   }
 
@@ -104,6 +106,17 @@ public final class EvaluationModule extends AbstractModule {
   private EvaluationEngine createEmbeddedEvaluationEngine() {
     return ShellEvaluationEngine.newBuilder()
       .useWorkerPool(Executors.newCachedThreadPool())
+      .useBuiltinImports(
+        List.of(
+          "java.lang.*",
+          "java.math.*",
+          "java.time.*",
+          "java.text.*",
+          "java.util.*",
+          "java.util.function.*",
+          "java.util.stream.*"
+        )
+      )
       .create();
   }
 

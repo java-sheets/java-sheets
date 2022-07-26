@@ -1,5 +1,7 @@
 package jsheets.evaluation.shell;
 
+import java.nio.file.Path;
+import java.util.List;
 import java.util.UUID;
 
 import jsheets.EvaluateResponse;
@@ -7,6 +9,7 @@ import jsheets.EvaluatedSnippet;
 import jsheets.Snippet;
 import jsheets.SnippetSources;
 import jsheets.StartEvaluationRequest;
+import jsheets.config.FileConfigSource;
 import jsheets.evaluation.Evaluation;
 import jsheets.evaluation.shell.environment.StandardEnvironment;
 import org.junit.jupiter.api.Test;
@@ -28,6 +31,7 @@ public class ShellEvaluationEngineTest {
     var engine = ShellEvaluationEngine.newBuilder()
       .useEnvironment(environment)
       .useWorkerPool(Runnable::run)
+      .useBuiltinImports(List.of("java.util.*"))
       .create();
     var request = StartEvaluationRequest.newBuilder()
       .setSnippet(
@@ -57,7 +61,7 @@ public class ShellEvaluationEngineTest {
           .addCodeComponents(code("6", "new Test().toString()"))
           .addCodeComponents(code("7", """
             System.out.println("Hello, World!");
-            System.out.println("Hello, World!");
+            System.out.println(List.of());
             """))
           .build()
       ).build();

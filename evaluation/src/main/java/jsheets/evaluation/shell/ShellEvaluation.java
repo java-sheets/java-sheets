@@ -3,10 +3,7 @@ package jsheets.evaluation.shell;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Comparator;
-import java.util.Locale;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import jdk.jshell.JShell;
@@ -42,6 +39,7 @@ final class ShellEvaluation implements Evaluation {
   private final MessageOutput messageOutput;
   private final EventSink events;
   private final Clock clock;
+  private final Collection<String> builtinImports;
   /* Is updated whenever errors occur, otherwise stays successful */
   private volatile EvaluationStopEvent.Status stopStatus =
     EvaluationStopEvent.Status.CompletedSuccessfully;
@@ -52,7 +50,8 @@ final class ShellEvaluation implements Evaluation {
     ExecutionMethod.Factory executionMethodFactory,
     Evaluation.Listener listener,
     EventSink events,
-    MessageOutput messageOutput
+    MessageOutput messageOutput,
+    Collection<String> builtinImports
   ) {
     this.clock = clock;
     this.listener = listener;
@@ -60,10 +59,12 @@ final class ShellEvaluation implements Evaluation {
     this.executionMethodFactory = executionMethodFactory;
     this.environment = environment;
     this.events = events;
+    this.builtinImports = builtinImports;
   }
 
   public void start(StartEvaluationRequest request) {
     shell = createShell();
+    setupInitialShellState(shell);
     executionMethod = executionMethodFactory.create(shell);
     startTime = clock.instant();
     messageOutput.open();
@@ -123,7 +124,7 @@ final class ShellEvaluation implements Evaluation {
   ) {
     messageOutput.updateCurrentComponentId(component.getId());
     try {
-      for (var snippet : executionMethod.execute(component.getCode()) ) {
+      for (var snippet : executionMethod.execute(component.getCode())) {
         reportSnippetEvent(component.getId(), snippet, response);
       }
       messageOutput.flush();
@@ -234,6 +235,20 @@ final class ShellEvaluation implements Evaluation {
       .err(messageOutput.createErrorSink())
       .executionEngine(engine, Map.of())
       .build();
+  }
+
+  private void setupInitialShellState(JShell shell) {
+    for (var packagePath : builtinImports) {
+      var events = shell.eval("import %s;".formatted(packagePath));
+      for (var event : events) {
+        if (!event.status().isDefined()) {
+          throw new IllegalStateException(
+            "failed to import %s".formatted(packagePath),
+            event.exception()
+          );
+        }
+      }
+    }
   }
 
   @Override
