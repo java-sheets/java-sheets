@@ -7,7 +7,6 @@ import Client from '../client'
 import styled from 'styled-components'
 import {LoadingOutlined} from '@ant-design/icons'
 import {Empty} from 'antd'
-import themed from '../theme/themed'
 
 interface ImportedSheetProperties {
   evaluating?: boolean
@@ -52,7 +51,6 @@ const Centered = styled.div`
 
 const ErrorBox = styled.div`
   margin: 50px auto auto auto;
-  background: ${themed('snippet.card.background')};
   border-radius: 5px;
   padding: 20px;
   max-width: 300px;
@@ -61,7 +59,6 @@ const ErrorBox = styled.div`
     width: 100%;
   }
   code {
-    background: ${themed('snippet.card.icon.background')};
     width: 100%;
     padding: 10px;
   }

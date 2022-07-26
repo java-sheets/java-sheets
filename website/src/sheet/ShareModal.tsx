@@ -1,7 +1,6 @@
 import {Button} from 'antd'
 import {CheckOutlined, CopyOutlined, ShareAltOutlined} from '@ant-design/icons'
 import * as Styled from './ShareModal.style'
-import * as StyledTitle from './snippet/Title.style'
 import useTimedFlag from '../util/useTimedFlag'
 import copy from 'copy-to-clipboard'
 
@@ -18,7 +17,7 @@ function createLink(sheetId: string) {
 export default function ShareModal(properties: ShareModalProperties) {
   const [clicked, setClicked] = useTimedFlag(false, 1000)
 
-  const link =createLink(properties.sheetId || 'none')
+  const link = createLink(properties.sheetId || 'none')
 
   const onClick = () => {
     setClicked(true)
@@ -27,12 +26,7 @@ export default function ShareModal(properties: ShareModalProperties) {
 
   return (
     <Styled.ShareModal
-      title={
-        <StyledTitle.Title>
-          <StyledTitle.IconBox><ShareAltOutlined/></StyledTitle.IconBox>
-          <StyledTitle.Text>Share</StyledTitle.Text>
-        </StyledTitle.Title>
-      }
+      title="Share"
       visible={properties.visible}
       onCancel={() => properties.onVisibilityChange?.(false)}
       onOk={() => properties.onVisibilityChange?.(false)}

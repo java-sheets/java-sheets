@@ -1,0 +1,50 @@
+.header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2em;
+  background: var(--header-bg);
+  border-bottom: 0.2em solid var(--card-border-color);
+}
+
+.branding {
+  display: flex;
+  flex-direction: column;
+}
+
+.logo {
+  color: var(--text-color);
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  font-size: 2em;
+}
+
+.slogan {
+  font-size: 0.8em;
+  font-weight: 500;
+}
+
+.logo strong {
+  font-weight: 700;
+}
+
+.logo span {
+  font-weight: 300;
+}
+
+.share-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.5em 1em;
+  border-radius: 50em;
+  color: var(--primary-fg);
+  background: var(--primary-bg);
+  transition: .2s ease-in background-color;
+}
+
+.share-button:hover {
+  background: var(--primary-hover-bg);
+}

@@ -47,7 +47,7 @@ function useComponents(
   )
 }
 
-export default function ComponentList(properties: ComponentListProperties) {
+export default function ComponentList() {
   const reorder = useReorder(properties.snippetId)
   const components = useComponents(properties.components, properties.capture)
   const draggableId = useDraggableId(properties.snippetId)

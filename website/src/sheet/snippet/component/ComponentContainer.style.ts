@@ -1,6 +1,5 @@
-import styled from "styled-components";
-import {Button} from "antd";
-import themed from '../../../theme/themed'
+import styled from 'styled-components'
+import {Button} from 'antd'
 
 export const ComponentOptions = styled.div`
   z-index: 20;
@@ -11,6 +10,7 @@ export const ComponentOptions = styled.div`
   transition: all .1s ease-in-out;
   right: -10px;
   opacity: 0;
+
   & > :not(:first-child) {
     margin-left: 5px;
   }
@@ -23,10 +23,10 @@ export const ComponentInputArea = styled.div`
 export const Component = styled.div`
   min-height: 45px; // To include the options
   transition: opacity .1s ease-in, box-shadow .1s ease-in;
-  background: ${themed('snippet.component.background')};
+  background: var(--snippet-code-bg);
 
   &:not(:first-child) {
-    border-top: ${themed('snippet.component.borderTop')};
+    border-top: var(--card-border-color);
   }
 
   &.dragging-component {
@@ -48,6 +48,7 @@ export const DragHandle = styled.div`
   border-radius: 2px;
   font-size: 15px;
   transition: background-color .2s ease-in;
+
   &:hover {
     background: rgba(250, 250, 250, 0.5);
   }

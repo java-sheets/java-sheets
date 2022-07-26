@@ -1,0 +1,56 @@
+.snippet {
+  overflow: hidden;
+  border-radius: 0.5em;
+}
+
+.snippet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--snippet-header-bg);
+  border-bottom: 0.2em solid var(--card-border-color);
+}
+
+.snippet-header-title {
+  font-size: 1.2em;
+  font-weight: 500;
+  user-select: inherit;
+}
+
+.snippet-header-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.5em;
+}
+
+.edit-button, .run-button {
+  font-size: 0.9em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.5em 1em;
+  border-radius: 0.2em;
+  transition: .2s ease-in background-color;
+}
+
+.run-button {
+  color: var(--primary-fg);
+  background: var(--primary-bg);
+}
+
+.run-button:hover {
+  background: var(--primary-hover-bg);
+}
+
+.edit-button {
+  color: var(--secondary-fg);
+  background: var(--secondary-bg);
+}
+
+.edit-button:hover {
+  background: var(--secondary-hover-bg);
+}
+
+.snippet-body { }

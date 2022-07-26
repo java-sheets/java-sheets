@@ -1,5 +1,7 @@
 package jsheets.evaluation.shell;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -178,6 +180,9 @@ final class ShellEvaluation implements Evaluation {
   ) {
     switch (event.status()) {
       case VALID -> {
+        if (event.exception() != null && event.exception().getCause() != null) {
+          reportException(componentId, event.exception().getCause(), response);
+        }
         if (event.value() == null) {
           return;
         }
@@ -191,6 +196,26 @@ final class ShellEvaluation implements Evaluation {
       }
       case REJECTED -> reportFailure(componentId, event, response);
     }
+  }
+
+  private void reportException(
+    String componentId,
+    Throwable exception,
+    EvaluateResponse.Builder response
+  ) {
+    response.addError(
+      EvaluationError.newBuilder()
+        .setComponentId(componentId)
+        .setKind("exception")
+        .setMessage(formatException(exception))
+        .build()
+    );
+  }
+
+  private String formatException(Throwable exception) {
+    var output = new StringWriter();
+    exception.printStackTrace(new PrintWriter(output));
+    return output.toString();
   }
 
   private void reportFailure(

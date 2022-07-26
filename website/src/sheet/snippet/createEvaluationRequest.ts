@@ -2,7 +2,7 @@ import {findComponentByIdInState, SnippetState} from '../index'
 import * as EvaluationProtocol from '@jsheets/protocol/src/jsheets/api/snippet_runtime_pb'
 import * as SnippetProtocol from '@jsheets/protocol/src/jsheets/api/snippet_pb'
 
-export default function createEvaluateRequest(
+export default function createEvaluationRequest(
   sheetId: string,
   snippet: SnippetState,
   componentSources: Map<string, string>

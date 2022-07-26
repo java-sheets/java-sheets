@@ -1,6 +1,6 @@
 import {HighlightStyle, tags as t} from '@codemirror/highlight'
-import {customTags} from '../java/language'
 import {EditorView} from '@codemirror/view'
+import {customTags} from './java/language'
 
 export const theme = EditorView.theme({
   ".cm-scroller": {

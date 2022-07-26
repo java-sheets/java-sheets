@@ -1,9 +1,6 @@
 import React, {useCallback, useState} from 'react'
-import {Layout} from 'antd'
-import {Content} from 'antd/lib/layout/layout'
-import Sheet from './sheet/Sheet'
+import Sheet, {CaptureSnippetReference} from './sheet/Sheet'
 import useEvaluate from './sheet/useEvaluate'
-import Header from './header/Header'
 import {
   Route,
   Switch,
@@ -13,60 +10,72 @@ import {useShare} from './sheet/useShare'
 import ImportedSheet from './sheet/ImportedSheet'
 import ShareModal from './sheet/ShareModal'
 import {createBlankSheet, createWelcomeSheet} from './sheet/defaultSheet'
+import Page from './layout/Page'
 
 const welcomeSheet = createWelcomeSheet()
 const blankSheet = createBlankSheet()
 
-export default function App() {
-  const [evaluate, evaluating, cooldown] = useEvaluate()
-  const history = useHistory()
+interface UseShareModal {
+  component: React.ReactNode
+  open: () => void
+  captureSnippet: CaptureSnippetReference
+}
+
+function useShareModal(): UseShareModal {
   const [sharedId, setSharedId] = useState('')
   const [shareVisible, setShareVisible] = useState(false)
+  const history = useHistory()
   const callback = useCallback(created => {
     history.push(`/s/${created.id}`)
     setShareVisible(true)
     setSharedId(created.id)
   }, [history])
-  const [share, captureSnippet] = useShare(callback)
+  const [open, captureSnippet] = useShare(callback)
+
+  const component = <ShareModal
+    visible={shareVisible}
+    onVisibilityChange={setShareVisible}
+    sheetId={sharedId}
+  />
+
+  return {component, open, captureSnippet}
+}
+
+export default function App() {
+  const [evaluate, evaluating, cooldown] = useEvaluate()
+  const {open, component, captureSnippet} = useShareModal()
   return (
-    <Layout>
-      <Header onShare={share}/>
-      <Content style={{padding: '0 50px 50px 50px'}}>
-          <ShareModal
-            visible={shareVisible}
-            onVisibilityChange={setShareVisible}
-            sheetId={sharedId}
+    <Page onShare={open}>
+      {component}
+      <Switch>
+        <Route path="/s/:sheetId">
+          <ImportedSheet
+            evaluating={evaluating}
+            isCooldown={cooldown}
+            evaluate={evaluate}
+            captureSnippet={captureSnippet}
           />
-          <Switch>
-            <Route path="/s/:sheetId">
-              <ImportedSheet
-                evaluating={evaluating}
-                isCooldown={cooldown}
-                evaluate={evaluate}
-                captureSnippet={captureSnippet}
-              />
-            </Route>
-            <Route path={['/new', '/blank']}>
-              <Sheet
-                initial={blankSheet}
-                isCooldown={cooldown}
-                evaluating={evaluating}
-                evaluate={evaluate}
-                captureSnippet={captureSnippet}
-              />
-            </Route>
-            <Route path="/">
-              <Sheet
-                initial={welcomeSheet}
-                isCooldown={cooldown}
-                evaluating={evaluating}
-                evaluate={evaluate}
-                captureSnippet={captureSnippet}
-              />
-            </Route>
-          </Switch>
-      </Content>
-    </Layout>
+        </Route>
+        <Route path={['/new', '/blank']}>
+          <Sheet
+            initial={blankSheet}
+            isCooldown={cooldown}
+            evaluating={evaluating}
+            evaluate={evaluate}
+            captureSnippet={captureSnippet}
+          />
+        </Route>
+        <Route path="/">
+          <Sheet
+            initial={welcomeSheet}
+            isCooldown={cooldown}
+            evaluating={evaluating}
+            evaluate={evaluate}
+            captureSnippet={captureSnippet}
+          />
+        </Route>
+      </Switch>
+    </Page>
   )
 }
 

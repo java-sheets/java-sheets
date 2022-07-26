@@ -16,7 +16,7 @@ final class ForkEnvironmentMonitoring {
     );
     var startedBoxes = Counter
       .builder("jsheets.runtime.evaluation.fork.startedBoxes")
-      .description("The number of boxes that have been started")
+      .description("The number of cells that have been started")
       .register(metrics);
     return new ForkEnvironmentMonitoring(activeBoxCount, startedBoxes);
   }

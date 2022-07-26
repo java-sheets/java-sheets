@@ -71,4 +71,11 @@ public final class ExhaustiveExecutionTest {
       .execute("callWithoutClosedParen(someArgument, 1, 2, 3");
     Assertions.assertEquals(1, events.size());
   }
+
+  @Test
+  public void textExceptionCapture() {
+    var events = ExhaustiveExecution.create(createSilentShell())
+      .execute("throw new RuntimeException();");
+    Assertions.assertEquals(1, events.size());
+  }
 }

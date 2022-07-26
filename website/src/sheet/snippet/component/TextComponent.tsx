@@ -3,9 +3,7 @@ import React from 'react'
 import {EditorComponentProperties} from './EditorComponent'
 import {SnippetComponentReference} from './reference'
 import RichMarkdownEditor from 'rich-markdown-editor'
-import {ThemeContext} from '../../../theme/ThemeContext'
 import * as SnippetProtocol from '@jsheets/protocol/src/jsheets/api/snippet_pb'
-import * as jspb from "google-protobuf";
 
 export interface TextComponentProperties {
   value: string
@@ -20,8 +18,6 @@ const disabledExtensions: 'placeholder'[] = ['empty-placeholder', 'placeholder',
 export default class TextComponent
   extends React.Component<TextComponentProperties>
   implements SnippetComponentReference {
-
-  static contextType = ThemeContext
 
   private readonly editorRef = React.createRef<RichMarkdownEditor>()
 

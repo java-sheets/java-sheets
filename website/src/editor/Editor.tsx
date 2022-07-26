@@ -2,13 +2,12 @@ import React, {useEffect} from 'react'
 import {EditorView} from '@codemirror/view'
 import {Compartment, EditorState} from '@codemirror/state'
 import {basicSetup} from '@codemirror/basic-setup'
-import {java} from "./java/language";
-import {ThemeKey, useTheme} from '../theme/ThemeContext'
-import {editorThemes, highlightingThemes} from './themes/themes'
+import {java} from './java/language'
+import {highlighting, theme} from './theme'
 
 const tabSize = 2
 
-function createView(initialContent: string, element: Element, theme: ThemeKey) {
+function createView(initialContent: string, element: Element) {
   return new EditorView({
     parent: element,
     state: EditorState.create({
@@ -17,8 +16,8 @@ function createView(initialContent: string, element: Element, theme: ThemeKey) {
         basicSetup,
         EditorState.tabSize.of(tabSize),
         java(),
-        themeState.of(editorThemes[theme]),
-        highlightingState.of(highlightingThemes[theme])
+        themeState.of(theme),
+        highlightingState.of(highlighting)
       ]
     })
   })
@@ -34,14 +33,13 @@ const highlightingState = new Compartment()
 
 export default function Editor(properties: EditorProperties) {
   const element = React.createRef<HTMLDivElement>()
-  const editor = React.useRef<{editor: EditorView | undefined}>({editor: undefined})
-  const [theme] = useTheme()
+  const editor = React.useRef<{ editor: EditorView | undefined }>({editor: undefined})
 
   useEffect(() => {
     if (element == null) {
       return
     }
-    const created = createView(properties.code, element.current!, theme)
+    const created = createView(properties.code, element.current!)
     editor.current.editor = created
     if (properties.editorRef) {
       properties.editorRef.current = created
@@ -49,14 +47,6 @@ export default function Editor(properties: EditorProperties) {
     return () => created.destroy()
   }, [properties.editorRef])
 
-  useEffect(() => {
-    properties.editorRef?.current?.dispatch({
-      effects: [
-        themeState.reconfigure(editorThemes[theme]),
-        highlightingState.reconfigure(highlightingThemes[theme])
-      ]
-    })
-  }, [theme])
 
   return (<div ref={element}/>)
 }

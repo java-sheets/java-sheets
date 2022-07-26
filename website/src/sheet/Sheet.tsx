@@ -13,10 +13,11 @@ import {useDispatch} from 'react-redux'
 import {StartEvaluationRequest} from "@jsheets/protocol/src/jsheets/api/snippet_runtime_pb";
 import {reorderSnippet} from './state'
 import {listSnippetsInState, SheetState, SnippetState} from './index'
-import Snippet, {SnippetReference} from './snippet/Snippet'
+import SnippetContext from './snippet/Snippet'
 import {useDraggableIds} from './snippet/draggableId'
+import {SnippetReference} from './snippet/SnippetX'
 
-const MemoizedSnippet = React.memo(Snippet)
+const MemoizedSnippet = React.memo(SnippetContext)
 
 function useReorder(): (result: DropResult) => void {
   const dispatch = useDispatch()
